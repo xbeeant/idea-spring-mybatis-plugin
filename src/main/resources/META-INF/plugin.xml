@@ -1,0 +1,32 @@
+<idea-plugin>
+    <id>org.xstudio.plugin.spring</id>
+    <name>spring mybatis code generator</name>
+    <vendor email="huangxb0512@gmail.com" url="https://beeant0512.github.io">xstudio</vendor>
+
+    <description><![CDATA[
+    spring boot project with mybatis code generator plugin
+    ]]></description>
+
+    <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
+         on how to target different products -->
+    <!-- uncomment to enable plugin in all products
+    <depends>com.intellij.modules.lang</depends>
+    -->
+
+    <extensions defaultExtensionNs="com.intellij">
+        <!-- Add your extensions here -->
+    </extensions>
+
+    <actions>
+        <!-- Add your actions here -->
+        <group id="XStudioPlugin.GeneratorMenu" text="XStudio" description="XStudio Plugins Menu">
+            <add-to-group group-id="MainMenu" anchor="last"/>
+            <action id="XStudioPlugin.MainUi" class="org.xstudio.plugins.idea.action.MainAction" text="项目配置"
+                    description="为该项目配置生成器使用的默认配置"/>
+            <action id="XStudioPlugin.Generate" class="org.xstudio.plugins.idea.action.GeneratorAction" text="后台代码生成"
+                    description="后台代码生成"/>
+            <action id="XStudioPlugin.GenerateWeb" class="org.xstudio.plugins.idea.action.GenerateWebAction"
+                    text="前端代码生成" description="前端代码生成"/>
+        </group>
+    </actions>
+</idea-plugin>
