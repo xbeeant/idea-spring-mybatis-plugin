@@ -15,7 +15,6 @@ repositories {
     maven {
         url 'http://dl.bintray.com/jetbrains/intellij-plugin-service'
     }
-//    maven { url "http://172.16.1.188:8082/content/groups/public" }
     maven { url "http://maven.aliyun.com/nexus/content/groups/public" }
     maven { url "http://mirrors.163.com/" }
     mavenCentral()

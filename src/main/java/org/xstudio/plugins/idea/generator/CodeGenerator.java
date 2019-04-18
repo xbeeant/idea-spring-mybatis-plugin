@@ -241,5 +241,6 @@ public class CodeGenerator {
         MyShellCallback callback = new MyShellCallback(overwrite, project);
         MyBatisGenerator myBatisGenerator = new MyBatisGenerator(config, callback, warnings);
         myBatisGenerator.generate(null);
+        project.getBaseDir().refresh(false, true);
     }
 }

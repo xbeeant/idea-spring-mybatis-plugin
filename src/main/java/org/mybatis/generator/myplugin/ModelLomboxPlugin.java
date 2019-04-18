@@ -3,10 +3,10 @@ package org.mybatis.generator.myplugin;
 import org.mybatis.generator.api.IntrospectedColumn;
 import org.mybatis.generator.api.IntrospectedTable;
 import org.mybatis.generator.api.PluginAdapter;
-import org.mybatis.generator.api.dom.java.*;
-import org.mybatis.generator.internal.util.JavaBeansUtil;
+import org.mybatis.generator.api.dom.java.Field;
+import org.mybatis.generator.api.dom.java.Method;
+import org.mybatis.generator.api.dom.java.TopLevelClass;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -24,6 +24,22 @@ public class ModelLomboxPlugin extends PluginAdapter {
     public boolean modelBaseRecordClassGenerated(TopLevelClass topLevelClass, IntrospectedTable introspectedTable) {
         topLevelClass.addAnnotation("@Data");
         topLevelClass.addImportedType("lombok.Data");
+        boolean imported = false;
+        for (Field field : topLevelClass.getFields()) {
+            for (String annotation : field.getAnnotations()) {
+                if (annotation.contains("@JSONField")) {
+                    topLevelClass.addImportedType("com.alibaba.fastjson.annotation.JSONField");
+                    imported = true;
+                    break;
+                }
+            }
+            if (imported) {
+                break;
+            }
+
+        }
+
+
         return super.modelBaseRecordClassGenerated(topLevelClass, introspectedTable);
     }
 
