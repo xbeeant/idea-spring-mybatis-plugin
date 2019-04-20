@@ -32,10 +32,11 @@ public class GeneratorWebUI extends JFrame {
      */
     private Project project;
     private JSONObject generatorConfig;
-    private Integer PANEL_WIDTH = 1024;
-    private Integer PANEL_HEIGHT = 600;
-
-    private Integer SCROLL_WIDTH = 300;
+    private Integer JFRAME_WIDTH = 1024;
+    private Integer JFRAME_HEIGHT = 600;
+    private Integer PANEL_HEIGHT = JFRAME_HEIGHT - 50;
+    private Integer SIDE_WIDTH = 200;
+    private Integer CONTENT_WIDTH = JFRAME_WIDTH - SIDE_WIDTH - 30;
     private String tablesName;
     private List<IntrospectedColumn> columns = new ArrayList<>();
     /**
@@ -80,11 +81,11 @@ public class GeneratorWebUI extends JFrame {
         } catch (Exception e) {
             tableNames = new ArrayList<>();
         }
-        JBPanel actionPanel = new JBPanel<>(new GridLayout(0, 1, 5, 5));
-//        actionPanel.setPreferredSize(new Dimension(PANEL_WIDTH - SCROLL_WIDTH - 40, PANEL_HEIGHT - 50));
+        JBPanel actionPanel = new JBPanel<>(new FlowLayout(FlowLayout.LEFT));
+
         JList<String> wordList = new JBList<>(tableNames);
         JScrollPane scrollPane = new JBScrollPane(wordList);
-        scrollPane.setPreferredSize(new Dimension(SCROLL_WIDTH, PANEL_HEIGHT - 50));
+        scrollPane.setPreferredSize(new Dimension(SIDE_WIDTH, PANEL_HEIGHT));
         wordList.setDragEnabled(false);
         wordList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         wordList.addListSelectionListener(e -> {
@@ -96,17 +97,19 @@ public class GeneratorWebUI extends JFrame {
                 // 生成代码配置
                 actionPanel.removeAll();
                 actionPanel.add(setGeneratorConfigUI(columns, tablesName));
+                actionPanel.setVisible(true);
                 actionPanel.revalidate();
+                actionPanel.setVisible(true);
             }
         });
 
         mainPanel.add(scrollPane);
         mainPanel.add(actionPanel);
-        setSize(new Dimension(PANEL_WIDTH, PANEL_HEIGHT));
+        setSize(new Dimension(JFRAME_WIDTH, JFRAME_HEIGHT));
         // 居中显示
         setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
-
+        setResizable(false);
         // show the frame
         setVisible(true);
     }
@@ -139,9 +142,12 @@ public class GeneratorWebUI extends JFrame {
         }
     }
 
-    private JPanel setGeneratorConfigUI(List<IntrospectedColumn> columns, String tablesName) {
-        JPanel panel = new JBPanel<>(new FlowLayout(FlowLayout.LEFT));
-        panel.setPreferredSize(new Dimension(PANEL_WIDTH - SCROLL_WIDTH - 70, 0));
+    private JScrollPane setGeneratorConfigUI(List<IntrospectedColumn> columns, String tablesName) {
+        JBPanel panel = new JBPanel(new FlowLayout(FlowLayout.LEFT));
+        panel.setVisible(true);
+        panel.setPreferredSize(new Dimension(CONTENT_WIDTH - 20, columns.size() * 70));
+        panel.revalidate();
+
         Label label;
         JTextField input;
         JPanel item;
@@ -152,7 +158,7 @@ public class GeneratorWebUI extends JFrame {
         JPanel buttonPanel;
 
         item = new JBPanel<>(new FlowLayout(FlowLayout.LEFT));
-        item.setPreferredSize(new Dimension(PANEL_WIDTH - SCROLL_WIDTH - 70, 25));
+        item.setPreferredSize(new Dimension(CONTENT_WIDTH - 70, 25));
         label = new Label("namespace");
         label.setAlignment(Label.RIGHT);
         item.add(label);
@@ -160,14 +166,14 @@ public class GeneratorWebUI extends JFrame {
         input = new JTextField();
         input.setHorizontalAlignment(JTextField.LEFT);
         input.setText(tablesName);
-        input.setPreferredSize(new Dimension(200, 25));
+        input.setPreferredSize(new Dimension(CONTENT_WIDTH - 200, 25));
         item.add(input);
         panel.add(item);
-        JList<JPanel> panels = new JBList<>();
         for (IntrospectedColumn column : columns) {
             itemDetail = new JBPanel<>(new GridLayout(0, 6, 5, 5));
-            itemDetail.setBorder(BorderFactory.createLineBorder(Color.black, 1));
-            label = new Label(column.getActualColumnName());
+            itemDetail.setPreferredSize(new Dimension(CONTENT_WIDTH - 30, 60));
+            itemDetail.setBorder(BorderFactory.createLineBorder(Color.gray, 1));
+            label = new Label(column.getActualColumnName() + " 中文");
             label.setPreferredSize(new Dimension(100, 25));
             label.setAlignment(Label.RIGHT);
             itemDetail.add(label);
@@ -177,7 +183,7 @@ public class GeneratorWebUI extends JFrame {
             input.setText(column.getRemarks());
             itemDetail.add(input);
 
-            label = new Label("表格");
+            label = new Label("表格中显示");
             label.setAlignment(Label.RIGHT);
             itemDetail.add(label);
 
@@ -195,7 +201,7 @@ public class GeneratorWebUI extends JFrame {
             buttonPanel.add(radioButton);
             itemDetail.add(buttonPanel);
 
-            label = new Label("宽度");
+            label = new Label("表格中可宽度");
             label.setAlignment(Label.RIGHT);
             itemDetail.add(label);
 
@@ -203,7 +209,7 @@ public class GeneratorWebUI extends JFrame {
             input.setHorizontalAlignment(JTextField.LEFT);
             itemDetail.add(input);
 
-            label = new Label("排序");
+            label = new Label("表格中可排序");
             label.setAlignment(Label.RIGHT);
             itemDetail.add(label);
 
@@ -221,7 +227,7 @@ public class GeneratorWebUI extends JFrame {
             buttonPanel.add(radioButton);
             itemDetail.add(buttonPanel);
 
-            label = new Label("校验唯一性");
+            label = new Label("编辑时校验唯一性");
             label.setAlignment(Label.RIGHT);
             itemDetail.add(label);
 
@@ -238,11 +244,14 @@ public class GeneratorWebUI extends JFrame {
             buttonGroup.add(radioButton);
             buttonPanel.add(radioButton);
             itemDetail.add(buttonPanel);
-            panels.add(itemDetail);
+            itemDetail.setVisible(true);
+//            panels.add(itemDetail);
             panel.add(itemDetail);
         }
-//        JScrollPane scrollPane = new JBScrollPane(panel);
-//        scrollPane.setPreferredSize(new Dimension(PANEL_WIDTH - SCROLL_WIDTH - 40, PANEL_HEIGHT - 50));
-        return panel;
+        JScrollPane scrollPane = new JBScrollPane(panel);
+        scrollPane.setPreferredSize(new Dimension(CONTENT_WIDTH - 10, PANEL_HEIGHT - 10));
+        scrollPane.setVisible(true);
+//        panel.add(scrollPane);
+        return scrollPane;
     }
 }

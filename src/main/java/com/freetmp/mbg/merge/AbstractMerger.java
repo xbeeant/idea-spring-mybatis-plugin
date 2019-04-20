@@ -21,6 +21,9 @@ import com.github.javaparser.ast.comments.LineComment;
 import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.stmt.*;
 import com.github.javaparser.ast.type.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.xstudio.plugins.idea.database.DatabaseUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +35,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @SuppressWarnings("unchecked")
 public abstract class AbstractMerger<M extends Node> {
+  private static final Logger LOGGER = LoggerFactory.getLogger(AbstractMerger.class);
 
   protected static ConcurrentHashMap<Class, AbstractMerger> map = new ConcurrentHashMap<>();
 
@@ -371,6 +375,7 @@ public abstract class AbstractMerger<M extends Node> {
     Class<?> type = clazz;
 
     while (merger == null && type != null) {
+      LOGGER.info("merge type {}", type);
       merger = map.get(type);
       type = type.getSuperclass();
     }
