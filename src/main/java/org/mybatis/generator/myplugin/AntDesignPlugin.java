@@ -7,9 +7,12 @@ import org.mybatis.generator.api.PluginAdapter;
 import org.mybatis.generator.api.dom.OutputUtilities;
 import org.mybatis.generator.internal.util.JavaBeansUtil;
 import org.mybatis.generator.myplugin.antd.Column;
+import org.xstudio.plugins.idea.ui.WebProperty;
 
 import java.io.*;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class AntDesignPlugin extends PluginAdapter {
 
@@ -24,16 +27,21 @@ public class AntDesignPlugin extends PluginAdapter {
     private String componentName;
     private int actionNumber = 0;
     private String targetProject;
+    private Map<String, Map<String, Object>> webPropertyMap = new HashMap<>();
 
     @Override
     public boolean validate(List<String> warnings) {
         targetProject = context.getJavaModelGeneratorConfiguration().getTargetProject();
         targetProject = targetProject.replace("java", "web");
-        viewModel = "是".equalsIgnoreCase(properties.getProperty("componentView", "否"));
-        editModel = "是".equalsIgnoreCase(properties.getProperty("componentEdit", "否"));
-        deleteAction = "是".equalsIgnoreCase(properties.getProperty("componentDelete", "否"));
-        modelName = properties.getProperty("modelName");
-        componentName = properties.getProperty("componentName");
+        List<WebProperty> webProperties = JSON.parseArray(properties.getProperty("web"), WebProperty.class);
+        for (WebProperty webProperty : webProperties) {
+            webPropertyMap.put(webProperty.getField(), webProperty.getProperties());
+        }
+        viewModel = true;
+        editModel = true;
+        deleteAction = true;
+        modelName = JavaBeansUtil.getCamelCaseString(String.valueOf(webPropertyMap.get("namespace").get("namespace")), false);
+        componentName = JavaBeansUtil.getCamelCaseString(modelName, true);
         if (viewModel) {
             actionNumber = actionNumber + 1;
         }
@@ -52,7 +60,6 @@ public class AntDesignPlugin extends PluginAdapter {
         if (!introspectedTable.getPrimaryKeyColumns().isEmpty()) {
             key = introspectedTable.getPrimaryKeyColumns().get(0).getJavaProperty();
         }
-        String name = JavaBeansUtil.getCamelCaseString(introspectedTable.getFullyQualifiedTable().getFullyQualifiedTableNameAtRuntime(), false);
 
         generateComponent(introspectedTable, componentName);
 
@@ -179,7 +186,7 @@ public class AntDesignPlugin extends PluginAdapter {
                     "      columns.push({\n" +
                     "        key: 'action',\n" +
                     "        title: '操作',\n" +
-                    "        width: '" + actionNumber + "* actionWidth',\n" +
+                    "        width: " + actionNumber + " * actionWidth,\n" +
                     "        render: (text, record) => (\n" +
                     "          <Fragment>\n");
             if (viewModel) {
@@ -204,19 +211,11 @@ public class AntDesignPlugin extends PluginAdapter {
         sb.append("\n");
         sb.append("    const defaultColumns = [\n");
         for (IntrospectedColumn introspectedColumn : introspectedTable.getPrimaryKeyColumns()) {
-            Column column = new Column(introspectedColumn.getRemarks(), introspectedColumn.getJavaProperty());
-            sb.append("      ");
-            sb.append(JSON.toJSONString(column).replaceAll(",", ", ").replaceAll(":",": "));
-            sb.append(",");
-            OutputUtilities.newLine(sb);
+            setTableDefaultColumns(sb, introspectedColumn);
         }
 
         for (IntrospectedColumn introspectedColumn : introspectedTable.getNonPrimaryKeyColumns()) {
-            Column column = new Column(introspectedColumn.getRemarks(), introspectedColumn.getJavaProperty());
-            sb.append("      ");
-            sb.append(JSON.toJSONString(column).replaceAll(",", ", ").replaceAll(":",": "));
-            sb.append(",");
-            OutputUtilities.newLine(sb);
+            setTableDefaultColumns(sb, introspectedColumn);
         }
         sb.append("    ];\n" +
                 "    columns.push(...defaultColumns);\n" +
@@ -266,6 +265,26 @@ public class AntDesignPlugin extends PluginAdapter {
             e.printStackTrace();
         }
 
+    }
+
+    private void setTableDefaultColumns(StringBuilder sb, IntrospectedColumn introspectedColumn) {
+        Map<String, Object> propertyObjectMap = webPropertyMap.get(introspectedColumn.getActualColumnName());
+        Object showInTable = propertyObjectMap.get("showInTable");
+        if (null != showInTable && (Boolean) showInTable) {
+            Column column = new Column((String) propertyObjectMap.get("remarks"), introspectedColumn.getJavaProperty());
+            sb.append("      ");
+            Object tableWidth = propertyObjectMap.get("tableWidth");
+            if (null != tableWidth) {
+                column.setWidth((String) tableWidth);
+            }
+            Object tableSorter = propertyObjectMap.get("tableSorter");
+            if (null != tableSorter && (Boolean) tableSorter) {
+                column.setSorter(true);
+            }
+            sb.append(JSON.toJSONString(column).replaceAll(",", ", ").replaceAll(":", ": "));
+            sb.append(",");
+            OutputUtilities.newLine(sb);
+        }
     }
 
 
@@ -348,7 +367,7 @@ public class AntDesignPlugin extends PluginAdapter {
                 "  },\n" +
                 "};\n");
         try {
-            writeFile("models", filename, sb.toString());
+            writeFile("components/" + componentName + "/models", filename, sb.toString());
         } catch (IOException e) {
             e.printStackTrace();
         }

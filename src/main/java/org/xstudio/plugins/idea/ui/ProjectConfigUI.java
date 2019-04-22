@@ -85,6 +85,7 @@ public class ProjectConfigUI extends JFrame {
 
         // show the frame
         setVisible(true);
+        setResizable(false);
     }
 
     private JPanel setDatabaseUI() {

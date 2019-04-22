@@ -3,11 +3,13 @@ package org.xstudio.plugins.idea.ui;
 import com.alibaba.fastjson.JSONObject;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.Messages;
 import com.intellij.ui.components.JBList;
 import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.components.JBScrollPane;
 import org.mybatis.generator.api.IntrospectedColumn;
 import org.xstudio.plugins.idea.database.DatabaseUtil;
+import org.xstudio.plugins.idea.generator.CodeGenerator;
 import org.xstudio.plugins.idea.generator.FileUtil;
 
 import javax.swing.*;
@@ -21,8 +23,6 @@ import java.util.*;
  * @version 2019/3/20
  */
 public class GeneratorWebUI extends JFrame {
-    Map<String, List<JCheckBox>> checkOptions = new HashMap<>();
-    Map<String, List<JRadioButton>> radioOptions = new HashMap<>();
     /**
      * 事件
      */
@@ -37,8 +37,10 @@ public class GeneratorWebUI extends JFrame {
     private Integer PANEL_HEIGHT = JFRAME_HEIGHT - 50;
     private Integer SIDE_WIDTH = 200;
     private Integer CONTENT_WIDTH = JFRAME_WIDTH - SIDE_WIDTH - 30;
-    private String tablesName;
+    private String tableName;
     private List<IntrospectedColumn> columns = new ArrayList<>();
+
+    private Map<String, Map<String, Object>> webProperties = new HashMap<>();
     /**
      * 配置面板
      * 创建面板，这个类似于 HTML 的 div 标签
@@ -54,6 +56,8 @@ public class GeneratorWebUI extends JFrame {
     }
 
     private void setUI() {
+        GeneratorWebUI generatorWebUI = this;
+
         String projectFolder = project.getBasePath();
         String configPath = projectFolder + File.separator;
 
@@ -82,6 +86,36 @@ public class GeneratorWebUI extends JFrame {
             tableNames = new ArrayList<>();
         }
         JBPanel actionPanel = new JBPanel<>(new FlowLayout(FlowLayout.LEFT));
+        actionPanel.setPreferredSize(new Dimension(CONTENT_WIDTH - 10, PANEL_HEIGHT));
+
+        JPanel buttonPanel = new JBPanel<>();
+        buttonPanel.setPreferredSize(new Dimension(CONTENT_WIDTH - 10, 30));
+
+        JBPanel contentPanel = new JBPanel<>(new FlowLayout(FlowLayout.LEFT));
+        contentPanel.setPreferredSize(new Dimension(CONTENT_WIDTH - 10, PANEL_HEIGHT - 30));
+        // 保存按钮
+        JButton buttonConfirm = new JButton("生成代码");
+        buttonConfirm.setPreferredSize(new Dimension(100, 26));
+        buttonConfirm.addActionListener(actionEvent -> {
+            boolean error = false;
+            List<WebProperty> webPropertyList = setCheckOption();
+            try {
+                generatorConfig.put("tableName", tableName);
+                generatorConfig.put("web", webPropertyList);
+                CodeGenerator.generate(projectFolder, generatorConfig, project);
+            } catch (Exception e) {
+                error = true;
+                Messages.showMessageDialog("表" + tableName + "代码生成异常" + e.getMessage(), "错误", Messages.getErrorIcon());
+            }
+
+            if (!error) {
+                Messages.showMessageDialog("代码生成完成", "提醒", Messages.getInformationIcon());
+            }
+        });
+        buttonPanel.add(buttonConfirm);
+
+        actionPanel.add(buttonPanel);
+        actionPanel.add(contentPanel);
 
         JList<String> wordList = new JBList<>(tableNames);
         JScrollPane scrollPane = new JBScrollPane(wordList);
@@ -91,15 +125,15 @@ public class GeneratorWebUI extends JFrame {
         wordList.addListSelectionListener(e -> {
             if (e.getValueIsAdjusting()) {
                 for (String value : wordList.getSelectedValuesList()) {
-                    tablesName = value;
+                    tableName = value;
                 }
-                columns = databaseUtil.getColumns(table, tablesName);
+                columns = databaseUtil.getColumns(table, tableName);
                 // 生成代码配置
-                actionPanel.removeAll();
-                actionPanel.add(setGeneratorConfigUI(columns, tablesName));
-                actionPanel.setVisible(true);
-                actionPanel.revalidate();
-                actionPanel.setVisible(true);
+                contentPanel.removeAll();
+                contentPanel.add(setGeneratorConfigUI(columns, tableName));
+                contentPanel.setVisible(true);
+                contentPanel.revalidate();
+                contentPanel.setVisible(true);
             }
         });
 
@@ -109,43 +143,48 @@ public class GeneratorWebUI extends JFrame {
         // 居中显示
         setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
-        setResizable(false);
+//        setResizable(false);
         // show the frame
         setVisible(true);
     }
 
-    private void setCheckOption() {
-        Set<Map.Entry<String, List<JCheckBox>>> checkOptionsSet = checkOptions.entrySet();
-        for (Map.Entry<String, List<JCheckBox>> checkOption : checkOptionsSet) {
-            String key = checkOption.getKey();
-            StringBuilder value = new StringBuilder();
-            List<JCheckBox> list = checkOption.getValue();
-            for (JCheckBox jCheckBox : list) {
-                if (jCheckBox.isSelected()) {
-                    value.append(jCheckBox.getText());
+    private List<WebProperty> setCheckOption() {
+        List<WebProperty> webPropertyList = new ArrayList<>();
+        Set<Map.Entry<String, Map<String, Object>>> webPropertiesSet = webProperties.entrySet();
+        for (Map.Entry<String, Map<String, Object>> stringMapEntry : webPropertiesSet) {
+            Set<Map.Entry<String, Object>> properties = stringMapEntry.getValue().entrySet();
+            WebProperty webProperty = new WebProperty();
+            webProperty.setField(stringMapEntry.getKey());
+            for (Map.Entry<String, Object> property : properties) {
+                Object value = property.getValue();
+                if (value instanceof ButtonGroup) {
+                    Enumeration<AbstractButton> elements = ((ButtonGroup) value).getElements();
+                    int buttonCount = ((ButtonGroup) value).getButtonCount();
+                    for (int i = 0; i < buttonCount; i++) {
+                        AbstractButton abstractButton = elements.nextElement();
+                        if (abstractButton.isSelected()) {
+                            if ("是".equalsIgnoreCase(abstractButton.getText())) {
+                                webProperty.addProperty(property.getKey(), true);
+                            } else {
+                                webProperty.addProperty(property.getKey(), false);
+                            }
+                            break;
+                        }
+                    }
+                } else if (value instanceof JTextField) {
+                    webProperty.addProperty(property.getKey(), ((JTextField) value).getText());
                 }
             }
-            generatorConfig.put(key, value);
+            webPropertyList.add(webProperty);
         }
 
-        Set<Map.Entry<String, List<JRadioButton>>> radioOptionsSet = radioOptions.entrySet();
-        for (Map.Entry<String, List<JRadioButton>> radioOption : radioOptionsSet) {
-            String key = radioOption.getKey();
-            StringBuilder value = new StringBuilder();
-            List<JRadioButton> list = radioOption.getValue();
-            for (JRadioButton radioButton : list) {
-                if (radioButton.isSelected()) {
-                    value.append(radioButton.getText());
-                }
-            }
-            generatorConfig.put(key, value);
-        }
+        return webPropertyList;
     }
 
     private JScrollPane setGeneratorConfigUI(List<IntrospectedColumn> columns, String tablesName) {
         JBPanel panel = new JBPanel(new FlowLayout(FlowLayout.LEFT));
         panel.setVisible(true);
-        panel.setPreferredSize(new Dimension(CONTENT_WIDTH - 20, columns.size() * 70));
+        panel.setPreferredSize(new Dimension(CONTENT_WIDTH - 30, columns.size() * 70));
         panel.revalidate();
 
         Label label;
@@ -168,8 +207,14 @@ public class GeneratorWebUI extends JFrame {
         input.setText(tablesName);
         input.setPreferredSize(new Dimension(CONTENT_WIDTH - 200, 25));
         item.add(input);
+        Map<String, Object> namespace = new HashMap<>();
+        namespace.put("namespace", input);
+        webProperties.put("namespace", namespace);
+
         panel.add(item);
+        Map<String, Object> columnMap;
         for (IntrospectedColumn column : columns) {
+            columnMap = new HashMap<>();
             itemDetail = new JBPanel<>(new GridLayout(0, 6, 5, 5));
             itemDetail.setPreferredSize(new Dimension(CONTENT_WIDTH - 30, 60));
             itemDetail.setBorder(BorderFactory.createLineBorder(Color.gray, 1));
@@ -182,6 +227,7 @@ public class GeneratorWebUI extends JFrame {
             input.setHorizontalAlignment(JTextField.LEFT);
             input.setText(column.getRemarks());
             itemDetail.add(input);
+            columnMap.put("remarks", input);
 
             label = new Label("表格中显示");
             label.setAlignment(Label.RIGHT);
@@ -200,14 +246,16 @@ public class GeneratorWebUI extends JFrame {
             buttonGroup.add(radioButton);
             buttonPanel.add(radioButton);
             itemDetail.add(buttonPanel);
+            columnMap.put("showInTable", buttonGroup);
 
-            label = new Label("表格中可宽度");
+            label = new Label("表格中宽度");
             label.setAlignment(Label.RIGHT);
             itemDetail.add(label);
 
             input = new JTextField();
             input.setHorizontalAlignment(JTextField.LEFT);
             itemDetail.add(input);
+            columnMap.put("tableInWidth", buttonGroup);
 
             label = new Label("表格中可排序");
             label.setAlignment(Label.RIGHT);
@@ -226,6 +274,7 @@ public class GeneratorWebUI extends JFrame {
             buttonGroup.add(radioButton);
             buttonPanel.add(radioButton);
             itemDetail.add(buttonPanel);
+            columnMap.put("tableSorter", buttonGroup);
 
             label = new Label("编辑时校验唯一性");
             label.setAlignment(Label.RIGHT);
@@ -244,12 +293,15 @@ public class GeneratorWebUI extends JFrame {
             buttonGroup.add(radioButton);
             buttonPanel.add(radioButton);
             itemDetail.add(buttonPanel);
+            columnMap.put("uniqueValidate", buttonGroup);
+
             itemDetail.setVisible(true);
 //            panels.add(itemDetail);
             panel.add(itemDetail);
+            webProperties.put(column.getActualColumnName(), columnMap);
         }
         JScrollPane scrollPane = new JBScrollPane(panel);
-        scrollPane.setPreferredSize(new Dimension(CONTENT_WIDTH - 10, PANEL_HEIGHT - 10));
+        scrollPane.setPreferredSize(new Dimension(CONTENT_WIDTH - 15, PANEL_HEIGHT - 10));
         scrollPane.setVisible(true);
 //        panel.add(scrollPane);
         return scrollPane;
