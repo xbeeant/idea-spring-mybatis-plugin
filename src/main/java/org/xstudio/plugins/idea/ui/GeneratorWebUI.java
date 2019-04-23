@@ -276,6 +276,25 @@ public class GeneratorWebUI extends JFrame {
             itemDetail.add(buttonPanel);
             columnMap.put("tableSorter", buttonGroup);
 
+            label = new Label("可编辑");
+            label.setAlignment(Label.RIGHT);
+            itemDetail.add(label);
+
+            buttonGroup = new ButtonGroup();
+            buttonPanel = new JBPanel<>(new FlowLayout(FlowLayout.LEFT));
+            radioButton = new JRadioButton("是");
+            radioButton.setHorizontalAlignment(JTextField.LEFT);
+            buttonGroup.add(radioButton);
+            buttonPanel.add(radioButton);
+
+            radioButton = new JRadioButton("否");
+            radioButton.setHorizontalAlignment(JTextField.LEFT);
+            radioButton.setSelected(true);
+            buttonGroup.add(radioButton);
+            buttonPanel.add(radioButton);
+            itemDetail.add(buttonPanel);
+            columnMap.put("editable", buttonGroup);
+
             label = new Label("编辑时校验唯一性");
             label.setAlignment(Label.RIGHT);
             itemDetail.add(label);
