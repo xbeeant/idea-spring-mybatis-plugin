@@ -110,6 +110,7 @@ public class ProjectConfigUI extends JFrame {
         JPanel panel = new JBPanel<>(new FlowLayout(FlowLayout.LEFT));
         panel.setPreferredSize(new Dimension(PANEL_WIDTH, 300));
         ArrayList<InputItem> labels = new ArrayList<>();
+        labels.add(new InputItem("项目路径：", "projectPath"));
         labels.add(new InputItem("基础包：", "pakage"));
         labels.add(new InputItem("ID生成器：", "idGenerator"));
         labels.add(new InputItem("IService：", "serviceRootObject"));

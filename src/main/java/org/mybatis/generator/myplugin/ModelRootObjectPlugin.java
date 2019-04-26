@@ -50,9 +50,18 @@ public class ModelRootObjectPlugin extends PluginAdapter {
 
     @Override
     public boolean modelBaseRecordClassGenerated(TopLevelClass topLevelClass, IntrospectedTable introspectedTable) {
-        // 添加父类
-        topLevelClass.setSuperClass(baseObject);
+        List<IntrospectedColumn> primaryKeyColumns = introspectedTable.getPrimaryKeyColumns();
+        FullyQualifiedJavaType fullyQualifiedJavaType;
         topLevelClass.addImportedType(baseObject);
+        FullyQualifiedJavaType superClass = new FullyQualifiedJavaType(baseObject.getFullyQualifiedName());
+        for (IntrospectedColumn primaryKeyColumn : primaryKeyColumns) {
+            fullyQualifiedJavaType = primaryKeyColumn.getFullyQualifiedJavaType();
+            superClass.addTypeArgument(fullyQualifiedJavaType);
+            topLevelClass.addImportedType(fullyQualifiedJavaType);
+        }
+
+        // 添加父类
+        topLevelClass.setSuperClass(superClass);
         return super.modelBaseRecordClassGenerated(topLevelClass, introspectedTable);
     }
 
@@ -74,26 +83,14 @@ public class ModelRootObjectPlugin extends PluginAdapter {
                 setKey.addBodyLine(JavaBeansUtil.getSetterMethodName(keyColumn.getJavaProperty()) + "(null);");
                 setKey.addBodyLine("return;");
                 setKey.addBodyLine("}");
-                switch (keyColumn.getFullyQualifiedJavaType().getShortName()) {
-                    case "Long":
-                        setKey.addBodyLine(JavaBeansUtil.getSetterMethodName(keyColumn.getJavaProperty()) + "(Long.valueOf(String.valueOf(key)));");
-                        break;
-                    case "Integer":
-                        setKey.addBodyLine(JavaBeansUtil.getSetterMethodName(keyColumn.getJavaProperty()) + "(Integer.valueOf(String.valueOf(key)));");
-                        break;
-                    case "Double":
-                        setKey.addBodyLine(JavaBeansUtil.getSetterMethodName(keyColumn.getJavaProperty()) + "(Double.valueOf(String.valueOf(key)));");
-                        break;
-                    default:
-                        setKey.addBodyLine(JavaBeansUtil.getSetterMethodName(keyColumn.getJavaProperty()) + "(String.valueOf(key));");
-                }
+                setKey.addBodyLine(JavaBeansUtil.getSetterMethodName(keyColumn.getJavaProperty()) + "(key);");
 
                 switch (keyColumn.getFullyQualifiedJavaType().getShortName()) {
                     case "String":
                         getKey.addBodyLine("return " + JavaBeansUtil.getGetterMethodName(keyColumn.getJavaProperty(), keyColumn.getFullyQualifiedJavaType()) + "();");
                         break;
                     default:
-                        getKey.addBodyLine("return String.valueOf(" + JavaBeansUtil.getGetterMethodName(keyColumn.getJavaProperty(), keyColumn.getFullyQualifiedJavaType()) + "());");
+                        getKey.addBodyLine("return " + JavaBeansUtil.getGetterMethodName(keyColumn.getJavaProperty(), keyColumn.getFullyQualifiedJavaType()) + "();");
                 }
             } else {
                 setKey.addBodyLine("");
@@ -102,12 +99,12 @@ public class ModelRootObjectPlugin extends PluginAdapter {
 
             setKey.addAnnotation("@Override");
             setKey.setVisibility(JavaVisibility.PUBLIC);
-            setKey.addParameter(new Parameter(new FullyQualifiedJavaType("java.lang.Object"), "key"));
+            setKey.addParameter(new Parameter(new FullyQualifiedJavaType("K"), "key"));
             topLevelClass.addMethod(setKey);
 
             getKey.addAnnotation("@Override");
             getKey.setVisibility(JavaVisibility.PUBLIC);
-            getKey.setReturnType(new FullyQualifiedJavaType("java.lang.String"));
+            getKey.setReturnType(new FullyQualifiedJavaType("K"));
             topLevelClass.addMethod(getKey);
             generated = true;
         }

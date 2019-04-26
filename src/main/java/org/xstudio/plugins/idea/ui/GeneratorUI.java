@@ -109,7 +109,7 @@ public class GeneratorUI extends JFrame {
             for (String tableName : tables) {
                 try {
                     generatorConfig.put("tableName", tableName);
-                    CodeGenerator.generate(projectFolder, generatorConfig, project);
+                    CodeGenerator.generate(generatorConfig.getString("projectPath"), generatorConfig, project);
                 } catch (Exception e) {
                     error = true;
                     Messages.showMessageDialog("表" + tableName + "代码生成异常" + e.getMessage(), "错误", Messages.getErrorIcon());

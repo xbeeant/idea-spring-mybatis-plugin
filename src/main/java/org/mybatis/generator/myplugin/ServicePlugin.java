@@ -54,10 +54,18 @@ public class ServicePlugin extends PluginAdapter {
         paramedRootService = new FullyQualifiedJavaType(properties.getProperty("rootService"));
         baseRecordType = new FullyQualifiedJavaType(introspectedTable.getBaseRecordType());
         paramedRootService.addTypeArgument(baseRecordType);
+
+
         paramedRootServiceImpl = new FullyQualifiedJavaType(properties.getProperty("rootServiceImpl"));
         paramedRootServiceImpl.addTypeArgument(baseRecordType);
+
         paramRootClient = new FullyQualifiedJavaType(properties.getProperty("rootClient"));
         paramRootClient.addTypeArgument(baseRecordType);
+        for (IntrospectedColumn primaryKeyColumn : introspectedTable.getPrimaryKeyColumns()) {
+            paramedRootService.addTypeArgument(primaryKeyColumn.getFullyQualifiedJavaType());
+            paramedRootServiceImpl.addTypeArgument(primaryKeyColumn.getFullyQualifiedJavaType());
+            paramRootClient.addTypeArgument(primaryKeyColumn.getFullyQualifiedJavaType());
+        }
         super.initialized(introspectedTable);
     }
 
@@ -83,8 +91,11 @@ public class ServicePlugin extends PluginAdapter {
         interfaze.addJavaDocLine(" * @version " + new Date());
         interfaze.addJavaDocLine(" */");
 
+
         // 设置父类
         interfaze.addSuperInterface(paramedRootService);
+
+
         interfaze.addImportedType(rootService);
         interfaze.addImportedType(baseRecordType);
 

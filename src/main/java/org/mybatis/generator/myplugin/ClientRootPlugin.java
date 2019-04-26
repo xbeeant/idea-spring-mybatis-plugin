@@ -70,7 +70,18 @@ public class ClientRootPlugin extends PluginAdapter {
             FullyQualifiedJavaType rootClientFqjtArgument = new FullyQualifiedJavaType(rootClient);
             FullyQualifiedJavaType tableFqjt = new FullyQualifiedJavaType(introspectedTable.getBaseRecordType());
             rootClientFqjtArgument.addTypeArgument(tableFqjt);
+
+            List<IntrospectedColumn> primaryKeyColumns = introspectedTable.getPrimaryKeyColumns();
+            FullyQualifiedJavaType fullyQualifiedJavaType;
+
+            for (IntrospectedColumn primaryKeyColumn : primaryKeyColumns) {
+                fullyQualifiedJavaType = primaryKeyColumn.getFullyQualifiedJavaType();
+                rootClientFqjtArgument.addTypeArgument(fullyQualifiedJavaType);
+                interfaze.addImportedType(fullyQualifiedJavaType);
+            }
             interfaze.addSuperInterface(rootClientFqjtArgument);
+
+
             interfaze.addImportedType(rootClientFqjt);
             interfaze.addImportedType(tableFqjt);
         }
