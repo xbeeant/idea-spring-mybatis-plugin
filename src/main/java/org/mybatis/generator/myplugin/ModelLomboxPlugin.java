@@ -23,7 +23,9 @@ public class ModelLomboxPlugin extends PluginAdapter {
     @Override
     public boolean modelBaseRecordClassGenerated(TopLevelClass topLevelClass, IntrospectedTable introspectedTable) {
         topLevelClass.addAnnotation("@Data");
+        topLevelClass.addAnnotation("@EqualsAndHashCode(callSuper = false)");
         topLevelClass.addImportedType("lombok.Data");
+        topLevelClass.addImportedType("lombok.EqualsAndHashCode");
         boolean imported = false;
         for (Field field : topLevelClass.getFields()) {
             for (String annotation : field.getAnnotations()) {

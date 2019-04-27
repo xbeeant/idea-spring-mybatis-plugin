@@ -96,15 +96,19 @@ public class ModelRootObjectPlugin extends PluginAdapter {
                 setKey.addBodyLine("");
                 getKey.addBodyLine("return null;");
             }
+            FullyQualifiedJavaType fullyQualifiedJavaType = new FullyQualifiedJavaType("java.lang.String");
+            for (IntrospectedColumn primaryKeyColumn : primaryKeyColumns) {
+                fullyQualifiedJavaType = primaryKeyColumn.getFullyQualifiedJavaType();
+            }
 
             setKey.addAnnotation("@Override");
             setKey.setVisibility(JavaVisibility.PUBLIC);
-            setKey.addParameter(new Parameter(new FullyQualifiedJavaType("K"), "key"));
+            setKey.addParameter(new Parameter(fullyQualifiedJavaType, "key"));
             topLevelClass.addMethod(setKey);
 
             getKey.addAnnotation("@Override");
             getKey.setVisibility(JavaVisibility.PUBLIC);
-            getKey.setReturnType(new FullyQualifiedJavaType("K"));
+            getKey.setReturnType(fullyQualifiedJavaType);
             topLevelClass.addMethod(getKey);
             generated = true;
         }
