@@ -87,7 +87,7 @@ public class MapperFuzzySearchPlugin extends PluginAdapter {
         }
         rootXmlElement.addAttribute(attribute);
 
-        for (IntrospectedColumn column : introspectedTable.getAllColumns()) {
+        for (IntrospectedColumn column : introspectedTable.getNonBLOBColumns()) {
             ifElement = new XmlElement("if");
             String testClause = getTestClause(column, pager);
             ifElement.addAttribute(new Attribute("test", testClause));
@@ -185,7 +185,7 @@ public class MapperFuzzySearchPlugin extends PluginAdapter {
         attribute = new Attribute("resultMap", "BaseResultMap");
         rootXmlElement.addAttribute(attribute);
         XmlElement whereElement = new XmlElement("where");
-        fromCondition(introspectedTable, rootXmlElement);
+        fromCondition(introspectedTable, rootXmlElement, false);
 
         if (pager) {
             addInclude(whereElement, "Prefixed_Fuzzy_Search_Where_Clause");
@@ -212,7 +212,7 @@ public class MapperFuzzySearchPlugin extends PluginAdapter {
         return false;
     }
 
-    private void fromCondition(IntrospectedTable introspectedTable, XmlElement rootXmlElement) {
+    private void fromCondition(IntrospectedTable introspectedTable, XmlElement rootXmlElement, Boolean noBlob) {
         StringBuilder sb;
         TextElement textElement;
 
@@ -220,8 +220,10 @@ public class MapperFuzzySearchPlugin extends PluginAdapter {
         rootXmlElement.addElement(textElement);
 
         if (introspectedTable.hasBLOBColumns()) {
-            rootXmlElement.addElement(new TextElement("<include refid=\"Base_Column_List\" />,"));
-            rootXmlElement.addElement(new TextElement("<include refid=\"Blob_Column_List\" />"));
+            rootXmlElement.addElement(new TextElement("<include refid=\"Base_Column_List\" />"));
+            if(!noBlob){
+                rootXmlElement.addElement(new TextElement(",<include refid=\"Blob_Column_List\" />"));
+            }
         } else {
             rootXmlElement.addElement(new TextElement("<include refid=\"Base_Column_List\" />"));
         }
