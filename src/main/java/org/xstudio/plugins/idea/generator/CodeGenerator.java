@@ -102,14 +102,19 @@ public class CodeGenerator {
                         ",insertSelective" +
                         ",selectByExample" +
                         ",selectByPrimaryKey" +
+                        ",selectByExampleWithBLOBs" +
                         ",updateByExampleSelective" +
                         ",updateByExample" +
                         ",updateByPrimaryKeySelective" +
+                        ",updateByExampleWithBLOBs" +
+                        ",updateByPrimaryKeyWithBLOBs" +
                         ",updateByPrimaryKey");
                 pluginConfiguration.addProperty("excludeMapper", "deleteByExample" +
                         ",insert" +
                         ",updateByExample" +
-                        ",updateByPrimaryKey"
+                        ",updateByPrimaryKey" +
+                        ",updateByPrimaryKeyWithBLOBs" +
+                        ",updateByExampleWithBLOBs"
                 );
                 context.addPluginConfiguration(pluginConfiguration);
 

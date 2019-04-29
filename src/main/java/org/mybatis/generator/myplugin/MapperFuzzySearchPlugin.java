@@ -182,7 +182,12 @@ public class MapperFuzzySearchPlugin extends PluginAdapter {
             attribute = new Attribute("id", "fuzzySearch");
         }
         rootXmlElement.addAttribute(attribute);
-        attribute = new Attribute("resultMap", "BaseResultMap");
+        if (null != introspectedTable.getBLOBColumns() && !introspectedTable.getBLOBColumns().isEmpty()) {
+            attribute = new Attribute("resultMap", "ResultMapWithBLOBs");
+
+        } else {
+            attribute = new Attribute("resultMap", "BaseResultMap");
+        }
         rootXmlElement.addAttribute(attribute);
         XmlElement whereElement = new XmlElement("where");
         fromCondition(introspectedTable, rootXmlElement, false);
@@ -221,7 +226,7 @@ public class MapperFuzzySearchPlugin extends PluginAdapter {
 
         if (introspectedTable.hasBLOBColumns()) {
             rootXmlElement.addElement(new TextElement("<include refid=\"Base_Column_List\" />"));
-            if(!noBlob){
+            if (!noBlob) {
                 rootXmlElement.addElement(new TextElement(",<include refid=\"Blob_Column_List\" />"));
             }
         } else {
