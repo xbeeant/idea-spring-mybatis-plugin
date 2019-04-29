@@ -22,8 +22,24 @@ public class ModelLomboxPlugin extends PluginAdapter {
 
     @Override
     public boolean modelBaseRecordClassGenerated(TopLevelClass topLevelClass, IntrospectedTable introspectedTable) {
+        lombokAnnotation(topLevelClass);
+
+
+        return super.modelBaseRecordClassGenerated(topLevelClass, introspectedTable);
+    }
+
+    @Override
+    public boolean modelRecordWithBLOBsClassGenerated(TopLevelClass topLevelClass, IntrospectedTable introspectedTable) {
+        lombokAnnotation(topLevelClass);
+
+        return super.modelRecordWithBLOBsClassGenerated(topLevelClass, introspectedTable);
+    }
+
+    private void lombokAnnotation(TopLevelClass topLevelClass) {
         topLevelClass.addAnnotation("@Data");
         topLevelClass.addImportedType("lombok.Data");
+        topLevelClass.addAnnotation("@EqualsAndHashCode(callSuper = false)");
+        topLevelClass.addImportedType("lombok.EqualsAndHashCode");
         boolean imported = false;
         for (Field field : topLevelClass.getFields()) {
             for (String annotation : field.getAnnotations()) {
@@ -38,9 +54,6 @@ public class ModelLomboxPlugin extends PluginAdapter {
             }
 
         }
-
-
-        return super.modelBaseRecordClassGenerated(topLevelClass, introspectedTable);
     }
 
     @Override

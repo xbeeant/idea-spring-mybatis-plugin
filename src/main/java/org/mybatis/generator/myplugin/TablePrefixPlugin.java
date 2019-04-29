@@ -21,7 +21,7 @@ public class TablePrefixPlugin extends PluginAdapter {
     }
 
     private List<String> getPrefixCamel() {
-        if (!"".equals(prefix) && null !=  prefix) {
+        if (!"".equals(prefix) && null != prefix) {
             if (prefix.contains(",")) {
                 String[] split = prefix.split(",");
                 for (int i = 0; i < split.length; i++) {
@@ -42,6 +42,9 @@ public class TablePrefixPlugin extends PluginAdapter {
         for (String prefixCamel : prefixCamels) {
             // 替换 对象的前缀
             introspectedTable.setBaseRecordType(introspectedTable.getBaseRecordType().replace(prefixCamel, ""));
+            if (null != introspectedTable.getRecordWithBLOBsType()) {
+                introspectedTable.setRecordWithBLOBsType(introspectedTable.getRecordWithBLOBsType().replace(prefixCamel, ""));
+            }
             // 替换 mapper 文件的前缀
             introspectedTable.setMyBatis3XmlMapperFileName(introspectedTable.getMyBatis3XmlMapperFileName().replace(prefixCamel, ""));
             // 替换 dao 接口的前缀
@@ -51,15 +54,5 @@ public class TablePrefixPlugin extends PluginAdapter {
         }
 
         super.initialized(introspectedTable);
-    }
-
-    @Override
-    public boolean modelBaseRecordClassGenerated(TopLevelClass topLevelClass, IntrospectedTable introspectedTable) {
-        return super.modelBaseRecordClassGenerated(topLevelClass, introspectedTable);
-    }
-
-    @Override
-    public boolean modelExampleClassGenerated(TopLevelClass topLevelClass, IntrospectedTable introspectedTable) {
-        return super.modelExampleClassGenerated(topLevelClass, introspectedTable);
     }
 }
