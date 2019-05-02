@@ -14,7 +14,7 @@ import java.sql.SQLException;
 public class CodeGeneratorTest {
     @Test
     public void renderTestMethodName() throws InterruptedException, SQLException, InvalidConfigurationException, IOException {
-        JSONObject config = FileUtil.getConfig("/Users/xiaobiao/git/idea-spring-mybatis-plugin/");
-        CodeGenerator.generate("/Users/xiaobiao/git/idea-spring-mybatis-plugin", config, null);
+        JSONObject config = FileUtil.getConfig("H:\\github\\idea-spring-mybatis-plugin\\");
+        CodeGenerator.generate("H:\\github\\xstudio\\crm", config, null);
     }
 }

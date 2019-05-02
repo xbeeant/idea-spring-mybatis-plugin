@@ -10,6 +10,7 @@ import org.mybatis.generator.api.dom.java.Method;
 import org.mybatis.generator.api.dom.java.TopLevelClass;
 import org.mybatis.generator.api.dom.xml.*;
 import org.mybatis.generator.myplugin.util.BeginEndPluginCheck;
+import org.mybatis.generator.myplugin.util.PrimaryKeyUtil;
 
 import java.util.List;
 import java.util.Optional;
@@ -71,16 +72,10 @@ public class ClientRootPlugin extends PluginAdapter {
             FullyQualifiedJavaType tableFqjt = new FullyQualifiedJavaType(introspectedTable.getBaseRecordType());
             rootClientFqjtArgument.addTypeArgument(tableFqjt);
 
-            List<IntrospectedColumn> primaryKeyColumns = introspectedTable.getPrimaryKeyColumns();
-            FullyQualifiedJavaType fullyQualifiedJavaType;
-
-            for (IntrospectedColumn primaryKeyColumn : primaryKeyColumns) {
-                fullyQualifiedJavaType = primaryKeyColumn.getFullyQualifiedJavaType();
-                rootClientFqjtArgument.addTypeArgument(fullyQualifiedJavaType);
-                interfaze.addImportedType(fullyQualifiedJavaType);
-            }
+            FullyQualifiedJavaType primaryKeyTypeFqjt = PrimaryKeyUtil.getFqjt(introspectedTable);
+            rootClientFqjtArgument.addTypeArgument(primaryKeyTypeFqjt);
+            interfaze.addImportedType(primaryKeyTypeFqjt);
             interfaze.addSuperInterface(rootClientFqjtArgument);
-
 
             interfaze.addImportedType(rootClientFqjt);
             interfaze.addImportedType(tableFqjt);
@@ -142,6 +137,8 @@ public class ClientRootPlugin extends PluginAdapter {
         if (excludeMapper.contains(element.getAttributes().get(0).getValue())) {
             return false;
         }
+        // key 查询条件添加key. 的前缀 满足多个key的情况
+        setPrimaryKeyCondition(element);
         element.getAttributes().remove(element.getAttributes().get(1));
         return super.sqlMapDeleteByPrimaryKeyElementGenerated(element, introspectedTable);
     }
@@ -180,6 +177,9 @@ public class ClientRootPlugin extends PluginAdapter {
 
     @Override
     public boolean sqlMapSelectByExampleWithoutBLOBsElementGenerated(XmlElement element, IntrospectedTable introspectedTable) {
+        if (excludeMapper.contains(element.getAttributes().get(0).getValue())) {
+            return false;
+        }
         element.getElements().remove(element.getElements().get(8));
         element.getElements().remove(element.getElements().get(8));
         XmlElement whereElement = new XmlElement("where");
@@ -191,6 +191,9 @@ public class ClientRootPlugin extends PluginAdapter {
 
     @Override
     public boolean sqlMapSelectByExampleWithBLOBsElementGenerated(XmlElement element, IntrospectedTable introspectedTable) {
+        if (excludeMapper.contains(element.getAttributes().get(0).getValue())) {
+            return false;
+        }
         element.getAttributes().removeIf(attribute -> "parameterType".equals(attribute.getName()));
         element.getElements().remove(5);
         element.getElements().remove(9);
@@ -207,11 +210,15 @@ public class ClientRootPlugin extends PluginAdapter {
             return false;
         }
         element.getAttributes().remove(element.getAttributes().get(2));
+        // key 查询条件添加key. 的前缀 满足多个key的情况
+        setPrimaryKeyCondition(element);
+
         return super.sqlMapSelectByPrimaryKeyElementGenerated(element, introspectedTable);
     }
 
     @Override
     public boolean sqlMapUpdateByExampleSelectiveElementGenerated(XmlElement element, IntrospectedTable introspectedTable) {
+
         element.getElements().remove(element.getElements().get(6));
         XmlElement whereElement = new XmlElement("where");
         addInclude(whereElement, "Prefixed_Example_Where_Clause");
@@ -222,6 +229,9 @@ public class ClientRootPlugin extends PluginAdapter {
 
     @Override
     public boolean sqlMapUpdateByExampleWithBLOBsElementGenerated(XmlElement element, IntrospectedTable introspectedTable) {
+        if (excludeMapper.contains(element.getAttributes().get(0).getValue())) {
+            return false;
+        }
         element.getAttributes().remove(1);
 
         List<Element> elements = element.getElements();
@@ -246,7 +256,22 @@ public class ClientRootPlugin extends PluginAdapter {
         if (excludeMapper.contains(element.getAttributes().get(0).getValue())) {
             return false;
         }
+        setPrimaryKeyCondition(element);
         return super.sqlMapUpdateByPrimaryKeySelectiveElementGenerated(element, introspectedTable);
+    }
+
+    private void setPrimaryKeyCondition(XmlElement element) {
+        // key 查询条件添加key. 的前缀 满足多个key的情况
+        List<Element> elements = element.getElements();
+        for (Element elementElement : elements) {
+            if (elementElement instanceof TextElement) {
+                TextElement textElement = (TextElement) elementElement;
+                String content = textElement.getContent();
+                if (content.contains("#{")) {
+                    textElement.setContent(content.replace("#{", "#{key."));
+                }
+            }
+        }
     }
 
     @Override
@@ -254,6 +279,7 @@ public class ClientRootPlugin extends PluginAdapter {
         if (excludeMapper.contains(element.getAttributes().get(0).getValue())) {
             return false;
         }
+        setPrimaryKeyCondition(element);
         return super.sqlMapUpdateByPrimaryKeyWithBLOBsElementGenerated(element, introspectedTable);
     }
 
@@ -262,6 +288,7 @@ public class ClientRootPlugin extends PluginAdapter {
         if (excludeMapper.contains(element.getAttributes().get(0).getValue())) {
             return false;
         }
+        setPrimaryKeyCondition(element);
         return super.sqlMapUpdateByPrimaryKeyWithoutBLOBsElementGenerated(element, introspectedTable);
     }
 
@@ -451,7 +478,7 @@ public class ClientRootPlugin extends PluginAdapter {
 
             element.addElement(foreachElement);
         }
-
+        // todo 多主键的更新语句
         document.getRootElement().addElement(element);
     }
 
@@ -511,7 +538,7 @@ public class ClientRootPlugin extends PluginAdapter {
 
             element.addElement(foreachElement);
         }
-
+        // todo 多个主键的删除逻辑不一样
         document.getRootElement().addElement(element);
     }
 }

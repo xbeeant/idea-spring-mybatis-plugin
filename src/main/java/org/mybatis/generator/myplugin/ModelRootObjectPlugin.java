@@ -4,7 +4,7 @@ import org.mybatis.generator.api.IntrospectedColumn;
 import org.mybatis.generator.api.IntrospectedTable;
 import org.mybatis.generator.api.PluginAdapter;
 import org.mybatis.generator.api.dom.java.*;
-import org.mybatis.generator.internal.util.JavaBeansUtil;
+import org.mybatis.generator.myplugin.util.PrimaryKeyUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,19 +50,30 @@ public class ModelRootObjectPlugin extends PluginAdapter {
 
     @Override
     public boolean modelBaseRecordClassGenerated(TopLevelClass topLevelClass, IntrospectedTable introspectedTable) {
-        List<IntrospectedColumn> primaryKeyColumns = introspectedTable.getPrimaryKeyColumns();
-        FullyQualifiedJavaType fullyQualifiedJavaType;
+        if (!topLevelClass.getSuperClass().isPresent()) {
+            FullyQualifiedJavaType primaryKeyTypeFqjt = PrimaryKeyUtil.getFqjt(introspectedTable);
+            topLevelClass.addImportedType(baseObject);
+            FullyQualifiedJavaType superClass = new FullyQualifiedJavaType(baseObject.getFullyQualifiedName());
+            superClass.addTypeArgument(primaryKeyTypeFqjt);
+            topLevelClass.addImportedType(primaryKeyTypeFqjt);
+
+            // 添加父类
+            topLevelClass.setSuperClass(superClass);
+        }
+        return super.modelBaseRecordClassGenerated(topLevelClass, introspectedTable);
+    }
+
+    @Override
+    public boolean modelPrimaryKeyClassGenerated(TopLevelClass topLevelClass, IntrospectedTable introspectedTable) {
+        FullyQualifiedJavaType primaryKeyTypeFqjt = PrimaryKeyUtil.getFqjt(introspectedTable);
         topLevelClass.addImportedType(baseObject);
         FullyQualifiedJavaType superClass = new FullyQualifiedJavaType(baseObject.getFullyQualifiedName());
-        for (IntrospectedColumn primaryKeyColumn : primaryKeyColumns) {
-            fullyQualifiedJavaType = primaryKeyColumn.getFullyQualifiedJavaType();
-            superClass.addTypeArgument(fullyQualifiedJavaType);
-            topLevelClass.addImportedType(fullyQualifiedJavaType);
-        }
+        superClass.addTypeArgument(primaryKeyTypeFqjt);
+        topLevelClass.addImportedType(primaryKeyTypeFqjt);
 
         // 添加父类
         topLevelClass.setSuperClass(superClass);
-        return super.modelBaseRecordClassGenerated(topLevelClass, introspectedTable);
+        return super.modelPrimaryKeyClassGenerated(topLevelClass, introspectedTable);
     }
 
     @Override
@@ -70,47 +81,48 @@ public class ModelRootObjectPlugin extends PluginAdapter {
         if (ignoreFields.contains(introspectedColumn.getActualColumnName())) {
             return false;
         }
+        if (!topLevelClass.getSuperClass().isPresent()) {
+            if (!generated && enableGenerateGetSetKey) {
+                List<IntrospectedColumn> primaryKeyColumns = introspectedTable.getPrimaryKeyColumns();
+                // set Key
+                Method setKey = new Method("setKey");
+                Method getKey = new Method("getKey");
+                FullyQualifiedJavaType primaryKeyTypeFqjt = PrimaryKeyUtil.getFqjt(introspectedTable);
+                if (!primaryKeyColumns.isEmpty()) {
+                    if (primaryKeyTypeFqjt.getFullyQualifiedName().contains("java.lang")) {
+                        IntrospectedColumn keyColumn = primaryKeyColumns.get(0);
+                        // set key
+                        // todo
+                        // set key
+                        setKey.addBodyLine("// todo");
+                        setKey.addBodyLine("return;");
 
-        if (!generated && enableGenerateGetSetKey) {
-            List<IntrospectedColumn> primaryKeyColumns = introspectedTable.getPrimaryKeyColumns();
-            // set Key
-            Method setKey = new Method("setKey");
-            Method getKey = new Method("getKey");
-            if (!primaryKeyColumns.isEmpty()) {
-                IntrospectedColumn keyColumn = primaryKeyColumns.get(0);
-                // set key
-                setKey.addBodyLine("if (null == key ||  \"null\".equals(key)) {");
-                setKey.addBodyLine(JavaBeansUtil.getSetterMethodName(keyColumn.getJavaProperty()) + "(null);");
-                setKey.addBodyLine("return;");
-                setKey.addBodyLine("}");
-                setKey.addBodyLine(JavaBeansUtil.getSetterMethodName(keyColumn.getJavaProperty()) + "(key);");
+                        getKey.addBodyLine("// todo");
+                        getKey.addBodyLine("return null;");
+                    } else {
+                        // set key
+                        setKey.addBodyLine("// todo");
+                        setKey.addBodyLine("return;");
 
-                switch (keyColumn.getFullyQualifiedJavaType().getShortName()) {
-                    case "String":
-                        getKey.addBodyLine("return " + JavaBeansUtil.getGetterMethodName(keyColumn.getJavaProperty(), keyColumn.getFullyQualifiedJavaType()) + "();");
-                        break;
-                    default:
-                        getKey.addBodyLine("return " + JavaBeansUtil.getGetterMethodName(keyColumn.getJavaProperty(), keyColumn.getFullyQualifiedJavaType()) + "();");
+                        getKey.addBodyLine("// todo");
+                        getKey.addBodyLine("return null;");
+                    }
+                } else {
+                    setKey.addBodyLine("");
+                    getKey.addBodyLine("return null;");
                 }
-            } else {
-                setKey.addBodyLine("");
-                getKey.addBodyLine("return null;");
-            }
-            FullyQualifiedJavaType fullyQualifiedJavaType = new FullyQualifiedJavaType("java.lang.String");
-            for (IntrospectedColumn primaryKeyColumn : primaryKeyColumns) {
-                fullyQualifiedJavaType = primaryKeyColumn.getFullyQualifiedJavaType();
-            }
 
-            setKey.addAnnotation("@Override");
-            setKey.setVisibility(JavaVisibility.PUBLIC);
-            setKey.addParameter(new Parameter(fullyQualifiedJavaType, "key"));
-            topLevelClass.addMethod(setKey);
+                setKey.addAnnotation("@Override");
+                setKey.setVisibility(JavaVisibility.PUBLIC);
+                setKey.addParameter(new Parameter(primaryKeyTypeFqjt, "key"));
+                topLevelClass.addMethod(setKey);
 
-            getKey.addAnnotation("@Override");
-            getKey.setVisibility(JavaVisibility.PUBLIC);
-            getKey.setReturnType(fullyQualifiedJavaType);
-            topLevelClass.addMethod(getKey);
-            generated = true;
+                getKey.addAnnotation("@Override");
+                getKey.setVisibility(JavaVisibility.PUBLIC);
+                getKey.setReturnType(primaryKeyTypeFqjt);
+                topLevelClass.addMethod(getKey);
+                generated = true;
+            }
         }
 
         return super.modelFieldGenerated(field, topLevelClass, introspectedColumn, introspectedTable, modelClassType);

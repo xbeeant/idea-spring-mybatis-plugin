@@ -38,10 +38,7 @@ public class ModelLomboxPlugin extends PluginAdapter {
             if (imported) {
                 break;
             }
-
         }
-
-
         return super.modelBaseRecordClassGenerated(topLevelClass, introspectedTable);
     }
 

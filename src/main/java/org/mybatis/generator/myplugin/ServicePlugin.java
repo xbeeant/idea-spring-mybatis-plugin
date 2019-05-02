@@ -7,6 +7,7 @@ import org.mybatis.generator.api.PluginAdapter;
 import org.mybatis.generator.api.dom.java.*;
 import org.mybatis.generator.config.PropertyRegistry;
 import org.mybatis.generator.internal.util.JavaBeansUtil;
+import org.mybatis.generator.myplugin.util.PrimaryKeyUtil;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -61,11 +62,10 @@ public class ServicePlugin extends PluginAdapter {
 
         paramRootClient = new FullyQualifiedJavaType(properties.getProperty("rootClient"));
         paramRootClient.addTypeArgument(baseRecordType);
-        for (IntrospectedColumn primaryKeyColumn : introspectedTable.getPrimaryKeyColumns()) {
-            paramedRootService.addTypeArgument(primaryKeyColumn.getFullyQualifiedJavaType());
-            paramedRootServiceImpl.addTypeArgument(primaryKeyColumn.getFullyQualifiedJavaType());
-            paramRootClient.addTypeArgument(primaryKeyColumn.getFullyQualifiedJavaType());
-        }
+        FullyQualifiedJavaType primaryKeyTypeFqjt = PrimaryKeyUtil.getFqjt(introspectedTable);
+        paramedRootService.addTypeArgument(primaryKeyTypeFqjt);
+        paramedRootServiceImpl.addTypeArgument(primaryKeyTypeFqjt);
+        paramRootClient.addTypeArgument(primaryKeyTypeFqjt);
         super.initialized(introspectedTable);
     }
 
@@ -91,6 +91,8 @@ public class ServicePlugin extends PluginAdapter {
         interfaze.addJavaDocLine(" * @version " + new Date());
         interfaze.addJavaDocLine(" */");
 
+        FullyQualifiedJavaType primaryKeyTypeFqjt = PrimaryKeyUtil.getFqjt(introspectedTable);
+        interfaze.addImportedType(primaryKeyTypeFqjt);
 
         // 设置父类
         interfaze.addSuperInterface(paramedRootService);
@@ -118,6 +120,7 @@ public class ServicePlugin extends PluginAdapter {
         topLevelClass.addAnnotation("@Service");
         topLevelClass.addImportedType(new FullyQualifiedJavaType("org.springframework.stereotype.Service"));
 
+        topLevelClass.addImportedType(primaryKeyTypeFqjt);
         topLevelClass.setVisibility(JavaVisibility.PUBLIC);
         topLevelClass.addJavaDocLine("/**");
         topLevelClass.addJavaDocLine(" * service implements for table " + introspectedTable.getFullyQualifiedTable().getIntrospectedTableName());
@@ -161,6 +164,7 @@ public class ServicePlugin extends PluginAdapter {
         setDefaults.addAnnotation("@Override");
         setDefaults.setVisibility(JavaVisibility.PUBLIC);
         setDefaults.addParameter(new Parameter(baseRecordType, "record"));
+        setDefaults.addBodyLine("// todo");
         topLevelClass.addImportedType(baseRecordType);
 
         Method getKeyValue = new Method("getKeyValue");
