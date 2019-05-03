@@ -4,6 +4,7 @@ import org.mybatis.generator.api.IntrospectedColumn;
 import org.mybatis.generator.api.IntrospectedTable;
 import org.mybatis.generator.api.PluginAdapter;
 import org.mybatis.generator.api.dom.java.*;
+import org.mybatis.generator.internal.util.JavaBeansUtil;
 import org.mybatis.generator.myplugin.util.PrimaryKeyUtil;
 
 import java.util.ArrayList;
@@ -89,23 +90,20 @@ public class ModelRootObjectPlugin extends PluginAdapter {
                 Method getKey = new Method("getKey");
                 FullyQualifiedJavaType primaryKeyTypeFqjt = PrimaryKeyUtil.getFqjt(introspectedTable);
                 if (!primaryKeyColumns.isEmpty()) {
-                    if (primaryKeyTypeFqjt.getFullyQualifiedName().contains("java.lang")) {
-                        IntrospectedColumn keyColumn = primaryKeyColumns.get(0);
-                        // set key
-                        // todo
-                        // set key
-                        setKey.addBodyLine("// todo");
-                        setKey.addBodyLine("return;");
-
-                        getKey.addBodyLine("// todo");
-                        getKey.addBodyLine("return null;");
+                    if (primaryKeyColumns.size() == 1) {
+                        String keyProperty = primaryKeyColumns.get(0).getJavaProperty();
+                        setKey.addBodyLine("this." + keyProperty + " = key;");
+                        getKey.addBodyLine("return " + keyProperty + ";");
                     } else {
-                        // set key
-                        setKey.addBodyLine("// todo");
-                        setKey.addBodyLine("return;");
-
-                        getKey.addBodyLine("// todo");
-                        getKey.addBodyLine("return null;");
+                        getKey.addBodyLine(primaryKeyTypeFqjt.getShortNameWithoutTypeArguments() + " key = " +
+                                "new " + primaryKeyTypeFqjt.getShortNameWithoutTypeArguments() + "();");
+                        for (IntrospectedColumn primaryKeyColumn : primaryKeyColumns) {
+                            String keyProperty = primaryKeyColumn.getJavaProperty();
+                            String propertyMethod = JavaBeansUtil.getCamelCaseString(keyProperty, true);
+                            setKey.addBodyLine("this." + keyProperty + " = key.get" + propertyMethod + "();");
+                            getKey.addBodyLine("key.set" + propertyMethod + "(this." + keyProperty + ");");
+                        }
+                        getKey.addBodyLine("return key;");
                     }
                 } else {
                     setKey.addBodyLine("");

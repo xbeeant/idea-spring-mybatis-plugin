@@ -158,10 +158,10 @@ public class CodeGenerator {
             }
 
 
-            // ModelLomboxPlugin
+            // ModelLombokPlugin
             if ("是".equalsIgnoreCase(generatorConfig.getString(EnConfigField.LOMBOK.getCode()))) {
                 pluginConfiguration = new PluginConfiguration();
-                pluginConfiguration.setConfigurationType("org.mybatis.generator.myplugin.ModelLomboxPlugin");
+                pluginConfiguration.setConfigurationType("org.mybatis.generator.myplugin.ModelLombokPlugin");
                 context.addPluginConfiguration(pluginConfiguration);
             }
 

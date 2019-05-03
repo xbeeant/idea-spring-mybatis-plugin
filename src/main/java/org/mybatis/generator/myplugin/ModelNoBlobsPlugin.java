@@ -7,6 +7,7 @@ import org.mybatis.generator.api.dom.java.Field;
 import org.mybatis.generator.api.dom.java.JavaVisibility;
 import org.mybatis.generator.api.dom.java.TopLevelClass;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -22,7 +23,16 @@ public class ModelNoBlobsPlugin extends PluginAdapter {
     @Override
     public boolean modelBaseRecordClassGenerated(TopLevelClass topLevelClass, IntrospectedTable introspectedTable) {
         List<IntrospectedColumn> blobColumns = introspectedTable.getBLOBColumns();
+        List<Field> fields = topLevelClass.getFields();
+        List<String> existField = new ArrayList<>();
+        for (Field field : fields) {
+            existField.add(field.getName());
+        }
+
         for (IntrospectedColumn blobColumn : blobColumns) {
+            if(existField.contains(blobColumn.getJavaProperty())){
+                continue;
+            }
             Field field = new Field(blobColumn.getJavaProperty(), blobColumn.getFullyQualifiedJavaType());
             field.setVisibility(JavaVisibility.PUBLIC);
             context.getCommentGenerator().addFieldComment(field,
