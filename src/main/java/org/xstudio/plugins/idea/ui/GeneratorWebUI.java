@@ -184,14 +184,12 @@ public class GeneratorWebUI extends JFrame {
     private JScrollPane setGeneratorConfigUI(List<IntrospectedColumn> columns, String tablesName) {
         JBPanel panel = new JBPanel(new FlowLayout(FlowLayout.LEFT));
         panel.setVisible(true);
-        panel.setPreferredSize(new Dimension(CONTENT_WIDTH - 30, columns.size() * 70));
-        panel.revalidate();
+        panel.setPreferredSize(new Dimension(CONTENT_WIDTH - 30, columns.size() * 85));
 
         Label label;
         JTextField input;
         JPanel item;
         JPanel itemDetail;
-        JCheckBox checkBox;
         ButtonGroup buttonGroup;
         JRadioButton radioButton;
         JPanel buttonPanel;
@@ -216,7 +214,7 @@ public class GeneratorWebUI extends JFrame {
         for (IntrospectedColumn column : columns) {
             columnMap = new HashMap<>();
             itemDetail = new JBPanel<>(new GridLayout(0, 6, 5, 5));
-            itemDetail.setPreferredSize(new Dimension(CONTENT_WIDTH - 30, 60));
+            itemDetail.setPreferredSize(new Dimension(CONTENT_WIDTH - 30, 75));
             itemDetail.setBorder(BorderFactory.createLineBorder(Color.gray, 1));
             label = new Label(column.getActualColumnName() + " 中文");
             label.setPreferredSize(new Dimension(100, 25));
@@ -276,6 +274,44 @@ public class GeneratorWebUI extends JFrame {
             itemDetail.add(buttonPanel);
             columnMap.put("tableSorter", buttonGroup);
 
+            label = new Label("简单搜索");
+            label.setAlignment(Label.RIGHT);
+            itemDetail.add(label);
+
+            buttonGroup = new ButtonGroup();
+            buttonPanel = new JBPanel<>(new FlowLayout(FlowLayout.LEFT));
+            radioButton = new JRadioButton("是");
+            radioButton.setHorizontalAlignment(JTextField.LEFT);
+            buttonGroup.add(radioButton);
+            buttonPanel.add(radioButton);
+
+            radioButton = new JRadioButton("否");
+            radioButton.setHorizontalAlignment(JTextField.LEFT);
+            radioButton.setSelected(true);
+            buttonGroup.add(radioButton);
+            buttonPanel.add(radioButton);
+            itemDetail.add(buttonPanel);
+            columnMap.put("simpleSearch", buttonGroup);
+
+            label = new Label("展开搜索");
+            label.setAlignment(Label.RIGHT);
+            itemDetail.add(label);
+
+            buttonGroup = new ButtonGroup();
+            buttonPanel = new JBPanel<>(new FlowLayout(FlowLayout.LEFT));
+            radioButton = new JRadioButton("是");
+            radioButton.setHorizontalAlignment(JTextField.LEFT);
+            buttonGroup.add(radioButton);
+            buttonPanel.add(radioButton);
+
+            radioButton = new JRadioButton("否");
+            radioButton.setHorizontalAlignment(JTextField.LEFT);
+            radioButton.setSelected(true);
+            buttonGroup.add(radioButton);
+            buttonPanel.add(radioButton);
+            itemDetail.add(buttonPanel);
+            columnMap.put("advanceSearch", buttonGroup);
+
             label = new Label("可编辑");
             label.setAlignment(Label.RIGHT);
             itemDetail.add(label);
@@ -315,14 +351,13 @@ public class GeneratorWebUI extends JFrame {
             columnMap.put("uniqueValidate", buttonGroup);
 
             itemDetail.setVisible(true);
-//            panels.add(itemDetail);
             panel.add(itemDetail);
             webProperties.put(column.getActualColumnName(), columnMap);
         }
         JScrollPane scrollPane = new JBScrollPane(panel);
         scrollPane.setPreferredSize(new Dimension(CONTENT_WIDTH - 15, PANEL_HEIGHT - 10));
         scrollPane.setVisible(true);
-//        panel.add(scrollPane);
+        panel.revalidate();
         return scrollPane;
     }
 }

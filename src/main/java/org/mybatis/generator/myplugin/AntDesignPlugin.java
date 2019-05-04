@@ -17,11 +17,21 @@ import org.mybatis.generator.myplugin.antd.Column;
 import org.xstudio.plugins.idea.ui.WebProperty;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class AntDesignPlugin extends PluginAdapter {
+    private static List<String> ignoreColumnPropertys;
+
+    static {
+        ignoreColumnPropertys = new ArrayList<>(0);
+        ignoreColumnPropertys.add("createAt");
+        ignoreColumnPropertys.add("createBy");
+        ignoreColumnPropertys.add("updateAt");
+        ignoreColumnPropertys.add("updateBy");
+    }
 
     private String key;
 
@@ -76,7 +86,265 @@ public class AntDesignPlugin extends PluginAdapter {
         generateEditModal(introspectedTable, componentName, modelName);
         generateService(introspectedTable, modelName);
 
+        generatePages(introspectedTable, componentName, modelName);
+
         super.initialized(introspectedTable);
+    }
+
+    private void generatePages(IntrospectedTable introspectedTable, String componentName, String modelName) {
+        String filename = "index.js";
+        StringBuilder sb = new StringBuilder();
+        sb.append("import React, { PureComponent } from 'react';\n" +
+                "import { connect } from 'dva';\n" +
+                "import { Input, Button, Form, Card, Icon, Row, Col } from 'antd';\n" +
+                "import { PageHeaderWrapper } from '@/components';\n" +
+                "import " + componentName + "Table from '@/components/" + componentName + "';\n" +
+                "import " + componentName + "EditModal from '@/components/" + componentName + "/edit';\n" +
+                "import { getTableFilter, toggleForm } from '@/utils/utils';\n" +
+                "\n" +
+                "import styles from '@/global.less';\n" +
+                "\n" +
+                "const FormItem = Form.Item;\n" +
+                "\n" +
+                "@connect(({ " + modelName + ", loading }) => ({\n" +
+                "  " + modelName + ",\n" +
+                "  loading: loading.effects['" + modelName + "/fetch'],\n" +
+                "}))\n" +
+                "@Form.create()\n" +
+                "class " + componentName + "List extends PureComponent {\n" +
+                "  state = {\n" +
+                "    expandForm: false,\n" +
+                "    selectedRows: [],\n" +
+                "    formValues: {},\n" +
+                "    tableParams: {},\n" +
+                "    addModalVisible: false,\n" +
+                "  };\n" +
+                "\n" +
+                "  componentDidMount() {\n" +
+                "    const { dispatch } = this.props;\n" +
+                "    dispatch({\n" +
+                "      type: '" + modelName + "/fetch',\n" +
+                "    });\n" +
+                "  }\n" +
+                "\n" +
+                "  handleSearch = (e) => {\n" +
+                "    e.preventDefault();\n" +
+                "\n" +
+                "    const { dispatch, form } = this.props;\n" +
+                "\n" +
+                "    const { tableParams } = this.state;\n" +
+                "    form.validateFields((err, fieldsValue) => {\n" +
+                "      if (err) return;\n" +
+                "\n" +
+                "      const values = {\n" +
+                "        ...fieldsValue,\n" +
+                "      };\n" +
+                "\n" +
+                "      this.setState({\n" +
+                "        formValues: values,\n" +
+                "      });\n" +
+                "\n" +
+                "      const{ pageSize = 10 } = tableParams;\n" +
+                "      dispatch({\n" +
+                "        type: '" + modelName + "/fetch',\n" +
+                "        payload: { pageSize, ...values },\n" +
+                "      });\n" +
+                "    });\n" +
+                "  };\n" +
+                "\n" +
+                "  handleModalVisible = (flag) => {\n" +
+                "    this.setState({\n" +
+                "      addModalVisible: flag,\n" +
+                "    });\n" +
+                "  };\n" +
+                "\n" +
+                "  handleFormReset = () => {\n" +
+                "    const { form, dispatch } = this.props;\n" +
+                "    const {\n" +
+                "      tableParams: { pageSize = 10 },\n" +
+                "    } = this.state;\n" +
+                "    form.resetFields();\n" +
+                "    this.setState({\n" +
+                "      formValues: {current: 1, pageSize},\n" +
+                "    });\n" +
+                "    dispatch({\n" +
+                "      type: '" + modelName + "/fetch',\n" +
+                "      payload: {current: 1, pageSize},\n" +
+                "    });\n" +
+                "  };\n" +
+                "\n" +
+                "  handleRefreshTable = () => {\n" +
+                "    const { dispatch } = this.props;\n" +
+                "    const { tableParams, formValues } = this.state;\n" +
+                "    dispatch({\n" +
+                "      type: '" + modelName + "/fetch',\n" +
+                "      payload: { ...tableParams, ...formValues },\n" +
+                "    });\n" +
+                "  };\n" +
+                "\n" +
+                "  handleTableDelete = () => {\n" +
+                "    const { dispatch } = this.props;\n" +
+                "    const { tableParams, formValues } = this.state;\n" +
+                "    const{pageSize} = tableParams;\n" +
+                "    dispatch({\n" +
+                "      type: '" + modelName + "/fetch',\n" +
+                "      payload: { pageSize, ...formValues },\n" +
+                "    });\n" +
+                "  };\n" +
+                "\n" +
+                "  handleStandardTableChange = (pagination, filtersArg, sorter) => {\n" +
+                "    const { dispatch } = this.props;\n" +
+                "    const { formValues } = this.state;\n" +
+                "\n" +
+                "    const params = getTableFilter(pagination, filtersArg, sorter, formValues);\n" +
+                "    this.setState({\n" +
+                "      tableParams: { ...pagination, ...filtersArg, ...sorter },\n" +
+                "    });\n" +
+                "\n" +
+                "    dispatch({\n" +
+                "      type: '" + modelName + "/fetch',\n" +
+                "      payload: params,\n" +
+                "    });\n" +
+                "  };\n" +
+                "\n" +
+                "  handleModalOk = () => {\n" +
+                "    this.setState({ addModalVisible: false });\n" +
+                "    this.handleFormReset();\n" +
+                "  };\n" +
+                "\n" +
+                "  renderSimpleForm() {\n" +
+                "    const { form: { getFieldDecorator }} = this.props;\n" +
+                "    return (\n" +
+                "      <Form onSubmit={this.handleSearch} layout=\"inline\">\n" +
+                "        <Row gutter={{ md: 8, lg: 24, xl: 48 }}>\n");
+        Map<String, Object> propertyObjectMap;
+        for (IntrospectedColumn introspectedColumn : introspectedTable.getNonPrimaryKeyColumns()) {
+            if (ignoreColumnPropertys.contains(introspectedColumn.getJavaProperty())) {
+                continue;
+            }
+            propertyObjectMap = webPropertyMap.get(introspectedColumn.getActualColumnName());
+            Object simpleSearch = propertyObjectMap.get("simpleSearch");
+            if(null != simpleSearch && "是".equals(simpleSearch)){
+                Object remarks = propertyObjectMap.get("remarks");
+                sb.append("          <Col xs={24} sm={24} md={8} lg={8}>\n" +
+                        "            <FormItem label=\"" + remarks + "\">\n" +
+                        "              {getFieldDecorator('" + introspectedColumn.getJavaProperty() + "')(\n" +
+                        "                <Input placeholder=\"请输入" + remarks + "\" />\n" +
+                        "              )}\n" +
+                        "            </FormItem>\n" +
+                        "          </Col>");
+                OutputUtilities.newLine(sb);
+            }
+        }
+        sb.append("          <Col xs={24} sm={24} md={8} lg={8}>\n" +
+                "            <span className={styles.submitButtons}>\n" +
+                "              <Button type=\"primary\" htmlType=\"submit\">查询</Button>\n" +
+                "              <Button style={{ marginLeft: 8 }} onClick={this.handleFormReset}>重置</Button>\n" +
+                "              <a style={{ marginLeft: 8 }} onClick={() => toggleForm(this)}>\n" +
+                "                展开 <Icon type=\"down\" />\n" +
+                "              </a>\n" +
+                "            </span>\n" +
+                "          </Col>\n" +
+                "        </Row>\n" +
+                "      </Form>\n" +
+                "    );\n" +
+                "  };\n" +
+                "\n" +
+                "  renderAdvancedForm() {\n" +
+                "    const { form: { getFieldDecorator }} = this.props;\n" +
+                "    return (\n" +
+                "      <Form onSubmit={this.handleSearch} layout=\"inline\">\n" +
+                "        <Row gutter={{ md: 8, lg: 24, xl: 48 }}>\n");
+        for (IntrospectedColumn introspectedColumn : introspectedTable.getNonPrimaryKeyColumns()) {
+            if (ignoreColumnPropertys.contains(introspectedColumn.getJavaProperty())) {
+                continue;
+            }
+            propertyObjectMap = webPropertyMap.get(introspectedColumn.getActualColumnName());
+            Object advanceSearch = propertyObjectMap.get("advanceSearch");
+            if(null != advanceSearch && "是".equals(advanceSearch)){
+                Object remarks = propertyObjectMap.get("remarks");
+                sb.append("          <Col xs={24} sm={24} md={8} lg={8}>\n" +
+                        "            <FormItem label=\"" + remarks + "\">\n" +
+                        "              {getFieldDecorator('" + introspectedColumn.getJavaProperty() + "')(\n" +
+                        "                <Input placeholder=\"请输入" + remarks + "\" />\n" +
+                        "              )}\n" +
+                        "            </FormItem>\n" +
+                        "          </Col>");
+                OutputUtilities.newLine(sb);
+            }
+        }
+                sb.append("\n" +
+                "        </Row>\n" +
+                "        <div style={{ overflow: 'hidden' }}>\n" +
+                "          <span style={{ float: 'right', marginBottom: 24 }}>\n" +
+                "            <Button type=\"primary\" htmlType=\"submit\">查询</Button>\n" +
+                "            <Button style={{ marginLeft: 8 }} onClick={this.handleFormReset}>重置</Button>\n" +
+                "            <a style={{ marginLeft: 8 }} onClick={() => toggleForm(this)}>\n" +
+                "              收起 <Icon type=\"up\" />\n" +
+                "            </a>\n" +
+                "          </span>\n" +
+                "        </div>\n" +
+                "      </Form>\n" +
+                "    );\n" +
+                "  };\n" +
+                "\n" +
+                "\n" +
+                "  renderForm() {\n" +
+                "    const { expandForm } = this.state;\n" +
+                "    return expandForm ? this.renderAdvancedForm() : this.renderSimpleForm();\n" +
+                "  }\n" +
+                "\n" +
+                "  render() {\n" +
+                "    const { " + modelName + ": { data }, loading } = this.props;\n" +
+                "    const { selectedRows, addModalVisible } = this.state;\n" +
+                "\n" +
+                "    return (\n" +
+                "      <PageHeaderWrapper>\n" +
+                "        <Card bordered={false}>\n" +
+                "          <div className={styles.tableList}>\n" +
+                "            <div className={styles.tableListForm}>\n" +
+                "              {this.renderForm()}\n" +
+                "            </div>\n" +
+                "            <div className={styles.tableListOperator}>\n" +
+                "              <Button icon=\"plus\" type=\"primary\" onClick={() => this.handleModalVisible(true)}>\n" +
+                "                新建\n" +
+                "              </Button>\n" +
+                "            </div>\n" +
+                "            <" + componentName + "Table\n" +
+                "              selectedRows={selectedRows}\n" +
+                "              loading={loading}\n" +
+                "              data={data}\n" +
+                "              onSelectRow={this.handleSelectRows}\n" +
+                "              onChange={this.handleStandardTableChange}\n" +
+                "              onDelete={this.handleTableDelete}\n" +
+                "              refreshTable={this.handleRefreshTable}\n" +
+                "            />\n" +
+                "          </div>\n" +
+                "        </Card>\n" +
+                "\n" +
+                "        {\n" +
+                "          addModalVisible &&\n" +
+                "            (\n" +
+                "            <" + componentName + "EditModal\n" +
+                "              title=\"新增\"\n" +
+                "              visible={addModalVisible}\n" +
+                "              values={{}}\n" +
+                "              onOk={this.handleModalOk}\n" +
+                "              onCancel={() => this.handleModalVisible(false)}\n" +
+                "            />\n" +
+                "            )\n" +
+                "        }\n" +
+                "      </PageHeaderWrapper>\n" +
+                "    );\n" +
+                "  }\n" +
+                "\n" +
+                "}\n" +
+                "export default " + componentName + "List;");
+        try {
+            writeFile("pages/" + componentName, filename, sb.toString());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void generateComponent(IntrospectedTable introspectedTable, String componentName) {
@@ -85,7 +353,7 @@ public class AntDesignPlugin extends PluginAdapter {
         sb.append("import React, { PureComponent, Fragment } from 'react';\n" +
                 "import { connect } from 'dva';\n" +
                 "import { Divider, Popconfirm } from 'antd';\n" +
-                "import { BasicTable } from 'caweb';\n" +
+                "import { BasicTable } from '@/components';\n" +
                 "import { portal } from '@/config/config';\n");
         if (viewModel) {
             sb.append("import " + componentName + "ViewModal from './view';\n");
@@ -284,7 +552,7 @@ public class AntDesignPlugin extends PluginAdapter {
 
         sb.append("import React, { PureComponent } from 'react';\n" +
                 "import { Card, Modal } from 'antd';\n" +
-                "import { DescriptionList } from 'caweb';\n" +
+                "import { DescriptionList } from '@/components';\n" +
                 "\n" +
                 "const { Description } = DescriptionList;\n" +
                 "\n" +

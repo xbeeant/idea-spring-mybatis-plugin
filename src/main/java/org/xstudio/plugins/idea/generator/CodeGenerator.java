@@ -82,6 +82,13 @@ public class CodeGenerator {
                 pluginConfiguration.addProperty("excludeFields", generatorConfig.getString("ignoreColumns"));
                 context.addPluginConfiguration(pluginConfiguration);
 
+                // ModelLombokPlugin
+                if ("是".equalsIgnoreCase(generatorConfig.getString(EnConfigField.LOMBOK.getCode()))) {
+                    pluginConfiguration = new PluginConfiguration();
+                    pluginConfiguration.setConfigurationType("org.mybatis.generator.myplugin.ModelLombokPlugin");
+                    context.addPluginConfiguration(pluginConfiguration);
+                }
+
                 // 给日期类型添加 ***Begin ***End 属性
                 // ModelBeginEndFieldPlugin
                 pluginConfiguration = new PluginConfiguration();
@@ -154,14 +161,6 @@ public class CodeGenerator {
                 pluginConfiguration.addProperty("rootFacadeService", generatorConfig.getString("facadeServiceRootObject"));
                 pluginConfiguration.addProperty("rootFacadeServiceImpl", generatorConfig.getString("facadeServiceImplRootObject"));
                 pluginConfiguration.addProperty("package", generatorConfig.getString("pakage") + "." + packageName);
-                context.addPluginConfiguration(pluginConfiguration);
-            }
-
-
-            // ModelLombokPlugin
-            if ("是".equalsIgnoreCase(generatorConfig.getString(EnConfigField.LOMBOK.getCode()))) {
-                pluginConfiguration = new PluginConfiguration();
-                pluginConfiguration.setConfigurationType("org.mybatis.generator.myplugin.ModelLombokPlugin");
                 context.addPluginConfiguration(pluginConfiguration);
             }
 
