@@ -169,6 +169,9 @@ public class ClientRootPlugin extends PluginAdapter {
 
     @Override
     public boolean sqlMapSelectByExampleWithoutBLOBsElementGenerated(XmlElement element, IntrospectedTable introspectedTable) {
+        if (excludeMapper.contains(element.getAttributes().get(0).getValue())) {
+            return false;
+        }
         element.getElements().remove(element.getElements().get(8));
         element.getElements().remove(element.getElements().get(8));
         XmlElement whereElement = new XmlElement("where");
@@ -180,6 +183,9 @@ public class ClientRootPlugin extends PluginAdapter {
 
     @Override
     public boolean sqlMapSelectByExampleWithBLOBsElementGenerated(XmlElement element, IntrospectedTable introspectedTable) {
+        if (excludeMapper.contains(element.getAttributes().get(0).getValue())) {
+            return false;
+        }
         element.getAttributes().removeIf(attribute -> "parameterType".equals(attribute.getName()));
         element.getElements().remove(5);
         element.getElements().remove(9);
@@ -211,6 +217,9 @@ public class ClientRootPlugin extends PluginAdapter {
 
     @Override
     public boolean sqlMapUpdateByExampleWithBLOBsElementGenerated(XmlElement element, IntrospectedTable introspectedTable) {
+        if (excludeMapper.contains(element.getAttributes().get(0).getValue())) {
+            return false;
+        }
         element.getAttributes().remove(1);
 
         List<Element> elements = element.getElements();

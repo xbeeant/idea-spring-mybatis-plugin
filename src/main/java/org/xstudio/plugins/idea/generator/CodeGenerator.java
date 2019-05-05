@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.intellij.openapi.project.Project;
 import org.apache.commons.lang3.StringUtils;
 import org.mybatis.generator.api.MyBatisGenerator;
+import org.mybatis.generator.internal.util.JavaBeansUtil;
 import org.mybatis.generator.myplugin.MyShellCallback;
 import org.mybatis.generator.config.*;
 import org.mybatis.generator.exception.InvalidConfigurationException;
@@ -32,6 +33,9 @@ public class CodeGenerator {
         context.addProperty("endingDelimiter", "`");
         context.addProperty("javaFileEncoding", "UTF-8");
         context.addProperty(PropertyRegistry.CONTEXT_JAVA_FILE_ENCODING, "UTF-8");
+        String prefix = generatorConfig.getString("prefix");
+
+
 
         String table = generatorConfig.getString("table");
 
@@ -55,14 +59,6 @@ public class CodeGenerator {
 
         // ================================= 自定义插件 配置 =============================================================
         if(generatorConfig.get("web") == null){
-            if("是".equals(generatorConfig.getString(EnConfigField.TABLE_PREFIX.getCode()))){
-                // 表前缀
-                pluginConfiguration = new PluginConfiguration();
-                pluginConfiguration.setConfigurationType("org.mybatis.generator.myplugin.TablePrefixPlugin");
-                pluginConfiguration.addProperty("prefix", generatorConfig.getString("prefix"));
-                context.addPluginConfiguration(pluginConfiguration);
-            }
-
             // swagger2 注解插件
             if("是".equals(generatorConfig.getString(EnConfigField.SWAGGER.getCode()))) {
                 pluginConfiguration = new PluginConfiguration();
@@ -86,10 +82,22 @@ public class CodeGenerator {
                 pluginConfiguration.addProperty("excludeFields", generatorConfig.getString("ignoreColumns"));
                 context.addPluginConfiguration(pluginConfiguration);
 
+                // ModelLombokPlugin
+                if ("是".equalsIgnoreCase(generatorConfig.getString(EnConfigField.LOMBOK.getCode()))) {
+                    pluginConfiguration = new PluginConfiguration();
+                    pluginConfiguration.setConfigurationType("org.mybatis.generator.myplugin.ModelLombokPlugin");
+                    context.addPluginConfiguration(pluginConfiguration);
+                }
+
                 // 给日期类型添加 ***Begin ***End 属性
                 // ModelBeginEndFieldPlugin
                 pluginConfiguration = new PluginConfiguration();
                 pluginConfiguration.setConfigurationType("org.mybatis.generator.myplugin.ModelBeginEndFieldPlugin");
+                context.addPluginConfiguration(pluginConfiguration);
+
+                // 没有blob对象
+                pluginConfiguration = new PluginConfiguration();
+                pluginConfiguration.setConfigurationType("org.mybatis.generator.myplugin.ModelNoBlobsPlugin");
                 context.addPluginConfiguration(pluginConfiguration);
 
                 // dao 继承父类
@@ -156,14 +164,6 @@ public class CodeGenerator {
                 context.addPluginConfiguration(pluginConfiguration);
             }
 
-
-            // ModelLomboxPlugin
-            if ("是".equalsIgnoreCase(generatorConfig.getString(EnConfigField.LOMBOK.getCode()))) {
-                pluginConfiguration = new PluginConfiguration();
-                pluginConfiguration.setConfigurationType("org.mybatis.generator.myplugin.ModelLomboxPlugin");
-                context.addPluginConfiguration(pluginConfiguration);
-            }
-
         } else {
             // antd 插件
             pluginConfiguration = new PluginConfiguration();
@@ -211,6 +211,13 @@ public class CodeGenerator {
         tableConfiguration.setTableName(tableName);
         tableConfiguration.setSchema(table);
         tableConfiguration.addProperty("virtualKeyColumns", "VirtualID");
+        if(null != prefix && !"".equals(prefix)){
+            String camelCaseString = JavaBeansUtil.getCamelCaseString(prefix, true);
+            DomainObjectRenamingRule domainObjectRenamingRule = new DomainObjectRenamingRule();
+            domainObjectRenamingRule.setSearchString("^" + camelCaseString);
+            domainObjectRenamingRule.setReplaceString("");
+            tableConfiguration.setDomainObjectRenamingRule(domainObjectRenamingRule);
+        }
         context.addTableConfiguration(tableConfiguration);
 
         // ===============================
@@ -242,6 +249,8 @@ public class CodeGenerator {
         MyShellCallback callback = new MyShellCallback(overwrite, project);
         MyBatisGenerator myBatisGenerator = new MyBatisGenerator(config, callback, warnings);
         myBatisGenerator.generate(null);
-        project.getBaseDir().refresh(false, true);
+        if(null != project){
+            project.getBaseDir().refresh(false, true);
+        }
     }
 }

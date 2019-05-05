@@ -32,4 +32,8 @@ public class TextElement extends Element {
     public <R> R accept(ElementVisitor<R> visitor) {
         return visitor.visit(this);
     }
+
+    public void setContent(String replace) {
+        this.content = replace;
+    }
 }

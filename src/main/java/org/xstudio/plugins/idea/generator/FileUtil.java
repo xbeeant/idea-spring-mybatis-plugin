@@ -61,13 +61,15 @@ public class FileUtil {
             for (Map.Entry<String, JTextField> fieldEntry : inputs.entrySet()) {
                 String key = fieldEntry.getKey();
                 JTextField value = fieldEntry.getValue();
+                String text = value.getText();
+                text = text.replaceAll("\\\\","\\\\\\\\");
                 bw.write("\"");
                 bw.write(key);
                 bw.write("\":\"");
-                bw.write(value.getText().trim());
+                bw.write(text.trim());
                 bw.write("\",");
                 bw.write("\n");
-                jsonObject.put(key, value.getText().trim());
+                jsonObject.put(key, text.trim());
             }
             bw.write("}");
 
