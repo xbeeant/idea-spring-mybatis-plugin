@@ -47,4 +47,8 @@ public class Attribute implements Comparable<Attribute> {
             }
         }
     }
+
+    public void setValue(String value) {
+        this.value = value;
+    }
 }
