@@ -91,12 +91,12 @@ public class ClientRootPlugin extends PluginAdapter {
         boolean ignoreListRemove = false;
         for (Method method : interfaze.getMethods()) {
             Optional<FullyQualifiedJavaType> returnType = method.getReturnType();
-            if(null != returnType && returnType.get().getShortName().equals("List")){
+            if (null != returnType && returnType.get().getShortName().equals("List")) {
                 ignoreListRemove = true;
                 break;
             }
         }
-        if(!ignoreListRemove){
+        if (!ignoreListRemove) {
             importedTypes.removeIf(next -> next.getShortName().equals("List"));
         }
 
@@ -138,7 +138,7 @@ public class ClientRootPlugin extends PluginAdapter {
             return false;
         }
         // key 查询条件添加key. 的前缀 满足多个key的情况
-        setPrimaryKeyCondition(element);
+        setPrimaryKeyCondition(element, true, introspectedTable.getPrimaryKeyColumns());
         element.getAttributes().remove(element.getAttributes().get(1));
         return super.sqlMapDeleteByPrimaryKeyElementGenerated(element, introspectedTable);
     }
@@ -211,7 +211,7 @@ public class ClientRootPlugin extends PluginAdapter {
         }
         element.getAttributes().remove(element.getAttributes().get(2));
         // key 查询条件添加key. 的前缀 满足多个key的情况
-        setPrimaryKeyCondition(element);
+        setPrimaryKeyCondition(element, true, introspectedTable.getPrimaryKeyColumns());
 
         return super.sqlMapSelectByPrimaryKeyElementGenerated(element, introspectedTable);
     }
@@ -256,20 +256,27 @@ public class ClientRootPlugin extends PluginAdapter {
         if (excludeMapper.contains(element.getAttributes().get(0).getValue())) {
             return false;
         }
-        setPrimaryKeyCondition(element);
+        setPrimaryKeyCondition(element, true, introspectedTable.getPrimaryKeyColumns());
         return super.sqlMapUpdateByPrimaryKeySelectiveElementGenerated(element, introspectedTable);
     }
 
-    private void setPrimaryKeyCondition(XmlElement element) {
+    private void setPrimaryKeyCondition(XmlElement element, boolean addPrefix, List<IntrospectedColumn> keyColumns) {
         // key 查询条件添加key. 的前缀 满足多个key的情况
         List<Element> elements = element.getElements();
         for (Element elementElement : elements) {
             if (elementElement instanceof TextElement) {
                 TextElement textElement = (TextElement) elementElement;
                 String content = textElement.getContent();
-                if (content.contains("#{")) {
-                    textElement.setContent(content.replace("#{", "#{key."));
+                if (keyColumns.size() > 1) {
+                    if (addPrefix && content.contains("#{")) {
+                        textElement.setContent(content.replace("#{", "#{key."));
+                    }
+                } else {
+                    if (addPrefix && content.contains("#{")) {
+                        textElement.setContent(content.replace("#{" + keyColumns.get(0).getJavaProperty(), "#{key"));
+                    }
                 }
+
             }
         }
     }
@@ -279,7 +286,7 @@ public class ClientRootPlugin extends PluginAdapter {
         if (excludeMapper.contains(element.getAttributes().get(0).getValue())) {
             return false;
         }
-        setPrimaryKeyCondition(element);
+        setPrimaryKeyCondition(element, true, introspectedTable.getPrimaryKeyColumns());
         return super.sqlMapUpdateByPrimaryKeyWithBLOBsElementGenerated(element, introspectedTable);
     }
 
@@ -288,7 +295,7 @@ public class ClientRootPlugin extends PluginAdapter {
         if (excludeMapper.contains(element.getAttributes().get(0).getValue())) {
             return false;
         }
-        setPrimaryKeyCondition(element);
+        setPrimaryKeyCondition(element, true, introspectedTable.getPrimaryKeyColumns());
         return super.sqlMapUpdateByPrimaryKeyWithoutBLOBsElementGenerated(element, introspectedTable);
     }
 
@@ -408,7 +415,7 @@ public class ClientRootPlugin extends PluginAdapter {
     private void selectByExampleByPager(Document document, IntrospectedTable introspectedTable) {
         XmlElement element = new XmlElement("select");
         element.addAttribute(new Attribute("id", "selectByExampleByPager"));
-        if(introspectedTable.getBLOBColumns() != null && introspectedTable.getBLOBColumns().size() > 1) {
+        if (introspectedTable.getBLOBColumns() != null && introspectedTable.getBLOBColumns().size() > 1) {
             element.addAttribute(new Attribute("resultMap", "ResultMapWithBLOBs"));
         } else {
             element.addAttribute(new Attribute("resultMap", "BaseResultMap"));
@@ -473,6 +480,9 @@ public class ClientRootPlugin extends PluginAdapter {
             foreachElement.addElement(setEl);
 
             String s = whereEl.getContent().replaceAll("#\\{", "#\\{item.");
+            if (introspectedTable.getPrimaryKeyColumns().size() > 1){
+                s = s.replaceAll("item.key.", "item.");
+            }
             whereEl = new TextElement(s);
             foreachElement.addElement(whereEl);
 

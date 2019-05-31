@@ -97,10 +97,10 @@ public class AntDesignPlugin extends PluginAdapter {
         sb.append("import React, { PureComponent } from 'react';\n" +
                 "import { connect } from 'dva';\n" +
                 "import { Input, Button, Form, Card, Icon, Row, Col } from 'antd';\n" +
-                "import { PageHeaderWrapper } from '@/components';\n" +
+                "import PageHeaderWrapper from '@/components/PageHeaderWrapper';\n" +
                 "import " + componentName + "Table from '@/components/" + componentName + "';\n" +
                 "import " + componentName + "EditModal from '@/components/" + componentName + "/edit';\n" +
-                "import { getTableFilter, toggleForm } from '@/utils/utils';\n" +
+                "import { getTableFilter, toggleForm } from '@/utils/myutils';\n" +
                 "\n" +
                 "import styles from '@/global.less';\n" +
                 "\n" +
@@ -224,7 +224,7 @@ public class AntDesignPlugin extends PluginAdapter {
             }
             propertyObjectMap = webPropertyMap.get(introspectedColumn.getActualColumnName());
             Object simpleSearch = propertyObjectMap.get("simpleSearch");
-            if(null != simpleSearch && "是".equals(simpleSearch)){
+            if(null != simpleSearch && (Boolean) simpleSearch){
                 Object remarks = propertyObjectMap.get("remarks");
                 sb.append("          <Col xs={24} sm={24} md={8} lg={8}>\n" +
                         "            <FormItem label=\"" + remarks + "\">\n" +
@@ -261,7 +261,7 @@ public class AntDesignPlugin extends PluginAdapter {
             }
             propertyObjectMap = webPropertyMap.get(introspectedColumn.getActualColumnName());
             Object advanceSearch = propertyObjectMap.get("advanceSearch");
-            if(null != advanceSearch && "是".equals(advanceSearch)){
+            if(null != advanceSearch && (Boolean) advanceSearch){
                 Object remarks = propertyObjectMap.get("remarks");
                 sb.append("          <Col xs={24} sm={24} md={8} lg={8}>\n" +
                         "            <FormItem label=\"" + remarks + "\">\n" +
@@ -287,7 +287,6 @@ public class AntDesignPlugin extends PluginAdapter {
                 "      </Form>\n" +
                 "    );\n" +
                 "  };\n" +
-                "\n" +
                 "\n" +
                 "  renderForm() {\n" +
                 "    const { expandForm } = this.state;\n" +
@@ -353,13 +352,13 @@ public class AntDesignPlugin extends PluginAdapter {
         sb.append("import React, { PureComponent, Fragment } from 'react';\n" +
                 "import { connect } from 'dva';\n" +
                 "import { Divider, Popconfirm } from 'antd';\n" +
-                "import { BasicTable } from '@/components';\n" +
+                "import BasicTable from '@/components/BasicTable';\n" +
                 "import { portal } from '@/config/config';\n");
         if (viewModel) {
             sb.append("import " + componentName + "ViewModal from './view';\n");
         }
         if (editModel) {
-            sb.append("import " + componentName + "EditModal from './view';\n");
+            sb.append("import " + componentName + "EditModal from './edit';\n");
         }
         sb.append("\n");
         sb.append("import { width } from '@/utils/styles';\n");
@@ -552,7 +551,7 @@ public class AntDesignPlugin extends PluginAdapter {
 
         sb.append("import React, { PureComponent } from 'react';\n" +
                 "import { Card, Modal } from 'antd';\n" +
-                "import { DescriptionList } from '@/components';\n" +
+                "import DescriptionList from '@/components/DescriptionList';\n" +
                 "\n" +
                 "const { Description } = DescriptionList;\n" +
                 "\n" +
@@ -832,7 +831,7 @@ public class AntDesignPlugin extends PluginAdapter {
                 "  },\n" +
                 "};\n");
         try {
-            writeFile("components/" + componentName + "/models", filename, sb.toString());
+            writeFile("pages/" + componentName + "/models", filename, sb.toString());
         } catch (IOException e) {
             e.printStackTrace();
         }
