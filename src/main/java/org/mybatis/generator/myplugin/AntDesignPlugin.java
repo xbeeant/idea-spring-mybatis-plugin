@@ -100,7 +100,7 @@ public class AntDesignPlugin extends PluginAdapter {
                 "import PageHeaderWrapper from '@/components/PageHeaderWrapper';\n" +
                 "import " + componentName + "Table from '@/components/" + componentName + "';\n" +
                 "import " + componentName + "EditModal from '@/components/" + componentName + "/edit';\n" +
-                "import { getTableFilter, toggleForm } from '@/utils/myutils';\n" +
+                "import { getTableFilter, toggleForm } from '@/utils/xsutils';\n" +
                 "\n" +
                 "import styles from '@/global.less';\n" +
                 "\n" +
@@ -352,8 +352,8 @@ public class AntDesignPlugin extends PluginAdapter {
         sb.append("import React, { PureComponent, Fragment } from 'react';\n" +
                 "import { connect } from 'dva';\n" +
                 "import { Divider, Popconfirm } from 'antd';\n" +
-                "import BasicTable from '@/components/BasicTable';\n" +
-                "import { portal } from '@/config/config';\n");
+                "import StandardTable from '@/components/StandardTable';\n")
+        ;
         if (viewModel) {
             sb.append("import " + componentName + "ViewModal from './view';\n");
         }
@@ -429,7 +429,7 @@ public class AntDesignPlugin extends PluginAdapter {
                     "  };\n");
         }
         if (editModel || viewModel) {
-            sb.append("  hideModal = (key, refresh = false) => {\n" +
+            sb.append("\n  hideModal = (key, refresh = false) => {\n" +
                     "    const { refreshTable } = this.props;\n" +
                     "    const state = {};\n" +
                     "    state[key] = false;\n" +
@@ -440,7 +440,7 @@ public class AntDesignPlugin extends PluginAdapter {
                     "  };\n");
         }
 
-        sb.append("  render() {\n" +
+        sb.append("\n  render() {\n" +
                 "    const { data, loading, action, selectedRows, onChange } = this.props;\n");
         if (viewModel || editModel) {
             sb.append("    const { ");
@@ -500,7 +500,7 @@ public class AntDesignPlugin extends PluginAdapter {
                 "\n" +
                 "    return (\n" +
                 "      <Fragment>\n" +
-                "        <BasicTable\n" +
+                "        <StandardTable\n" +
                 "          selectedRows={selectedRows}\n" +
                 "          loading={loading}\n" +
                 "          data={data}\n" +
@@ -708,9 +708,9 @@ public class AntDesignPlugin extends PluginAdapter {
                 sb.append(", {\n" +
                         "                  validator(rule, fieldValues, callback) {\n" +
                         "                    me.uniqueValid('" + introspectedColumn.getJavaProperty() + "', fieldValues, callback);\n" +
-                        "                  },\n");
+                        "                  }},\n");
             }
-            sb.append("                }],\n" +
+            sb.append("\n                ],\n" +
                     "              })(<Input placeholder=\"请输入" + remarks + "\" />)}\n" +
                     "              </FormItem>\n" +
                     "            </Col>\n");
@@ -847,7 +847,6 @@ public class AntDesignPlugin extends PluginAdapter {
         String filename = modelName + ".js";
         StringBuilder sb = new StringBuilder("import { stringify } from 'qs';\n" +
                 "import request from '@/utils/request';\n" +
-                "import { apiPrefix } from '@/config/config';\n" +
                 "\n" +
                 "/**\n" +
                 " * 查询所有\n" +
@@ -855,7 +854,7 @@ public class AntDesignPlugin extends PluginAdapter {
                 " * @returns {Promise<*>}\n" +
                 " */\n" +
                 "export async function query(params) {\n" +
-                "  return request(`${apiPrefix}/" + modelName + "/table?${stringify(params)}`);\n" +
+                "  return request(`/" + modelName + "/table?${stringify(params)}`);\n" +
                 "}\n" +
                 "\n" +
                 "/**\n" +
@@ -864,7 +863,7 @@ public class AntDesignPlugin extends PluginAdapter {
                 " * @returns {Promise<*>}\n" +
                 " */\n" +
                 "export async function get(params) {\n" +
-                "  return request(`${apiPrefix}/" + modelName + "/?${stringify(params)}`);\n" +
+                "  return request(`/" + modelName + "/?${stringify(params)}`);\n" +
                 "}\n" +
                 "\n" +
                 "/**\n" +
@@ -873,7 +872,7 @@ public class AntDesignPlugin extends PluginAdapter {
                 " * @returns {Promise<*>}\n" +
                 " */\n" +
                 "export async function remove(params) {\n" +
-                "  return request(`${apiPrefix}/" + modelName + "/delete`, {\n" +
+                "  return request(`/" + modelName + "/delete`, {\n" +
                 "    method: 'POST',\n" +
                 "    body: {\n" +
                 "      ...params,\n" +
@@ -887,7 +886,7 @@ public class AntDesignPlugin extends PluginAdapter {
                 " * @returns {Promise<*>}\n" +
                 " */\n" +
                 "export async function add(params) {\n" +
-                "  return request(`${apiPrefix}/" + modelName + "`, {\n" +
+                "  return request(`/" + modelName + "`, {\n" +
                 "    method: 'POST',\n" +
                 "    body: {\n" +
                 "      ...params,\n" +
@@ -902,7 +901,7 @@ public class AntDesignPlugin extends PluginAdapter {
                 " * @returns {Promise<*>}\n" +
                 " */\n" +
                 "export async function update(params) {\n" +
-                "  return request(`${apiPrefix}/" + modelName + "/${params." + key + "}`, {\n" +
+                "  return request(`/" + modelName + "/${params." + key + "}`, {\n" +
                 "    method: 'PUT',\n" +
                 "    body: {\n" +
                 "      ...params,\n" +
@@ -917,7 +916,7 @@ public class AntDesignPlugin extends PluginAdapter {
                 " * @returns {Promise<*>}\n" +
                 " */\n" +
                 "export async function validate(params) {\n" +
-                "  return request(`${apiPrefix}/" + modelName + "/validate`, {\n" +
+                "  return request(`/" + modelName + "/validate`, {\n" +
                 "    method: 'POST',\n" +
                 "    body: {\n" +
                 "      ...params,\n" +
