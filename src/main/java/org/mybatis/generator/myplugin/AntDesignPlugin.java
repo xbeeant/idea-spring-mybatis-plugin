@@ -693,7 +693,7 @@ public class AntDesignPlugin extends PluginAdapter {
             Object editable = propertyObjectMap.get("editable");
             Object remarks = propertyObjectMap.get("remarks");
             Object uniqueValidate = propertyObjectMap.get("uniqueValidate");
-            if (null != editable && (Boolean) editable) {
+            if (null == editable || !(Boolean) editable) {
                 continue;
             }
             sb.append("            <Col span={24}>\n" +
