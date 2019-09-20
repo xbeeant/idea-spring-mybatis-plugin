@@ -1,10 +1,11 @@
 <idea-plugin>
-    <id>org.xstudio.plugin.spring</id>
+    <id>org.xstudio.plugin.idea</id>
     <name>spring mybatis code generator</name>
-    <vendor email="huangxb0512@gmail.com" url="https://beeant0512.github.io">xstudio</vendor>
+    <vendor email="huangxb0512@gmail.com" url="https://beeant0512.github.io">XStudio</vendor>
 
     <description><![CDATA[
-    spring boot project with mybatis code generator plugin
+    Enter short description for your plugin here.<br>
+    <em>most HTML tags may be used</em>
     ]]></description>
 
     <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
@@ -12,6 +13,7 @@
     <!-- uncomment to enable plugin in all products
     <depends>com.intellij.modules.lang</depends>
     -->
+    <depends optional="true">com.intellij.database</depends>
 
     <extensions defaultExtensionNs="com.intellij">
         <!-- Add your extensions here -->
@@ -19,14 +21,9 @@
 
     <actions>
         <!-- Add your actions here -->
-        <group id="XStudioPlugin.GeneratorMenu" text="XStudio" description="XStudio Plugins Menu">
-            <add-to-group group-id="MainMenu" anchor="last"/>
-            <action id="XStudioPlugin.MainUi" class="org.xstudio.plugins.idea.action.MainAction" text="项目配置"
-                    description="为该项目配置生成器使用的默认配置"/>
-            <action id="XStudioPlugin.Generate" class="org.xstudio.plugins.idea.action.GeneratorAction" text="后台代码生成"
-                    description="后台代码生成"/>
-            <action id="XStudioPlugin.GenerateWeb" class="org.xstudio.plugins.idea.action.GenerateWebAction"
-                    text="前端代码生成" description="前端代码生成"/>
-        </group>
+        <action id="mybatis-generator-action" class="org.xstudio.plugin.idea.action.MainAction" text="Code Generate">
+            <add-to-group group-id="DatabaseViewPopupMenu" anchor="first"/>
+            <keyboard-shortcut keymap="$default" first-keystroke="shift meta G"/>
+        </action>
     </actions>
 </idea-plugin>
