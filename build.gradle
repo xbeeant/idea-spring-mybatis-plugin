@@ -14,6 +14,14 @@ repositories {
 
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
+
+    compile group: 'org.projectlombok', name: 'lombok', version: '1.18.10'
+    compile group: 'com.github.javaparser', name: 'javaparser-core', version: '3.14.14'
+
+    // dependencies for mybatis generator core
+    compile group: 'org.apache.ant', name: 'ant', version: '1.10.7'
+    compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.12.1'
+
 }
 
 // See https://github.com/JetBrains/gradle-intellij-plugin/
