@@ -20,6 +20,9 @@
         <projectService
                 serviceInterface="org.xstudio.plugin.idea.setting.MybatisSpringGeneratorConfiguration"
                 serviceImplementation="org.xstudio.plugin.idea.setting.MybatisSpringGeneratorConfiguration"/>
+        <projectConfigurable groupId="tools" displayName="Mybatis Spring Generator Plus" id="Mybatis.Generator.Plus.Plugin"
+                             instance="org.xstudio.plugin.idea.setting.SettingConfigurable"/>
+
     </extensions>
 
     <actions>

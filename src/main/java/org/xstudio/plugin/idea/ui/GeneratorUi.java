@@ -22,6 +22,7 @@ import org.xstudio.plugin.idea.model.TableConfig;
 import org.xstudio.plugin.idea.model.TableInfo;
 import org.xstudio.plugin.idea.mybatis.MyBatisGenerateCommand;
 import org.xstudio.plugin.idea.setting.MybatisSpringGeneratorConfiguration;
+import org.xstudio.plugin.idea.util.JavaUtil;
 
 import javax.swing.*;
 import java.awt.*;
@@ -44,6 +45,8 @@ public class GeneratorUi extends DialogWrapper {
      * IDEA当前工程对象
      */
     private Project project;
+
+    private RawConnectionConfig connectionConfig;
     /**
      * 当前模块
      */
@@ -67,8 +70,40 @@ public class GeneratorUi extends DialogWrapper {
      */
     private JBTabbedPane tabPanel = new JBTabbedPane();
 
+
+    private JTextField idGeneratorField =  new JBTextField(20);
+    private JTextField serviceInterfaceField =  new JBTextField(20);
+    private JTextField serviceImplField =  new JBTextField(20);
+    private JTextField facadeInterfaceField =  new JBTextField(20);
+    private JTextField facadeImplField =  new JBTextField(20);
+    private JTextField daoInterfaceField =  new JBTextField(20);
+    private JTextField rootObjectField =  new JBTextField(20);
+    private JTextField ignoreColumnsField =  new JBTextField(20);
+    private JTextField nonFuzzySearchColumnsField = new JBTextField(20);
+
+
+    // ===============
+    // mybatis spring code generator config
+    // ===============
+
+    private JCheckBox commentBox = new JCheckBox("Comment");
+    private JCheckBox overrideBox = new JCheckBox("Overwrite");
+    private JCheckBox needToStringHashcodeEqualsBox = new JCheckBox("toString/hashCode/equals");
+    private JCheckBox useSchemaPrefixBox = new JCheckBox("Use Schema Prefix");
+    private JCheckBox useTableNameAliasBox = new JCheckBox("Use-Alias");
+    private JCheckBox mysql8Box = new JCheckBox("MySQL 8");
+    private JCheckBox lombokAnnotationBox = new JCheckBox("Lombok");
+    private JCheckBox swaggerAnnotationBox = new JCheckBox("Swagger Model");
+    private JCheckBox generateFacade = new JCheckBox("Generate Facade");
+    private JCheckBox markDelete = new JCheckBox("Mark Delete");
+    private JCheckBox rootObject = new JCheckBox("Root Entity Object");
+    private JCheckBox fastJson = new JCheckBox("Fast Json");
+
     private MybatisSpringGeneratorConfiguration mybatisSpringGeneratorConfiguration;
 
+    private TableConfig tableConfig;
+
+    private boolean[] boxChanged;
     /**
      * 主面板
      */
@@ -82,6 +117,11 @@ public class GeneratorUi extends DialogWrapper {
 
         this.event = e;
         this.tableInfo = tableInfo;
+
+        boxChanged = new boolean[12];
+        for (int i = 0; i < 12; i++) {
+            boxChanged[i] = false;
+        }
 
         PsiElement[] psiElements = e.getData(LangDataKeys.PSI_ELEMENT_ARRAY);
         // =================================
@@ -107,9 +147,8 @@ public class GeneratorUi extends DialogWrapper {
         contentPane.setBorder(JBUI.Borders.empty());
 
         PsiElement current = psiElements[0];
-
         String tableName = this.tableInfo.getTableName();
-        TableConfig tableConfig = mybatisSpringGeneratorConfiguration.getTableConfig(tableName);
+        tableConfig = mybatisSpringGeneratorConfiguration.getTableConfig(tableName);
 
         // 初始化数据库的信息界面
         this.initTablePanel(tableConfig);
@@ -136,12 +175,7 @@ public class GeneratorUi extends DialogWrapper {
 
         mybatisSpringGeneratorConfiguration.addTableConfig(tableConfig.getTableName(), tableConfig);
 
-        // 显示配置界面UI
-
-        MyBatisGenerateCommand myBatisGenerateCommand = new MyBatisGenerateCommand(tableConfig);
-        // 执行代码生成
-        RawConnectionConfig connectionConfig = dbDataSource.getConnectionConfig();
-//        myBatisGenerateCommand.execute(project, connectionConfig);
+        connectionConfig = dbDataSource.getConnectionConfig();
     }
 
     private void initTabPanel(TableConfig tableConfig) {
@@ -149,6 +183,17 @@ public class GeneratorUi extends DialogWrapper {
         // 代码生成路径、对象等基础配置
 
         // 对象
+        this.initPackagePanel();
+
+        // 生成器配置
+        this.initOptionsPanel();
+    }
+
+    private void initPackagePanel() {
+        JPanel generalPanel = new JPanel();
+        generalPanel.setLayout(new VerticalFlowLayout(VerticalFlowLayout.TOP));
+        generalPanel.add(new TitledSeparator("Domain"));
+
         JPanel domainNamePanel = new JPanel();
         domainNamePanel.setLayout(new BoxLayout(domainNamePanel, BoxLayout.X_AXIS));
         JLabel entityNameLabel = new JLabel("Domain Name:");
@@ -165,11 +210,6 @@ public class GeneratorUi extends DialogWrapper {
         mapperNamePanel.add(mapperNameLabel);
         mapperNamePanel.add(mapperNameField);
 
-        // 面板
-        JPanel generalPanel = new JPanel();
-        generalPanel.setLayout(new VerticalFlowLayout(VerticalFlowLayout.TOP));
-        generalPanel.add(new TitledSeparator("Domain"));
-
         JPanel domainPanel = new JPanel();
         domainPanel.setLayout(new VerticalFlowLayout(VerticalFlowLayout.TOP));
 
@@ -183,12 +223,95 @@ public class GeneratorUi extends DialogWrapper {
         JPanel packagePanel = new JPanel();
         packagePanel.setLayout(new VerticalFlowLayout(VerticalFlowLayout.TOP));
 
+        packagePanel.add(JavaUtil.panelField("Model Entity:", idGeneratorField, tableConfig.getModelClass()));
+        packagePanel.add(JavaUtil.panelField("Service Interface:", serviceInterfaceField, tableConfig.getIServiceClass()));
+        packagePanel.add(JavaUtil.panelField("Service Impl:", serviceImplField, tableConfig.getServiceImplClass()));
+        packagePanel.add(JavaUtil.panelField("Facade Interface:", facadeInterfaceField, tableConfig.getIFacadeClass()));
+        packagePanel.add(JavaUtil.panelField("Facade Impl:", facadeImplField, tableConfig.getFacadeImplClass()));
+        packagePanel.add(JavaUtil.panelField("Mapper Interface:", daoInterfaceField, tableConfig.getMapperClass()));
+        packagePanel.add(JavaUtil.panelField("Mapper Impl:", daoInterfaceField, tableConfig.getMapperImpl()));
 
         generalPanel.add(packagePanel);
         generalPanel.setName("General");
 
         tabPanel.add(generalPanel);
         contentPane.add(tabPanel);
+    }
+
+    @Override
+    protected void doOKAction() {
+        if (overrideBox.getSelectedObjects() != null) {
+            int confirm = Messages.showOkCancelDialog(project, "The exists file will be overwrite ,Confirm generate?", Constant.TITLE, Messages.getQuestionIcon());
+            if (confirm == 2) {
+                return;
+            }
+        } else {
+            int confirm = Messages.showOkCancelDialog(project, "Confirm generate mybatis spring code?", Constant.TITLE, Messages.getQuestionIcon());
+            if (confirm == 2) {
+                return;
+            }
+        }
+
+        super.doOKAction();
+
+        new MyBatisGenerateCommand(tableConfig).execute(project, connectionConfig);
+    }
+
+    private void initOptionsPanel() {
+        JBPanel optionsPanel = new JBPanel(new GridLayout(6, 2, 10, 10));
+        commentBox.setSelected(tableConfig.isComment());
+        overrideBox.setSelected(tableConfig.isOverride());
+        needToStringHashcodeEqualsBox.setSelected(tableConfig.isToStringHashcodeEquals());
+        useSchemaPrefixBox.setSelected(tableConfig.isUseSchemaPrefix());
+        useTableNameAliasBox.setSelected(tableConfig.isUseTableNameAlias());
+        mysql8Box.setSelected(tableConfig.isMysql8());
+        lombokAnnotationBox.setSelected(tableConfig.isLombokPlugin());
+        swaggerAnnotationBox.setSelected(tableConfig.isSwagger2Plugin());
+        generateFacade.setSelected(tableConfig.isFacadePlugin());
+        markDelete.setSelected(tableConfig.isMarkDeletePlugin());
+        rootObject.setSelected(tableConfig.isRootObjectPlugin());
+        fastJson.setSelected(tableConfig.isFastjsonPlugin());
+
+        JavaUtil.boxListener(commentBox, Constant.CommentBox, "comment", boxChanged, tableConfig);
+        JavaUtil.boxListener(overrideBox, Constant.Overwrite, "override", boxChanged, tableConfig);
+        JavaUtil.boxListener(needToStringHashcodeEqualsBox, Constant.ToStringHashEquals, "toStringHashcodeEquals", boxChanged, tableConfig);
+        JavaUtil.boxListener(useSchemaPrefixBox, Constant.SchemaPrefix, "useSchemaPrefix", boxChanged, tableConfig);
+        JavaUtil.boxListener(useTableNameAliasBox, Constant.UseAlias, "useTableNameAlias", boxChanged, tableConfig);
+        JavaUtil.boxListener(mysql8Box, Constant.MySql8, "mysql8", boxChanged, tableConfig);
+        JavaUtil.boxListener(lombokAnnotationBox, Constant.Lombok, "lombokPlugin", boxChanged, tableConfig);
+        JavaUtil.boxListener(swaggerAnnotationBox, Constant.Swagger, "swagger2Plugin", boxChanged, tableConfig);
+        JavaUtil.boxListener(markDelete, Constant.MarkDelete, "markDeletePlugin", boxChanged, tableConfig);
+        JavaUtil.boxListener(rootObject, Constant.RootEntity, "rootObjectPlugin", boxChanged, tableConfig);
+        JavaUtil.boxListener(fastJson, Constant.FastJson, "fastjsonPlugin", boxChanged, tableConfig);
+
+
+        optionsPanel.add(commentBox);
+        optionsPanel.add(overrideBox);
+        optionsPanel.add(needToStringHashcodeEqualsBox);
+        optionsPanel.add(useSchemaPrefixBox);
+        optionsPanel.add(useTableNameAliasBox);
+        optionsPanel.add(mysql8Box);
+        optionsPanel.add(lombokAnnotationBox);
+        optionsPanel.add(swaggerAnnotationBox);
+        optionsPanel.add(generateFacade);
+        optionsPanel.add(markDelete);
+        optionsPanel.add(rootObject);
+        optionsPanel.add(fastJson);
+
+        optionsPanel.add(JavaUtil.panelField("Id Generator:", idGeneratorField, tableConfig.getIdGenerator()));
+        optionsPanel.add(JavaUtil.panelField("Service Interface:", serviceInterfaceField, tableConfig.getIService()));
+        optionsPanel.add(JavaUtil.panelField("Service Impl:", serviceImplField, tableConfig.getServiceImpl()));
+        optionsPanel.add(JavaUtil.panelField("Facade Interface:", facadeInterfaceField, tableConfig.getIFacade()));
+        optionsPanel.add(JavaUtil.panelField("Facade Impl:", facadeImplField, tableConfig.getFacadeImpl()));
+        optionsPanel.add(JavaUtil.panelField("Dao Interface:", daoInterfaceField, tableConfig.getIDao()));
+        optionsPanel.add(JavaUtil.panelField("Root Object:", rootObjectField, tableConfig.getBaseObject()));
+        optionsPanel.add(JavaUtil.panelField("Ignore Columns:", ignoreColumnsField, tableConfig.getIgnoreColumn()));
+        optionsPanel.add(JavaUtil.panelField("Non Fuzzy Search Columns:", nonFuzzySearchColumnsField, tableConfig.getNonFuzzyColumn()));
+
+
+        optionsPanel.setName("Options");
+        tabPanel.add(optionsPanel);
+
     }
 
     private TableConfig initTablePanel(TableConfig tableConfig) {
@@ -228,7 +351,7 @@ public class GeneratorUi extends DialogWrapper {
         tableNameField.setEditable(false);
         tableConfig.setTableName(tableName);
 
-        String entityName = JavaBeansUtil.getCamelCaseString(tableName, true);
+        String entityName = JavaBeansUtil.getCamelCaseString(tableName.replace(tableConfig.getTablePrefix(), ""), true);
         domainNameField.setText(entityName);
         mapperNameField.setText(entityName + "Mapper");
 
@@ -248,10 +371,10 @@ public class GeneratorUi extends DialogWrapper {
                 mapperNameField.setText(entityName + "Mapper");
                 tableConfig.setEntityName(entityName);
                 tableConfig.setMapperName(entityName + "Mapper");
-                tableConfig.setPrefix(prefix);
+                tableConfig.setTablePrefix(prefix);
             }
         });
-        tablePrefixField.setText(tableConfig.getPrefix());
+        tablePrefixField.setText(tableConfig.getTablePrefix());
         tablePrefixField.setEditable(true);
         headerPanel.add(moduleRootPanel);
         headerPanel.add(tableNamePanel);

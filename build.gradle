@@ -18,6 +18,8 @@ dependencies {
     compile group: 'org.projectlombok', name: 'lombok', version: '1.18.10'
     compile group: 'com.github.javaparser', name: 'javaparser-core', version: '3.14.14'
 
+    compile group: 'com.alibaba', name: 'fastjson', version: "1.2.58"
+
     // dependencies for mybatis generator core
     compile group: 'org.apache.ant', name: 'ant', version: '1.10.7'
     compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.12.1'

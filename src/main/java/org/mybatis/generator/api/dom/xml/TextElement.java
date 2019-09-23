@@ -31,4 +31,8 @@ public class TextElement implements VisitableElement {
     public <R> R accept(ElementVisitor<R> visitor) {
         return visitor.visit(this);
     }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
 }
