@@ -98,13 +98,5 @@ public class ProjectConfig extends MybatisPluginConfig {
      * 资源文件地址
      */
     private String resourcePath = "src/main/resources";
-    /**
-     * mapper file package or path
-     */
-    private String xmlPackage;
-    /**
-     * mapper interface package
-     */
-    private String mapperPackage;
 
 }

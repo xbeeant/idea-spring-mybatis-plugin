@@ -70,10 +70,10 @@ public class GeneratorSettingUi extends JDialog {
     private JCheckBox mysql8Box = new JCheckBox("MySQL 8");
     private JCheckBox lombokAnnotationBox = new JCheckBox("Lombok");
     private JCheckBox swaggerAnnotationBox = new JCheckBox("Swagger Model");
-    private JCheckBox generateFacade = new JCheckBox("Generate Facade");
-    private JCheckBox markDelete = new JCheckBox("Mark Delete");
-    private JCheckBox rootObject = new JCheckBox("Root Entity Object");
-    private JCheckBox fastJson = new JCheckBox("Fast Json");
+    private JCheckBox generateFacadeBox = new JCheckBox("Generate Facade");
+    private JCheckBox markDeleteBox = new JCheckBox("Mark Delete");
+    private JCheckBox rootObjectBox = new JCheckBox("Root Entity Object");
+    private JCheckBox fastJsonBox = new JCheckBox("Fast Json");
 
     private boolean[] boxChanged;
 
@@ -104,9 +104,9 @@ public class GeneratorSettingUi extends JDialog {
     private void initPathPanel() {
         ProjectConfig globalConfig = config.getProjectConfig();
 
-        JPanel sourcePathPanel = JavaUtil.panelField("Source Path:", sourcePathField, globalConfig.getSourcePath());
+        JPanel sourcePathPanel = JavaUtil.panelField("Source Path:", sourcePathField, globalConfig.getSourcePath()).getPanel();
 
-        JPanel resourcePathPanel = JavaUtil.panelField("Resource Path:", resourcePathField, globalConfig.getResourcePath());
+        JPanel resourcePathPanel = JavaUtil.panelField("Resource Path:", resourcePathField, globalConfig.getResourcePath()).getPanel();
 
         JPanel pathPanel = new JPanel();
         pathPanel.setLayout(new VerticalFlowLayout(VerticalFlowLayout.TOP));
@@ -145,17 +145,17 @@ public class GeneratorSettingUi extends JDialog {
         projectRootPanel.add(moduleRootField);
         projectPanel.add(projectRootLabel);
 
-        projectPanel.add(JavaUtil.panelField("Table Prefix:", tablePrefixField, globalConfig.getTablePrefix()));
-        projectPanel.add(JavaUtil.panelField("Code Package:", basePackageField, globalConfig.getBasePackage()));
-        projectPanel.add(JavaUtil.panelField("Id Generator:", idGeneratorField, globalConfig.getIdGenerator()));
-        projectPanel.add(JavaUtil.panelField("Service Interface:", serviceInterfaceField, globalConfig.getIService()));
-        projectPanel.add(JavaUtil.panelField("Service Impl:", serviceImplField, globalConfig.getServiceImpl()));
-        projectPanel.add(JavaUtil.panelField("Facade Interface:", facadeInterfaceField, globalConfig.getIFacade()));
-        projectPanel.add(JavaUtil.panelField("Facade Impl:", facadeImplField, globalConfig.getFacadeImpl()));
-        projectPanel.add(JavaUtil.panelField("Dao Interface:", daoInterfaceField, globalConfig.getIDao()));
-        projectPanel.add(JavaUtil.panelField("Root Object:", rootObjectField, globalConfig.getBaseObject()));
-        projectPanel.add(JavaUtil.panelField("Ignore Columns:", ignoreColumnsField, globalConfig.getIgnoreColumn()));
-        projectPanel.add(JavaUtil.panelField("Non Fuzzy Search Columns:", nonFuzzyColumnField, globalConfig.getNonFuzzyColumn()));
+        projectPanel.add(JavaUtil.panelField("Table Prefix:", tablePrefixField, globalConfig.getTablePrefix()).getPanel());
+        projectPanel.add(JavaUtil.panelField("Code Package:", basePackageField, globalConfig.getBasePackage()).getPanel());
+        projectPanel.add(JavaUtil.panelField("Id Generator:", idGeneratorField, globalConfig.getIdGenerator()).getPanel());
+        projectPanel.add(JavaUtil.panelField("Service Interface:", serviceInterfaceField, globalConfig.getIService()).getPanel());
+        projectPanel.add(JavaUtil.panelField("Service Impl:", serviceImplField, globalConfig.getServiceImpl()).getPanel());
+        projectPanel.add(JavaUtil.panelField("Facade Interface:", facadeInterfaceField, globalConfig.getIFacade()).getPanel());
+        projectPanel.add(JavaUtil.panelField("Facade Impl:", facadeImplField, globalConfig.getFacadeImpl()).getPanel());
+        projectPanel.add(JavaUtil.panelField("Dao Interface:", daoInterfaceField, globalConfig.getIDao()).getPanel());
+        projectPanel.add(JavaUtil.panelField("Root Object:", rootObjectField, globalConfig.getBaseObject()).getPanel());
+        projectPanel.add(JavaUtil.panelField("Ignore Columns:", ignoreColumnsField, globalConfig.getIgnoreColumn()).getPanel());
+        projectPanel.add(JavaUtil.panelField("Non Fuzzy Search Columns:", nonFuzzyColumnField, globalConfig.getNonFuzzyColumn()).getPanel());
 
 
         TitledSeparator separator = new TitledSeparator();
@@ -175,10 +175,10 @@ public class GeneratorSettingUi extends JDialog {
         mysql8Box.setSelected(this.config.getProjectConfig().isMysql8());
         lombokAnnotationBox.setSelected(this.config.getProjectConfig().isLombokPlugin());
         swaggerAnnotationBox.setSelected(this.config.getProjectConfig().isSwagger2Plugin());
-        generateFacade.setSelected(this.config.getProjectConfig().isFacadePlugin());
-        markDelete.setSelected(this.config.getProjectConfig().isMarkDeletePlugin());
-        rootObject.setSelected(this.config.getProjectConfig().isRootObjectPlugin());
-        fastJson.setSelected(this.config.getProjectConfig().isFastjsonPlugin());
+        generateFacadeBox.setSelected(this.config.getProjectConfig().isFacadePlugin());
+        markDeleteBox.setSelected(this.config.getProjectConfig().isMarkDeletePlugin());
+        rootObjectBox.setSelected(this.config.getProjectConfig().isRootObjectPlugin());
+        fastJsonBox.setSelected(this.config.getProjectConfig().isFastjsonPlugin());
 
         JavaUtil.boxListener(commentBox, Constant.CommentBox, "comment", boxChanged, this.config.getProjectConfig());
         JavaUtil.boxListener(overrideBox, Constant.Overwrite, "override", boxChanged, this.config.getProjectConfig());
@@ -188,9 +188,10 @@ public class GeneratorSettingUi extends JDialog {
         JavaUtil.boxListener(mysql8Box, Constant.MySql8, "mysql8", boxChanged, this.config.getProjectConfig());
         JavaUtil.boxListener(lombokAnnotationBox, Constant.Lombok, "lombokPlugin", boxChanged, this.config.getProjectConfig());
         JavaUtil.boxListener(swaggerAnnotationBox, Constant.Swagger, "swagger2Plugin", boxChanged, this.config.getProjectConfig());
-        JavaUtil.boxListener(markDelete, Constant.MarkDelete, "markDeletePlugin", boxChanged, this.config.getProjectConfig());
-        JavaUtil.boxListener(rootObject, Constant.RootEntity, "rootObjectPlugin", boxChanged, this.config.getProjectConfig());
-        JavaUtil.boxListener(fastJson, Constant.FastJson, "fastjsonPlugin", boxChanged, this.config.getProjectConfig());
+        JavaUtil.boxListener(generateFacadeBox, Constant.Facade, "facadePlugin", boxChanged, this.config.getProjectConfig());
+        JavaUtil.boxListener(markDeleteBox, Constant.MarkDelete, "markDeletePlugin", boxChanged, this.config.getProjectConfig());
+        JavaUtil.boxListener(rootObjectBox, Constant.RootEntity, "rootObjectPlugin", boxChanged, this.config.getProjectConfig());
+        JavaUtil.boxListener(fastJsonBox, Constant.FastJson, "fastjsonPlugin", boxChanged, this.config.getProjectConfig());
 
         optionsPanel.add(commentBox);
         optionsPanel.add(overrideBox);
@@ -200,10 +201,10 @@ public class GeneratorSettingUi extends JDialog {
         optionsPanel.add(mysql8Box);
         optionsPanel.add(lombokAnnotationBox);
         optionsPanel.add(swaggerAnnotationBox);
-        optionsPanel.add(generateFacade);
-        optionsPanel.add(markDelete);
-        optionsPanel.add(rootObject);
-        optionsPanel.add(fastJson);
+        optionsPanel.add(generateFacadeBox);
+        optionsPanel.add(markDeleteBox);
+        optionsPanel.add(rootObjectBox);
+        optionsPanel.add(fastJsonBox);
 
         TitledSeparator separator = new TitledSeparator();
         separator.setText("Options");
@@ -268,8 +269,8 @@ public class GeneratorSettingUi extends JDialog {
         globalConfig.setMysql8(mysql8Box.getSelectedObjects() != null);
         globalConfig.setLombokPlugin(lombokAnnotationBox.getSelectedObjects() != null);
         globalConfig.setSwagger2Plugin(swaggerAnnotationBox.getSelectedObjects() != null);
-        globalConfig.setFacadePlugin(generateFacade.getSelectedObjects() != null);
-        globalConfig.setFastjsonPlugin(fastJson.getSelectedObjects() != null);
+        globalConfig.setFacadePlugin(generateFacadeBox.getSelectedObjects() != null);
+        globalConfig.setFastjsonPlugin(fastJsonBox.getSelectedObjects() != null);
 
         for (int i = 0; i < 12; i++) {
             boxChanged[i] = false;

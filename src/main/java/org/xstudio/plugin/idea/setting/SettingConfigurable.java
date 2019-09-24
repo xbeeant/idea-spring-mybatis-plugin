@@ -25,6 +25,12 @@ public class SettingConfigurable implements SearchableConfigurable {
         this.project = project;
     }
 
+    @Nullable
+    @Override
+    public String getHelpTopic() {
+        return "gene.helpTopic";
+    }
+
     @NotNull
     @Override
     public String getId() {
@@ -44,6 +50,12 @@ public class SettingConfigurable implements SearchableConfigurable {
         return mainPanel.getContentPanel();
     }
 
+    @Nullable
+    @Override
+    public Runnable enableSearch(String option) {
+        return null;
+    }
+
     @Override
     public boolean isModified() {
         return mainPanel.isModified();
@@ -52,5 +64,10 @@ public class SettingConfigurable implements SearchableConfigurable {
     @Override
     public void apply() throws ConfigurationException {
         mainPanel.apply();
+    }
+
+    @Override
+    public void disposeUIResources() {
+        mainPanel = null;
     }
 }

@@ -9,12 +9,11 @@ import com.intellij.openapi.project.Project;
 import com.intellij.util.xmlb.XmlSerializerUtil;
 import lombok.Getter;
 import lombok.Setter;
-import org.apache.batik.svggen.font.table.Table;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.xstudio.plugin.idea.model.Credential;
 import org.xstudio.plugin.idea.model.ProjectConfig;
 import org.xstudio.plugin.idea.model.TableConfig;
-import org.xstudio.plugin.idea.util.JavaUtil;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -28,12 +27,33 @@ public class MybatisSpringGeneratorConfiguration implements PersistentStateCompo
     @Getter
     @Setter
     private ProjectConfig projectConfig = new ProjectConfig();
+    /**
+     * 账号密码信息
+     */
+    @Getter
+    @Setter
+    private Map<String, Credential> credentials;
 
     private Map<String, TableConfig> tableConfigs = new HashMap<>(1);
 
     @Nullable
     public static MybatisSpringGeneratorConfiguration getInstance(Project project) {
         return ServiceManager.getService(project, MybatisSpringGeneratorConfiguration.class);
+    }
+
+    public static void setTableGenerateTarget(TableConfig tableConfig, String entityName) {
+        String databaseName = tableConfig.getDatabaseName();
+        String databaseNamePackage = tableConfig.getDatabaseNamePackage();
+        String basePackage = tableConfig.getBasePackage() + "." + databaseNamePackage;
+        String resourcePath = tableConfig.getResourcePath();
+
+        tableConfig.setModelClass(basePackage + ".model." + entityName);
+        tableConfig.setServiceInterfaceClass(basePackage + ".service.I" + entityName + "Service");
+        tableConfig.setServiceImplClass(basePackage + ".service.impl." + entityName + "ServiceImpl");
+        tableConfig.setFacadeInterfaceClass(basePackage + ".facade.I" + entityName + "Facade");
+        tableConfig.setFacadeImplClass(basePackage + ".facade.impl." + entityName + "FacadeImpl");
+        tableConfig.setMapperClass(basePackage + ".mapper.I" + entityName + "Mapper");
+        tableConfig.setMapperImplClass(resourcePath + "/mybatis/" + databaseName + "/" + entityName + "Mapper.xml");
     }
 
     @Nullable
@@ -54,10 +74,13 @@ public class MybatisSpringGeneratorConfiguration implements PersistentStateCompo
         tableConfigs.put(tableConfig.getTableName(), tableConfig);
     }
 
-    public TableConfig getTableConfig(String tableName) {
+    public TableConfig getTableConfig(String tableName, String databaseName) {
         TableConfig tableConfig = tableConfigs.get(tableName);
         if (null == tableConfig) {
             tableConfig = JSON.parseObject(JSON.toJSONString(projectConfig), TableConfig.class);
+            tableConfig.setDatabaseName(databaseName);
+            tableConfig.setTableName(tableName);
+            setTableGenerateTarget(tableConfig, tableConfig.getEntityName());
             return tableConfig;
         }
         return tableConfig;

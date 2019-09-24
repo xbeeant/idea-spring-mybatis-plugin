@@ -1,11 +1,12 @@
 <idea-plugin>
     <id>org.xstudio.plugin.idea</id>
     <name>spring mybatis code generator</name>
-    <vendor email="huangxb0512@gmail.com" url="https://beeant0512.github.io">XStudio</vendor>
+    <vendor email="huangxb0512@gmail.com" url="https://beeant0512.github.io">Beeant</vendor>
 
     <description><![CDATA[
-    Enter short description for your plugin here.<br>
-    <em>most HTML tags may be used</em>
+    a idea plugin for generate mybatis mapper(interface and mapper.xml files) and spring service, facade<br>
+    <br>
+    modified from <a href="https://github.com/leecho/mybatis-generator-plus">https://github.com/leecho/mybatis-generator-plus</a>
     ]]></description>
 
     <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html

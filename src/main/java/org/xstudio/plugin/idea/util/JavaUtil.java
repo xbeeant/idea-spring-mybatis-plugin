@@ -1,10 +1,9 @@
 package org.xstudio.plugin.idea.util;
 
-import com.intellij.ui.components.JBLabel;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.xstudio.plugin.idea.model.MybatisPluginConfig;
+import org.xstudio.plugin.idea.model.PanelLabel;
 import org.xstudio.plugin.idea.model.ProjectConfig;
 
 import javax.swing.*;
@@ -121,22 +120,32 @@ public class JavaUtil {
         });
     }
 
-    public static JPanel panelField(String label, JTextField field, String defaultValue) {
-        JPanel panel = new JPanel();
-        panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
+    public static PanelLabel panelField(String label, JTextField field, String defaultValue) {
+        return panelField(label, field, defaultValue, new Dimension(200, 20));
+    }
 
-        JBLabel basePackageLabel = new JBLabel(label);
-        basePackageLabel.setPreferredSize(new Dimension(200, 20));
+    public static PanelLabel panelField(String label, JTextField field, String defaultValue, Dimension dimension) {
+        PanelLabel panelLabel = new PanelLabel();
         if (!StringUtils.isEmpty(defaultValue)) {
             field.setText(defaultValue);
-        } else {
+        }
+
+        if (StringUtils.isEmpty(field.getText())) {
             field.setText("");
         }
 
-        panel.add(basePackageLabel);
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
+        JLabel jlabel = new JLabel(label);
+        jlabel.setPreferredSize(dimension);
+        jlabel.setLabelFor(field);
+        panel.add(jlabel);
         panel.add(field);
 
-        return panel;
-    }
+        panelLabel.setPanel(panel);
+        panelLabel.setLabel(jlabel);
+        panelLabel.setField(field);
 
+        return panelLabel;
+    }
 }

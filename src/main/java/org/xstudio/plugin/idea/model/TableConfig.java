@@ -2,6 +2,7 @@ package org.xstudio.plugin.idea.model;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.mybatis.generator.internal.util.JavaBeansUtil;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -19,6 +20,14 @@ public class TableConfig extends ProjectConfig {
      */
     private String name;
     /**
+     * 数据库类型
+     */
+    private String databaseType;
+    /**
+     * 数据库名称
+     */
+    private String databaseName;
+    /**
      * 表名
      */
     private String tableName;
@@ -27,19 +36,34 @@ public class TableConfig extends ProjectConfig {
      */
     private String entityName;
     /**
-     * dao名称
-     */
-    private String mapperName;
-    /**
      * 字段配置
      */
     private Map<String, ColumnSetting> columnSettings = new HashMap<>();
 
     private String modelClass;
-    private String iServiceClass;
+    private String serviceInterfaceClass;
     private String serviceImplClass;
-    private String iFacadeClass;
+    private String facadeInterfaceClass;
     private String facadeImplClass;
     private String mapperClass;
-    private String mapperImpl;
+    private String mapperImplClass;
+
+    public String getEntityName() {
+        if (null != getTablePrefix() && null != tableName) {
+            return JavaBeansUtil.getCamelCaseString(tableName.replace(getTablePrefix(), ""), true);
+        }
+        return entityName;
+    }
+
+    public String getDatabaseNamePackage() {
+        return databaseName.replaceAll("_", ".");
+    }
+
+    public String getTargetPackage() {
+        return getBasePackage() + "." + getDatabaseNamePackage();
+    }
+
+    public String getMapperTargetPackage() {
+        return getResourcePath() + "/mybatis/" + databaseType + "/";
+    }
 }

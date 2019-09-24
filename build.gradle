@@ -4,7 +4,7 @@ plugins {
 }
 
 group 'org.xstudio.plugin'
-version '1.0-SNAPSHOT'
+version '1.0.0'
 
 sourceCompatibility = 1.8
 
@@ -17,6 +17,11 @@ dependencies {
 
     compile group: 'org.projectlombok', name: 'lombok', version: '1.18.10'
     compile group: 'com.github.javaparser', name: 'javaparser-core', version: '3.14.14'
+
+
+    // database driver
+    compile group: 'mysql', name: 'mysql-connector-java', version: '8.0.11'
+    compile group: 'mysql', name: 'mysql-connector-java', version: '5.1.48'
 
     compile group: 'com.alibaba', name: 'fastjson', version: "1.2.58"
 
@@ -32,13 +37,19 @@ intellij {
     plugins "com.intellij.database:192.6262.44"
     localPath "/Users/changan/Library/Application Support/JetBrains/Toolbox/apps/IDEA-U/ch-0/192.6603.28/IntelliJ IDEA.app"
 //    version "IU-192.6603.28"
-    type "IU"
+//    type "IU"
     patchPluginXml {
         sinceBuild '145.0'
     }
 }
 patchPluginXml {
     changeNotes """
-      Add change notes here.<br>
-      <em>most HTML tags may be used</em>"""
+      ui release"""
 }
+
+// 指定编译的编码
+tasks.withType(JavaCompile){
+    options.encoding = "UTF-8"
+}
+
+buildSearchableOptions.enabled = false

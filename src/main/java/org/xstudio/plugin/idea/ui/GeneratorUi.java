@@ -1,15 +1,18 @@
 package org.xstudio.plugin.idea.ui;
 
+import com.intellij.credentialStore.CredentialAttributes;
 import com.intellij.database.model.RawConnectionConfig;
 import com.intellij.database.psi.DbDataSource;
+import com.intellij.database.psi.DbNamespaceImpl;
+import com.intellij.ide.passwordSafe.PasswordSafe;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.LangDataKeys;
 import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
+import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.*;
 import com.intellij.psi.PsiElement;
-import com.intellij.ui.TitledSeparator;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.components.JBTabbedPane;
@@ -18,10 +21,12 @@ import com.intellij.util.ui.JBUI;
 import org.jetbrains.annotations.Nullable;
 import org.mybatis.generator.internal.util.JavaBeansUtil;
 import org.xstudio.plugin.idea.Constant;
+import org.xstudio.plugin.idea.model.Credential;
 import org.xstudio.plugin.idea.model.TableConfig;
 import org.xstudio.plugin.idea.model.TableInfo;
 import org.xstudio.plugin.idea.mybatis.MyBatisGenerateCommand;
 import org.xstudio.plugin.idea.setting.MybatisSpringGeneratorConfiguration;
+import org.xstudio.plugin.idea.util.DatabaseUtils;
 import org.xstudio.plugin.idea.util.JavaUtil;
 
 import javax.swing.*;
@@ -29,6 +34,11 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.sql.SQLException;
+import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
 
 /**
  * @author xiaobiao
@@ -47,6 +57,8 @@ public class GeneratorUi extends DialogWrapper {
     private Project project;
 
     private RawConnectionConfig connectionConfig;
+
+    private DbDataSource dbDataSource;
     /**
      * 当前模块
      */
@@ -63,22 +75,28 @@ public class GeneratorUi extends DialogWrapper {
     /**
      * 对象名称
      */
-    private JTextField mapperNameField = new JBTextField(20);
-    private JTextField domainNameField = new JBTextField(20);
+    private JTextField tableMapperField = new JBTextField(20);
+    private JTextField tableEntityField = new JBTextField(20);
+    private JTextField tableServiceInterfaceField = new JBTextField(20);
+    private JTextField tableServiceImplField = new JBTextField(20);
+    private JTextField tableFacadeInterfaceField = new JBTextField(20);
+    private JTextField tableFacadeImplField = new JBTextField(20);
+    private JTextField tableControllerField = new JBTextField(20);
+    private JTextField tableMapperFileField = new JBTextField(20);
     /**
      * Tab页面
      */
     private JBTabbedPane tabPanel = new JBTabbedPane();
 
 
-    private JTextField idGeneratorField =  new JBTextField(20);
-    private JTextField serviceInterfaceField =  new JBTextField(20);
-    private JTextField serviceImplField =  new JBTextField(20);
-    private JTextField facadeInterfaceField =  new JBTextField(20);
-    private JTextField facadeImplField =  new JBTextField(20);
-    private JTextField daoInterfaceField =  new JBTextField(20);
-    private JTextField rootObjectField =  new JBTextField(20);
-    private JTextField ignoreColumnsField =  new JBTextField(20);
+    private JTextField idGeneratorField = new JBTextField(20);
+    private JTextField serviceInterfaceField = new JBTextField(20);
+    private JTextField serviceImplField = new JBTextField(20);
+    private JTextField facadeInterfaceField = new JBTextField(20);
+    private JTextField facadeImplField = new JBTextField(20);
+    private JTextField daoInterfaceField = new JBTextField(20);
+    private JTextField rootObjectField = new JBTextField(20);
+    private JTextField ignoreColumnsField = new JBTextField(20);
     private JTextField nonFuzzySearchColumnsField = new JBTextField(20);
 
 
@@ -94,10 +112,10 @@ public class GeneratorUi extends DialogWrapper {
     private JCheckBox mysql8Box = new JCheckBox("MySQL 8");
     private JCheckBox lombokAnnotationBox = new JCheckBox("Lombok");
     private JCheckBox swaggerAnnotationBox = new JCheckBox("Swagger Model");
-    private JCheckBox generateFacade = new JCheckBox("Generate Facade");
-    private JCheckBox markDelete = new JCheckBox("Mark Delete");
-    private JCheckBox rootObject = new JCheckBox("Root Entity Object");
-    private JCheckBox fastJson = new JCheckBox("Fast Json");
+    private JCheckBox generateFacadeBox = new JCheckBox("Generate Facade");
+    private JCheckBox markDeleteBox = new JCheckBox("Mark Delete");
+    private JCheckBox rootObjectBox = new JCheckBox("Root Entity Object");
+    private JCheckBox fastJsonBox = new JCheckBox("Fast Json");
 
     private MybatisSpringGeneratorConfiguration mybatisSpringGeneratorConfiguration;
 
@@ -109,13 +127,13 @@ public class GeneratorUi extends DialogWrapper {
      */
     private JPanel contentPane = new JBPanel<>();
 
-    public GeneratorUi(AnActionEvent e, TableInfo tableInfo) {
-        super(e.getData(PlatformDataKeys.PROJECT));
+    public GeneratorUi(AnActionEvent event, TableInfo tableInfo) {
+        super(event.getData(PlatformDataKeys.PROJECT));
 
-        this.project = e.getData(PlatformDataKeys.PROJECT);
+        this.project = event.getData(PlatformDataKeys.PROJECT);
         mybatisSpringGeneratorConfiguration = MybatisSpringGeneratorConfiguration.getInstance(this.project);
 
-        this.event = e;
+        this.event = event;
         this.tableInfo = tableInfo;
 
         boxChanged = new boolean[12];
@@ -123,7 +141,7 @@ public class GeneratorUi extends DialogWrapper {
             boxChanged[i] = false;
         }
 
-        PsiElement[] psiElements = e.getData(LangDataKeys.PSI_ELEMENT_ARRAY);
+        PsiElement[] psiElements = event.getData(LangDataKeys.PSI_ELEMENT_ARRAY);
         // =================================
         // 从所选择的元素中获取数据库的配置
         // =================================
@@ -147,15 +165,14 @@ public class GeneratorUi extends DialogWrapper {
         contentPane.setBorder(JBUI.Borders.empty());
 
         PsiElement current = psiElements[0];
-        String tableName = this.tableInfo.getTableName();
-        tableConfig = mybatisSpringGeneratorConfiguration.getTableConfig(tableName);
 
-        // 初始化数据库的信息界面
-        this.initTablePanel(tableConfig);
-
-        DbDataSource dbDataSource = null;
+        dbDataSource = null;
+        String databaseName = "";
         // 遍历父节点，判断是否已经到达顶层节点（数据库配置）
         while (current != null) {
+            if (DbNamespaceImpl.class.isAssignableFrom(current.getClass())) {
+                databaseName = ((DbNamespaceImpl) current).getName();
+            }
             if (DbDataSource.class.isAssignableFrom(current.getClass())) {
                 dbDataSource = (DbDataSource) current;
                 break;
@@ -168,6 +185,12 @@ public class GeneratorUi extends DialogWrapper {
             return;
         }
 
+        String tableName = this.tableInfo.getTableName();
+        tableConfig = mybatisSpringGeneratorConfiguration.getTableConfig(tableName, databaseName);
+
+        // 初始化数据库的信息界面
+        this.initTablePanel(tableConfig);
+
         // 初始化代码生成的配置界面
         this.initTabPanel(tableConfig);
 
@@ -176,6 +199,11 @@ public class GeneratorUi extends DialogWrapper {
         mybatisSpringGeneratorConfiguration.addTableConfig(tableConfig.getTableName(), tableConfig);
 
         connectionConfig = dbDataSource.getConnectionConfig();
+    }
+
+    private boolean getDatabaseCredential(RawConnectionConfig connectionConfig) {
+        DatabaseCredentialUI databaseCredentialUI = new DatabaseCredentialUI(event.getProject(), connectionConfig.getUrl());
+        return databaseCredentialUI.showAndGet();
     }
 
     private void initTabPanel(TableConfig tableConfig) {
@@ -192,46 +220,23 @@ public class GeneratorUi extends DialogWrapper {
     private void initPackagePanel() {
         JPanel generalPanel = new JPanel();
         generalPanel.setLayout(new VerticalFlowLayout(VerticalFlowLayout.TOP));
-        generalPanel.add(new TitledSeparator("Domain"));
-
-        JPanel domainNamePanel = new JPanel();
-        domainNamePanel.setLayout(new BoxLayout(domainNamePanel, BoxLayout.X_AXIS));
-        JLabel entityNameLabel = new JLabel("Domain Name:");
-        entityNameLabel.setPreferredSize(new Dimension(150, 10));
-        domainNamePanel.add(entityNameLabel);
-        domainNamePanel.add(domainNameField);
-
-        // MapperName
-        JPanel mapperNamePanel = new JPanel();
-        mapperNamePanel.setLayout(new BoxLayout(mapperNamePanel, BoxLayout.X_AXIS));
-        JLabel mapperNameLabel = new JLabel("Mapper Name:");
-        mapperNameLabel.setPreferredSize(new Dimension(150, 10));
-        mapperNameLabel.setLabelFor(domainNameField);
-        mapperNamePanel.add(mapperNameLabel);
-        mapperNamePanel.add(mapperNameField);
-
+        // ===========================
+        // domain panel
+        // ===========================
         JPanel domainPanel = new JPanel();
         domainPanel.setLayout(new VerticalFlowLayout(VerticalFlowLayout.TOP));
 
-        domainPanel.add(domainNamePanel);
-        domainPanel.add(mapperNamePanel);
+        domainPanel.add(JavaUtil.panelField("Model Entity:", tableEntityField, null).getPanel());
+        domainPanel.add(JavaUtil.panelField("Service Interface:", tableServiceInterfaceField, tableConfig.getServiceInterfaceClass()).getPanel());
+        domainPanel.add(JavaUtil.panelField("Service Impl:", tableServiceImplField, tableConfig.getServiceImplClass()).getPanel());
+        domainPanel.add(JavaUtil.panelField("Facade Interface:", tableFacadeInterfaceField, tableConfig.getFacadeInterfaceClass()).getPanel());
+        domainPanel.add(JavaUtil.panelField("Facade Impl:", tableFacadeImplField, tableConfig.getFacadeImplClass()).getPanel());
+        domainPanel.add(JavaUtil.panelField("Mapper Interface:", tableMapperField, tableConfig.getMapperClass()).getPanel());
+        domainPanel.add(JavaUtil.panelField("Mapper Impl:", tableMapperFileField, tableConfig.getMapperImplClass()).getPanel());
 
         generalPanel.add(domainPanel);
 
-        // 包
-        generalPanel.add(new TitledSeparator("Package"));
-        JPanel packagePanel = new JPanel();
-        packagePanel.setLayout(new VerticalFlowLayout(VerticalFlowLayout.TOP));
 
-        packagePanel.add(JavaUtil.panelField("Model Entity:", idGeneratorField, tableConfig.getModelClass()));
-        packagePanel.add(JavaUtil.panelField("Service Interface:", serviceInterfaceField, tableConfig.getIServiceClass()));
-        packagePanel.add(JavaUtil.panelField("Service Impl:", serviceImplField, tableConfig.getServiceImplClass()));
-        packagePanel.add(JavaUtil.panelField("Facade Interface:", facadeInterfaceField, tableConfig.getIFacadeClass()));
-        packagePanel.add(JavaUtil.panelField("Facade Impl:", facadeImplField, tableConfig.getFacadeImplClass()));
-        packagePanel.add(JavaUtil.panelField("Mapper Interface:", daoInterfaceField, tableConfig.getMapperClass()));
-        packagePanel.add(JavaUtil.panelField("Mapper Impl:", daoInterfaceField, tableConfig.getMapperImpl()));
-
-        generalPanel.add(packagePanel);
         generalPanel.setName("General");
 
         tabPanel.add(generalPanel);
@@ -240,6 +245,63 @@ public class GeneratorUi extends DialogWrapper {
 
     @Override
     protected void doOKAction() {
+
+        connectionConfig = dbDataSource.getConnectionConfig();
+
+        Map<String, Credential> credentials = mybatisSpringGeneratorConfiguration.getCredentials();
+        Credential credential;
+        if (credentials == null || !credentials.containsKey(connectionConfig.getUrl())) {
+            boolean result = getDatabaseCredential(connectionConfig);
+            if (result) {
+                credentials = mybatisSpringGeneratorConfiguration.getCredentials();
+                credential = credentials.get(connectionConfig.getUrl());
+            } else {
+                return;
+            }
+        } else {
+            credential = credentials.get(connectionConfig.getUrl());
+        }
+
+        Callable<Exception> callable = new Callable<Exception>() {
+            @Override
+            public Exception call() {
+                String url = connectionConfig.getUrl();
+                CredentialAttributes credentialAttributes = new CredentialAttributes(Constant.PLUGIN_NAME + "-" + url, credential.getUsername(), this.getClass(), false);
+                String password = PasswordSafe.getInstance().getPassword(credentialAttributes);
+                try {
+                    String databaseType = DatabaseUtils.testConnection(connectionConfig.getDriverClass(), connectionConfig.getUrl(), credential.getUsername(), password, mysql8Box.getSelectedObjects() != null);
+                    tableConfig.setDatabaseType(databaseType);
+                } catch (ClassNotFoundException | SQLException e) {
+                    mybatisSpringGeneratorConfiguration.setCredentials(null);
+                    return e;
+                }
+                return null;
+            }
+        };
+        FutureTask<Exception> future = new FutureTask<>(callable);
+        ProgressManager.getInstance().runProcessWithProgressSynchronously(future, "Connect to Database", true, project);
+        Exception exception;
+        try {
+            exception = future.get();
+        } catch (InterruptedException | ExecutionException e) {
+            Messages.showMessageDialog(project, "Failed to connect to database \n " + e.getMessage(), Constant.TITLE, Messages.getErrorIcon());
+            return;
+        }
+        if (exception != null) {
+            Messages.showMessageDialog(project, "Failed to connect to database \n " + exception.getMessage(), Constant.TITLE, Messages.getErrorIcon());
+            if (exception.getClass().equals(SQLException.class)) {
+                SQLException sqlException = (SQLException) exception;
+                if (sqlException.getErrorCode() == 1045) {
+                    boolean result = getDatabaseCredential(connectionConfig);
+                    if (result) {
+                        this.doOKAction();
+                        return;
+                    }
+                }
+            }
+            return;
+        }
+
         if (overrideBox.getSelectedObjects() != null) {
             int confirm = Messages.showOkCancelDialog(project, "The exists file will be overwrite ,Confirm generate?", Constant.TITLE, Messages.getQuestionIcon());
             if (confirm == 2) {
@@ -258,7 +320,10 @@ public class GeneratorUi extends DialogWrapper {
     }
 
     private void initOptionsPanel() {
-        JBPanel optionsPanel = new JBPanel(new GridLayout(6, 2, 10, 10));
+        JPanel optionsPanel = new JPanel();
+        optionsPanel.setLayout(new VerticalFlowLayout(VerticalFlowLayout.TOP));
+
+        JBPanel checkBoxPanel = new JBPanel(new GridLayout(6, 2, 10, 10));
         commentBox.setSelected(tableConfig.isComment());
         overrideBox.setSelected(tableConfig.isOverride());
         needToStringHashcodeEqualsBox.setSelected(tableConfig.isToStringHashcodeEquals());
@@ -267,10 +332,10 @@ public class GeneratorUi extends DialogWrapper {
         mysql8Box.setSelected(tableConfig.isMysql8());
         lombokAnnotationBox.setSelected(tableConfig.isLombokPlugin());
         swaggerAnnotationBox.setSelected(tableConfig.isSwagger2Plugin());
-        generateFacade.setSelected(tableConfig.isFacadePlugin());
-        markDelete.setSelected(tableConfig.isMarkDeletePlugin());
-        rootObject.setSelected(tableConfig.isRootObjectPlugin());
-        fastJson.setSelected(tableConfig.isFastjsonPlugin());
+        generateFacadeBox.setSelected(tableConfig.isFacadePlugin());
+        markDeleteBox.setSelected(tableConfig.isMarkDeletePlugin());
+        rootObjectBox.setSelected(tableConfig.isRootObjectPlugin());
+        fastJsonBox.setSelected(tableConfig.isFastjsonPlugin());
 
         JavaUtil.boxListener(commentBox, Constant.CommentBox, "comment", boxChanged, tableConfig);
         JavaUtil.boxListener(overrideBox, Constant.Overwrite, "override", boxChanged, tableConfig);
@@ -280,34 +345,40 @@ public class GeneratorUi extends DialogWrapper {
         JavaUtil.boxListener(mysql8Box, Constant.MySql8, "mysql8", boxChanged, tableConfig);
         JavaUtil.boxListener(lombokAnnotationBox, Constant.Lombok, "lombokPlugin", boxChanged, tableConfig);
         JavaUtil.boxListener(swaggerAnnotationBox, Constant.Swagger, "swagger2Plugin", boxChanged, tableConfig);
-        JavaUtil.boxListener(markDelete, Constant.MarkDelete, "markDeletePlugin", boxChanged, tableConfig);
-        JavaUtil.boxListener(rootObject, Constant.RootEntity, "rootObjectPlugin", boxChanged, tableConfig);
-        JavaUtil.boxListener(fastJson, Constant.FastJson, "fastjsonPlugin", boxChanged, tableConfig);
+        JavaUtil.boxListener(generateFacadeBox, Constant.Facade, "facadePlugin", boxChanged, tableConfig);
+        JavaUtil.boxListener(markDeleteBox, Constant.MarkDelete, "markDeletePlugin", boxChanged, tableConfig);
+        JavaUtil.boxListener(rootObjectBox, Constant.RootEntity, "rootObjectPlugin", boxChanged, tableConfig);
+        JavaUtil.boxListener(fastJsonBox, Constant.FastJson, "fastjsonPlugin", boxChanged, tableConfig);
 
 
-        optionsPanel.add(commentBox);
-        optionsPanel.add(overrideBox);
-        optionsPanel.add(needToStringHashcodeEqualsBox);
-        optionsPanel.add(useSchemaPrefixBox);
-        optionsPanel.add(useTableNameAliasBox);
-        optionsPanel.add(mysql8Box);
-        optionsPanel.add(lombokAnnotationBox);
-        optionsPanel.add(swaggerAnnotationBox);
-        optionsPanel.add(generateFacade);
-        optionsPanel.add(markDelete);
-        optionsPanel.add(rootObject);
-        optionsPanel.add(fastJson);
+        checkBoxPanel.add(commentBox);
+        checkBoxPanel.add(overrideBox);
+        checkBoxPanel.add(needToStringHashcodeEqualsBox);
+        checkBoxPanel.add(useSchemaPrefixBox);
+        checkBoxPanel.add(useTableNameAliasBox);
+        checkBoxPanel.add(mysql8Box);
+        checkBoxPanel.add(lombokAnnotationBox);
+        checkBoxPanel.add(swaggerAnnotationBox);
+        checkBoxPanel.add(generateFacadeBox);
+        checkBoxPanel.add(markDeleteBox);
+        checkBoxPanel.add(rootObjectBox);
+        checkBoxPanel.add(fastJsonBox);
+        optionsPanel.add(checkBoxPanel);
 
-        optionsPanel.add(JavaUtil.panelField("Id Generator:", idGeneratorField, tableConfig.getIdGenerator()));
-        optionsPanel.add(JavaUtil.panelField("Service Interface:", serviceInterfaceField, tableConfig.getIService()));
-        optionsPanel.add(JavaUtil.panelField("Service Impl:", serviceImplField, tableConfig.getServiceImpl()));
-        optionsPanel.add(JavaUtil.panelField("Facade Interface:", facadeInterfaceField, tableConfig.getIFacade()));
-        optionsPanel.add(JavaUtil.panelField("Facade Impl:", facadeImplField, tableConfig.getFacadeImpl()));
-        optionsPanel.add(JavaUtil.panelField("Dao Interface:", daoInterfaceField, tableConfig.getIDao()));
-        optionsPanel.add(JavaUtil.panelField("Root Object:", rootObjectField, tableConfig.getBaseObject()));
-        optionsPanel.add(JavaUtil.panelField("Ignore Columns:", ignoreColumnsField, tableConfig.getIgnoreColumn()));
-        optionsPanel.add(JavaUtil.panelField("Non Fuzzy Search Columns:", nonFuzzySearchColumnsField, tableConfig.getNonFuzzyColumn()));
+        JBPanel optionsInputPanel = new JBPanel();
+        optionsInputPanel.setLayout(new VerticalFlowLayout(VerticalFlowLayout.TOP));
 
+        optionsInputPanel.add(JavaUtil.panelField("Id Generator:", idGeneratorField, tableConfig.getIdGenerator()).getPanel());
+        optionsInputPanel.add(JavaUtil.panelField("Service Interface:", serviceInterfaceField, tableConfig.getIService()).getPanel());
+        optionsInputPanel.add(JavaUtil.panelField("Service Impl:", serviceImplField, tableConfig.getServiceImpl()).getPanel());
+        optionsInputPanel.add(JavaUtil.panelField("Facade Interface:", facadeInterfaceField, tableConfig.getIFacade()).getPanel());
+        optionsInputPanel.add(JavaUtil.panelField("Facade Impl:", facadeImplField, tableConfig.getFacadeImpl()).getPanel());
+        optionsInputPanel.add(JavaUtil.panelField("Dao Interface:", daoInterfaceField, tableConfig.getIDao()).getPanel());
+        optionsInputPanel.add(JavaUtil.panelField("Root Object:", rootObjectField, tableConfig.getBaseObject()).getPanel());
+        optionsInputPanel.add(JavaUtil.panelField("Ignore Columns:", ignoreColumnsField, tableConfig.getIgnoreColumn()).getPanel());
+        optionsInputPanel.add(JavaUtil.panelField("Non Fuzzy Search Columns:", nonFuzzySearchColumnsField, tableConfig.getNonFuzzyColumn()).getPanel());
+
+        optionsPanel.add(optionsInputPanel);
 
         optionsPanel.setName("Options");
         tabPanel.add(optionsPanel);
@@ -338,13 +409,7 @@ public class GeneratorUi extends DialogWrapper {
         moduleRootPanel.add(moduleRootField);
 
         // Table
-        JPanel tableNamePanel = new JPanel();
-        tableNamePanel.setLayout(new BoxLayout(tableNamePanel, BoxLayout.X_AXIS));
-        JLabel tableLabel = new JLabel("Table Name:");
-        tableLabel.setLabelFor(tableNameField);
-        tableLabel.setPreferredSize(new Dimension(150, 10));
-        tableNamePanel.add(tableLabel);
-        tableNamePanel.add(tableNameField);
+        JPanel tableNamePanel = JavaUtil.panelField("Table Name:", tableNameField, null, new Dimension(150, 10)).getPanel();
 
         String tableName = this.tableInfo.getTableName();
         tableNameField.setText(tableName);
@@ -352,8 +417,8 @@ public class GeneratorUi extends DialogWrapper {
         tableConfig.setTableName(tableName);
 
         String entityName = JavaBeansUtil.getCamelCaseString(tableName.replace(tableConfig.getTablePrefix(), ""), true);
-        domainNameField.setText(entityName);
-        mapperNameField.setText(entityName + "Mapper");
+        tableEntityField.setText(entityName);
+        tableMapperField.setText(entityName + "Mapper");
 
         JPanel tablePrefixPanel = new JPanel();
         tablePrefixPanel.setLayout(new BoxLayout(tablePrefixPanel, BoxLayout.X_AXIS));
@@ -367,11 +432,20 @@ public class GeneratorUi extends DialogWrapper {
             public void keyReleased(KeyEvent e) {
                 String prefix = tablePrefixField.getText();
                 String entityName = JavaBeansUtil.getCamelCaseString(tableName.replace(prefix, ""), true);
-                domainNameField.setText(entityName);
-                mapperNameField.setText(entityName + "Mapper");
+                tableEntityField.setText(entityName);
+                tableMapperField.setText(entityName + "Mapper");
                 tableConfig.setEntityName(entityName);
-                tableConfig.setMapperName(entityName + "Mapper");
                 tableConfig.setTablePrefix(prefix);
+
+                MybatisSpringGeneratorConfiguration.setTableGenerateTarget(tableConfig, entityName);
+
+                serviceInterfaceField.setText(tableConfig.getServiceInterfaceClass());
+                serviceImplField.setText(tableConfig.getServiceImplClass());
+                facadeInterfaceField.setText(tableConfig.getFacadeInterfaceClass());
+                facadeImplField.setText(tableConfig.getFacadeImplClass());
+                tableEntityField.setText(tableConfig.getModelClass());
+                tableMapperField.setText(tableConfig.getMapperClass());
+                tableMapperFileField.setText(tableConfig.getMapperImplClass());
             }
         });
         tablePrefixField.setText(tableConfig.getTablePrefix());
