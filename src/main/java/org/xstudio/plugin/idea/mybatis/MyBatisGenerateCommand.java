@@ -27,7 +27,7 @@ import org.xstudio.plugin.idea.model.Credential;
 import org.xstudio.plugin.idea.model.DbType;
 import org.xstudio.plugin.idea.model.TableConfig;
 import org.xstudio.plugin.idea.mybatis.generator.MergeableShellCallback;
-import org.xstudio.plugin.idea.setting.MybatisSpringGeneratorConfiguration;
+import org.xstudio.plugin.idea.setting.ProjectPersistentConfiguration;
 
 import javax.swing.event.HyperlinkEvent;
 import java.io.File;
@@ -42,7 +42,7 @@ import java.util.stream.Collectors;
  * @version 2019/9/20
  */
 public class MyBatisGenerateCommand {
-    private MybatisSpringGeneratorConfiguration mybatisSpringGeneratorConfiguration;
+    private ProjectPersistentConfiguration projectPersistentConfiguration;
     /**
      * 数据库类型
      */
@@ -76,7 +76,7 @@ public class MyBatisGenerateCommand {
      * @param connectionConfig {@link RawConnectionConfig}
      */
     public void execute(Project project, RawConnectionConfig connectionConfig) {
-        this.mybatisSpringGeneratorConfiguration = MybatisSpringGeneratorConfiguration.getInstance(project);
+        this.projectPersistentConfiguration = ProjectPersistentConfiguration.getInstance(project);
 
         setDatabaseInfo(connectionConfig);
 
@@ -346,7 +346,7 @@ public class MyBatisGenerateCommand {
         jdbcConfig.addProperty("remarks", "true");
         jdbcConfig.addProperty("useInformationSchema", "true");
 
-        Map<String, Credential> users = mybatisSpringGeneratorConfiguration.getCredentials();
+        Map<String, Credential> users = projectPersistentConfiguration.getCredentials();
         Credential credential = users.get(databaseUrl);
 
         username = credential.getUsername();

@@ -38,7 +38,7 @@ import org.mybatis.generator.config.Context;
  * 
  */
 public abstract class CompositePlugin implements Plugin {
-    private List<Plugin> plugins = new ArrayList<>();
+    public List<Plugin> plugins = new ArrayList<>();
     
     protected CompositePlugin() {
         super();

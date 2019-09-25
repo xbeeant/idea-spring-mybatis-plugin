@@ -18,18 +18,20 @@ public class BeginEndPluginCheck {
 
     public static boolean exist(Context context) {
         PluginAggregator plugins = (PluginAggregator) context.getPlugins();
+        boolean isExist = false;
         try {
             Field field = plugins.getClass().getDeclaredField("plugins");
             field.setAccessible(true);
             ArrayList<PluginAdapter> pluginAdapters = (ArrayList<PluginAdapter>) field.get(plugins);
             for (PluginAdapter pluginAdapter : pluginAdapters) {
                 if (pluginAdapter instanceof ModelBeginEndFieldPlugin) {
-                    return true;
+                    isExist = true;
+                    break;
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            isExist = false;
         }
-        return false;
+        return isExist;
     }
 }

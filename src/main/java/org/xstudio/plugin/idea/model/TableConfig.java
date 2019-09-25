@@ -14,7 +14,7 @@ import java.util.Map;
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class TableConfig extends ProjectConfig {
+public class TableConfig extends PersistentConfig {
     /**
      * 配置名称
      */

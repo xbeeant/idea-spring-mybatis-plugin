@@ -2,12 +2,11 @@ package org.xstudio.plugin.idea.setting;
 
 import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.openapi.options.SearchableConfigurable;
-import com.intellij.openapi.project.Project;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.xstudio.plugin.idea.Constant;
-import org.xstudio.plugin.idea.ui.GeneratorSettingUi;
+import org.xstudio.plugin.idea.ui.DefaultSettingUi;
 
 import javax.swing.*;
 
@@ -15,15 +14,8 @@ import javax.swing.*;
  * @author xiaobiao
  * @version 2019/9/23
  */
-public class SettingConfigurable implements SearchableConfigurable {
-    private GeneratorSettingUi mainPanel;
-
-    @SuppressWarnings("FieldCanBeLocal")
-    private final Project project;
-
-    public SettingConfigurable(@NotNull Project project) {
-        this.project = project;
-    }
+public class DefaultSettingConfigurable implements SearchableConfigurable {
+    private DefaultSettingUi mainPanel;
 
     @Nullable
     @Override
@@ -46,7 +38,7 @@ public class SettingConfigurable implements SearchableConfigurable {
     @Nullable
     @Override
     public JComponent createComponent() {
-        mainPanel = new GeneratorSettingUi(project);
+        mainPanel = new DefaultSettingUi();
         return mainPanel.getContentPanel();
     }
 

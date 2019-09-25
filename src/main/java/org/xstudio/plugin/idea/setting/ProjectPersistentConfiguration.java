@@ -12,7 +12,7 @@ import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.xstudio.plugin.idea.model.Credential;
-import org.xstudio.plugin.idea.model.ProjectConfig;
+import org.xstudio.plugin.idea.model.PersistentConfig;
 import org.xstudio.plugin.idea.model.TableConfig;
 
 import java.util.HashMap;
@@ -22,11 +22,8 @@ import java.util.Map;
  * @author xiaobiao
  * @version 2019/9/22
  */
-@State(name = "MybatisSpringGeneratorConfiguration", storages = {@Storage("mybatis-spring-generator-config.xml")})
-public class MybatisSpringGeneratorConfiguration implements PersistentStateComponent<MybatisSpringGeneratorConfiguration> {
-    @Getter
-    @Setter
-    private ProjectConfig projectConfig = new ProjectConfig();
+@State(name = "MybatisSpringGeneratorConfiguration", storages = {@Storage("mybatis-spring-generator-project-config.xml")})
+public class ProjectPersistentConfiguration implements PersistentStateComponent<ProjectPersistentConfiguration> {
     /**
      * 账号密码信息
      */
@@ -34,14 +31,20 @@ public class MybatisSpringGeneratorConfiguration implements PersistentStateCompo
     @Setter
     private Map<String, Credential> credentials;
 
+    @Getter
+    @Setter
     private Map<String, TableConfig> tableConfigs = new HashMap<>(1);
 
+    @Getter
+    @Setter
+    private PersistentConfig persistentConfig = new PersistentConfig();
+
     @Nullable
-    public static MybatisSpringGeneratorConfiguration getInstance(Project project) {
-        return ServiceManager.getService(project, MybatisSpringGeneratorConfiguration.class);
+    public static ProjectPersistentConfiguration getInstance(Project project) {
+        return ServiceManager.getService(project, ProjectPersistentConfiguration.class);
     }
 
-    public static void setTableGenerateTarget(TableConfig tableConfig, String entityName) {
+    public void setTableGenerateTarget(TableConfig tableConfig, String entityName) {
         String databaseName = tableConfig.getDatabaseName();
         String databaseNamePackage = tableConfig.getDatabaseNamePackage();
         String basePackage = tableConfig.getBasePackage() + "." + databaseNamePackage;
@@ -54,17 +57,19 @@ public class MybatisSpringGeneratorConfiguration implements PersistentStateCompo
         tableConfig.setFacadeImplClass(basePackage + ".facade.impl." + entityName + "FacadeImpl");
         tableConfig.setMapperClass(basePackage + ".mapper.I" + entityName + "Mapper");
         tableConfig.setMapperImplClass(resourcePath + "/mybatis/" + databaseName + "/" + entityName + "Mapper.xml");
+
+        tableConfigs.put(tableConfig.getTableName(), tableConfig);
     }
 
     @Nullable
     @Override
-    public MybatisSpringGeneratorConfiguration getState() {
+    public ProjectPersistentConfiguration getState() {
         return this;
     }
 
     @Override
-    public void loadState(@NotNull MybatisSpringGeneratorConfiguration mybatisSpringGeneratorConfiguration) {
-        XmlSerializerUtil.copyBean(mybatisSpringGeneratorConfiguration, this);
+    public void loadState(@NotNull ProjectPersistentConfiguration projectPersistentConfiguration) {
+        XmlSerializerUtil.copyBean(projectPersistentConfiguration, this);
     }
 
     public void addTableConfig(String databaseName, TableConfig tableConfig) {
@@ -75,9 +80,11 @@ public class MybatisSpringGeneratorConfiguration implements PersistentStateCompo
     }
 
     public TableConfig getTableConfig(String tableName, String databaseName) {
+        DefaultPersistentConfiguration persistentConfiguration = ServiceManager.getService(DefaultPersistentConfiguration.class);
+        PersistentConfig persistentConfig = persistentConfiguration.getPersistentConfig();
         TableConfig tableConfig = tableConfigs.get(tableName);
         if (null == tableConfig) {
-            tableConfig = JSON.parseObject(JSON.toJSONString(projectConfig), TableConfig.class);
+            tableConfig = JSON.parseObject(JSON.toJSONString(persistentConfig), TableConfig.class);
             tableConfig.setDatabaseName(databaseName);
             tableConfig.setTableName(tableName);
             setTableGenerateTarget(tableConfig, tableConfig.getEntityName());

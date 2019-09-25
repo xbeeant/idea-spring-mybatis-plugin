@@ -9,7 +9,7 @@ import lombok.EqualsAndHashCode;
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class ProjectConfig extends MybatisPluginConfig {
+public class PersistentConfig extends MybatisPluginConfig {
     /**
      * base package
      */

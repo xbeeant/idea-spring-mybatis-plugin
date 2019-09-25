@@ -38,6 +38,9 @@ public class ServicePlugin extends PluginAdapter {
         rootService = new FullyQualifiedJavaType(properties.getProperty("rootService"));
         String idGeneratorString = properties.getProperty("idGenerator");
         int idx = idGeneratorString.lastIndexOf(".");
+        if (idx < 0) {
+            idx = 0;
+        }
         idGeneratorMethod = idGeneratorString.substring(idx);
         idGenerator = new FullyQualifiedJavaType(idGeneratorString.substring(0, idx));
         rootClient = new FullyQualifiedJavaType(properties.getProperty("rootClient"));
@@ -202,7 +205,7 @@ public class ServicePlugin extends PluginAdapter {
         annotationString.append("@UnAspectEscapeSpecialString(fields = {\"");
         List<IntrospectedColumn> baseColumns = introspectedTable.getBaseColumns();
         ArrayList<String> strings = new ArrayList<>();
-        for(IntrospectedColumn introspectedColumn : baseColumns){
+        for (IntrospectedColumn introspectedColumn : baseColumns) {
             if (introspectedColumn.getRemarks().indexOf("noTransfer") != -1) {
                 noTransferFlag = true;
                 strings.add(introspectedColumn.getActualColumnName());
@@ -211,13 +214,13 @@ public class ServicePlugin extends PluginAdapter {
         Integer index = 0;
         for (String columName : strings) {
             index += 1;
-                if (index != strings.size()) {
-                    annotationString.append(columName);
-                    annotationString.append("\",");
-                } else {
-                    annotationString.append(columName);
-                    annotationString.append("\"");
-                }
+            if (index != strings.size()) {
+                annotationString.append(columName);
+                annotationString.append("\",");
+            } else {
+                annotationString.append(columName);
+                annotationString.append("\"");
+            }
         }
         annotationString.append("})");
         if (noTransferFlag) {

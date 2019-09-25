@@ -25,7 +25,7 @@ import org.xstudio.plugin.idea.model.Credential;
 import org.xstudio.plugin.idea.model.TableConfig;
 import org.xstudio.plugin.idea.model.TableInfo;
 import org.xstudio.plugin.idea.mybatis.MyBatisGenerateCommand;
-import org.xstudio.plugin.idea.setting.MybatisSpringGeneratorConfiguration;
+import org.xstudio.plugin.idea.setting.ProjectPersistentConfiguration;
 import org.xstudio.plugin.idea.util.DatabaseUtils;
 import org.xstudio.plugin.idea.util.JavaUtil;
 
@@ -44,7 +44,7 @@ import java.util.concurrent.FutureTask;
  * @author xiaobiao
  * @version 2019/9/20
  */
-public class GeneratorUi extends DialogWrapper {
+public class ProjectCodeGeneratorUi extends DialogWrapper {
     /**
      * idea 事件对象
      */
@@ -117,7 +117,7 @@ public class GeneratorUi extends DialogWrapper {
     private JCheckBox rootObjectBox = new JCheckBox("Root Entity Object");
     private JCheckBox fastJsonBox = new JCheckBox("Fast Json");
 
-    private MybatisSpringGeneratorConfiguration mybatisSpringGeneratorConfiguration;
+    private ProjectPersistentConfiguration projectPersistentConfiguration;
 
     private TableConfig tableConfig;
 
@@ -127,11 +127,11 @@ public class GeneratorUi extends DialogWrapper {
      */
     private JPanel contentPane = new JBPanel<>();
 
-    public GeneratorUi(AnActionEvent event, TableInfo tableInfo) {
+    public ProjectCodeGeneratorUi(AnActionEvent event, TableInfo tableInfo) {
         super(event.getData(PlatformDataKeys.PROJECT));
 
         this.project = event.getData(PlatformDataKeys.PROJECT);
-        mybatisSpringGeneratorConfiguration = MybatisSpringGeneratorConfiguration.getInstance(this.project);
+        this.projectPersistentConfiguration = ProjectPersistentConfiguration.getInstance(this.project);
 
         this.event = event;
         this.tableInfo = tableInfo;
@@ -186,8 +186,8 @@ public class GeneratorUi extends DialogWrapper {
         }
 
         String tableName = this.tableInfo.getTableName();
-        tableConfig = mybatisSpringGeneratorConfiguration.getTableConfig(tableName, databaseName);
-
+        tableConfig = projectPersistentConfiguration.getTableConfig(tableName, databaseName);
+        tableConfig.setModuleRootPath(project.getBasePath());
         // 初始化数据库的信息界面
         this.initTablePanel(tableConfig);
 
@@ -196,7 +196,7 @@ public class GeneratorUi extends DialogWrapper {
 
         this.init();
 
-        mybatisSpringGeneratorConfiguration.addTableConfig(tableConfig.getTableName(), tableConfig);
+        projectPersistentConfiguration.addTableConfig(tableConfig.getTableName(), tableConfig);
 
         connectionConfig = dbDataSource.getConnectionConfig();
     }
@@ -248,12 +248,12 @@ public class GeneratorUi extends DialogWrapper {
 
         connectionConfig = dbDataSource.getConnectionConfig();
 
-        Map<String, Credential> credentials = mybatisSpringGeneratorConfiguration.getCredentials();
+        Map<String, Credential> credentials = projectPersistentConfiguration.getCredentials();
         Credential credential;
         if (credentials == null || !credentials.containsKey(connectionConfig.getUrl())) {
             boolean result = getDatabaseCredential(connectionConfig);
             if (result) {
-                credentials = mybatisSpringGeneratorConfiguration.getCredentials();
+                credentials = projectPersistentConfiguration.getCredentials();
                 credential = credentials.get(connectionConfig.getUrl());
             } else {
                 return;
@@ -272,7 +272,7 @@ public class GeneratorUi extends DialogWrapper {
                     String databaseType = DatabaseUtils.testConnection(connectionConfig.getDriverClass(), connectionConfig.getUrl(), credential.getUsername(), password, mysql8Box.getSelectedObjects() != null);
                     tableConfig.setDatabaseType(databaseType);
                 } catch (ClassNotFoundException | SQLException e) {
-                    mybatisSpringGeneratorConfiguration.setCredentials(null);
+                    projectPersistentConfiguration.setCredentials(null);
                     return e;
                 }
                 return null;
@@ -400,7 +400,9 @@ public class GeneratorUi extends DialogWrapper {
             @Override
             public void actionPerformed(ActionEvent e) {
                 super.actionPerformed(e);
-                moduleRootField.setText(moduleRootField.getText().replaceAll("\\\\", "/"));
+                String moduleRootPath = moduleRootField.getText().replaceAll("\\\\", "/");
+                moduleRootField.setText(moduleRootPath);
+                tableConfig.setModuleRootPath(moduleRootPath);
             }
         });
 
@@ -416,7 +418,10 @@ public class GeneratorUi extends DialogWrapper {
         tableNameField.setEditable(false);
         tableConfig.setTableName(tableName);
 
-        String entityName = JavaBeansUtil.getCamelCaseString(tableName.replace(tableConfig.getTablePrefix(), ""), true);
+        String entityName = JavaBeansUtil.getCamelCaseString(tableName, true);
+        if (null != tableConfig.getTablePrefix()) {
+            entityName = JavaBeansUtil.getCamelCaseString(tableName.replace(tableConfig.getTablePrefix(), ""), true);
+        }
         tableEntityField.setText(entityName);
         tableMapperField.setText(entityName + "Mapper");
 
@@ -437,7 +442,7 @@ public class GeneratorUi extends DialogWrapper {
                 tableConfig.setEntityName(entityName);
                 tableConfig.setTablePrefix(prefix);
 
-                MybatisSpringGeneratorConfiguration.setTableGenerateTarget(tableConfig, entityName);
+                projectPersistentConfiguration.setTableGenerateTarget(tableConfig, entityName);
 
                 serviceInterfaceField.setText(tableConfig.getServiceInterfaceClass());
                 serviceImplField.setText(tableConfig.getServiceImplClass());

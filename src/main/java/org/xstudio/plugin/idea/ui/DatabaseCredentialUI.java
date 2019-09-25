@@ -16,8 +16,7 @@ import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.Nullable;
 import org.xstudio.plugin.idea.Constant;
 import org.xstudio.plugin.idea.model.Credential;
-import org.xstudio.plugin.idea.setting.MybatisSpringGeneratorConfiguration;
-import org.xstudio.plugin.idea.util.DatabaseUtils;
+import org.xstudio.plugin.idea.setting.ProjectPersistentConfiguration;
 
 import javax.swing.*;
 import java.awt.*;
@@ -30,8 +29,8 @@ import java.util.Map;
  */
 public class DatabaseCredentialUI extends DialogWrapper {
 
-    private MybatisSpringGeneratorConfiguration myBatisGeneratorConfiguration;
-    private String url;
+    private ProjectPersistentConfiguration projectPersistentConfiguration;
+
     private Project project;
     private JPanel contentPanel = new JBPanel<>();
 
@@ -43,16 +42,15 @@ public class DatabaseCredentialUI extends DialogWrapper {
 
     public DatabaseCredentialUI(Project project, String url) throws HeadlessException {
         super(project);
-        this.url = url;
         this.project = project;
-        this.myBatisGeneratorConfiguration = MybatisSpringGeneratorConfiguration.getInstance(project);
+        this.projectPersistentConfiguration = ProjectPersistentConfiguration.getInstance(project);
         setTitle("Connect to Database");
         pack();
 
         contentPanel.setLayout(new VerticalFlowLayout(VerticalFlowLayout.TOP));
-        Map<String, Credential> credentials = myBatisGeneratorConfiguration.getCredentials();
+        Map<String, Credential> credentials = projectPersistentConfiguration.getCredentials();
 
-
+        // ========== database url
         JPanel urlPanel = new JBPanel<>();
         urlPanel.setLayout(new BoxLayout(urlPanel, BoxLayout.X_AXIS));
         urlPanel.setBorder(JBUI.Borders.empty(1));
@@ -63,7 +61,8 @@ public class DatabaseCredentialUI extends DialogWrapper {
         if (url != null) {
             urlField.setText(url);
         }
-
+        contentPanel.add(urlPanel);
+        // ========== username
         JPanel usernamePanel = new JBPanel<>();
         usernamePanel.setLayout(new BoxLayout(usernamePanel, BoxLayout.X_AXIS));
         usernamePanel.setBorder(JBUI.Borders.empty(1));
@@ -74,7 +73,8 @@ public class DatabaseCredentialUI extends DialogWrapper {
         if (credentials != null && credentials.containsKey(url)) {
             usernameField.setText(credentials.get(url).getUsername());
         }
-
+        contentPanel.add(usernamePanel);
+        // ========== password
         JPanel passwordPanel = new JBPanel<>();
         passwordPanel.setLayout(new BoxLayout(passwordPanel, BoxLayout.X_AXIS));
         passwordPanel.setBorder(JBUI.Borders.empty(1));
@@ -82,7 +82,7 @@ public class DatabaseCredentialUI extends DialogWrapper {
         passwordLabel.setPreferredSize(new Dimension(80, 20));
         passwordPanel.add(passwordLabel);
         passwordPanel.add(passwordField);
-        contentPanel.add(usernamePanel);
+
         contentPanel.add(passwordPanel);
         contentPanel.add(errorMessage);
         errorMessage.setForeground(JBColor.RED);
@@ -97,7 +97,7 @@ public class DatabaseCredentialUI extends DialogWrapper {
             return;
         }
 
-        Map<String, Credential> credentials = myBatisGeneratorConfiguration.getCredentials();
+        Map<String, Credential> credentials = projectPersistentConfiguration.getCredentials();
         if (credentials == null) {
             credentials = new HashMap<>();
         }
@@ -107,7 +107,7 @@ public class DatabaseCredentialUI extends DialogWrapper {
         CredentialAttributes attributes = new CredentialAttributes(Constant.PLUGIN_NAME + "-" + dbUrl, usernameField.getText(), this.getClass(), false);
         Credentials saveCredentials = new Credentials(attributes.getUserName(), passwordField.getText());
         PasswordSafe.getInstance().set(attributes, saveCredentials);
-        myBatisGeneratorConfiguration.setCredentials(credentials);
+        projectPersistentConfiguration.setCredentials(credentials);
         VirtualFile baseDir = project.getBaseDir();
         baseDir.refresh(false, true);
 

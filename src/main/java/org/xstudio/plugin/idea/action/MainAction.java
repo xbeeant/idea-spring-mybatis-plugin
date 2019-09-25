@@ -8,7 +8,7 @@ import com.intellij.openapi.ui.Messages;
 import com.intellij.psi.PsiElement;
 import org.xstudio.plugin.idea.Constant;
 import org.xstudio.plugin.idea.model.TableInfo;
-import org.xstudio.plugin.idea.ui.GeneratorUi;
+import org.xstudio.plugin.idea.ui.ProjectCodeGeneratorUi;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,7 +43,7 @@ public class MainAction extends AnAction {
         // 当前选择的表的信息
         TableInfo tableInfo = new TableInfo((DbTable) current);
 
-        GeneratorUi ui = new GeneratorUi(e, tableInfo);
+        ProjectCodeGeneratorUi ui = new ProjectCodeGeneratorUi(e, tableInfo);
         ui.show();
     }
 }

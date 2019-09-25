@@ -4,7 +4,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.xstudio.plugin.idea.model.PanelLabel;
-import org.xstudio.plugin.idea.model.ProjectConfig;
+import org.xstudio.plugin.idea.model.PersistentConfig;
 
 import javax.swing.*;
 import java.awt.*;
@@ -111,7 +111,7 @@ public class JavaUtil {
         return sb.toString();
     }
 
-    public static void boxListener(JCheckBox checkBox, Integer index, String property, boolean[] boxChanged, ProjectConfig config) {
+    public static void boxListener(JCheckBox checkBox, Integer index, String property, boolean[] boxChanged, PersistentConfig config) {
         checkBox.addItemListener(e -> {
             // 1 check 2 uncheck
             int stateChange = e.getStateChange();
