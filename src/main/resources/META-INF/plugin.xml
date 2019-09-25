@@ -28,7 +28,7 @@
 
     <actions>
         <!-- Add your actions here -->
-        <action id="mybatis-generator-action" class="org.xstudio.plugin.idea.action.MainAction" text="Code Generate">
+        <action id="mybatis-generator-action" class="org.xstudio.plugin.idea.action.MainAction" text="Mybatis Spring Code Generate">
             <add-to-group group-id="DatabaseViewPopupMenu" anchor="first"/>
             <keyboard-shortcut keymap="$default" first-keystroke="shift meta G"/>
         </action>

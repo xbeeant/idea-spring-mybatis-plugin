@@ -35,6 +35,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * @author xiaobiao
@@ -270,7 +271,14 @@ public class MyBatisGenerateCommand {
 
                         NotificationGroup balloonNotifications = new NotificationGroup(Constant.TITLE, NotificationDisplayType.STICKY_BALLOON, true);
 
-                        Notification notification = balloonNotifications.createNotification("Generate Successfully", "<html>" + String.join("<br/>", "todo") + "</html>", NotificationType.INFORMATION, (notification1, hyperlinkEvent) -> {
+                        List<String> result = myBatisGenerator.getGeneratedJavaFiles().stream()
+                                .map(generatedJavaFile -> String.format("<a href=\"%s%s/%s/%s\" target=\"_blank\">%s</a>", getRelativePath(project), MyBatisGenerateCommand.this.generatorConfig.getSourcePath(), generatedJavaFile.getTargetPackage().replace(".", "/"), generatedJavaFile.getFileName(), generatedJavaFile.getFileName()))
+                                .collect(Collectors.toList());
+                        result.addAll(myBatisGenerator.getGeneratedXmlFiles().stream()
+                                .map(generatedXmlFile -> String.format("<a href=\"%s%s/%s/%s\" target=\"_blank\">%s</a>", getRelativePath(project).replace(project.getBasePath() + "/", ""), MyBatisGenerateCommand.this.generatorConfig.getMapperTargetPackage(), generatedXmlFile.getTargetPackage().replace(".", "/"), generatedXmlFile.getFileName(), generatedXmlFile.getFileName()))
+                                .collect(Collectors.toList()));
+
+                        Notification notification = balloonNotifications.createNotification("Generate Successfully", "<html>" + String.join("<br/>", result) + "</html>", NotificationType.INFORMATION, (notification1, hyperlinkEvent) -> {
                             if (hyperlinkEvent.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
                                 new OpenFileDescriptor(project, Objects.requireNonNull(project.getBaseDir().findFileByRelativePath(hyperlinkEvent.getDescription()))).navigate(true);
                             }
@@ -293,6 +301,14 @@ public class MyBatisGenerateCommand {
             Messages.showMessageDialog(e.getMessage(), "Generate Failure", Messages.getInformationIcon());
         }
 
+    }
+
+    private String getRelativePath(Project project) {
+        if (generatorConfig.getModuleRootPath().equals(project.getBasePath())) {
+            return "";
+        } else {
+            return generatorConfig.getModuleRootPath().replace(project.getBasePath() + "/", "") + "/";
+        }
     }
 
     /**

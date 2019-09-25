@@ -35,6 +35,7 @@ public class DatabaseCredentialUI extends DialogWrapper {
     private Project project;
     private JPanel contentPanel = new JBPanel<>();
 
+    private JTextField urlField = new JBTextField(30);
     private JTextField usernameField = new JBTextField(30);
     private JTextField passwordField = new JBPasswordField();
     private JLabel errorMessage = new JLabel("");
@@ -50,6 +51,18 @@ public class DatabaseCredentialUI extends DialogWrapper {
 
         contentPanel.setLayout(new VerticalFlowLayout(VerticalFlowLayout.TOP));
         Map<String, Credential> credentials = myBatisGeneratorConfiguration.getCredentials();
+
+
+        JPanel urlPanel = new JBPanel<>();
+        urlPanel.setLayout(new BoxLayout(urlPanel, BoxLayout.X_AXIS));
+        urlPanel.setBorder(JBUI.Borders.empty(1));
+        JLabel urlLabel = new JLabel("URL:");
+        urlLabel.setPreferredSize(new Dimension(80, 20));
+        urlPanel.add(urlLabel);
+        urlPanel.add(urlField);
+        if (url != null) {
+            urlField.setText(url);
+        }
 
         JPanel usernamePanel = new JBPanel<>();
         usernamePanel.setLayout(new BoxLayout(usernamePanel, BoxLayout.X_AXIS));
@@ -84,16 +97,14 @@ public class DatabaseCredentialUI extends DialogWrapper {
             return;
         }
 
-        if (StringUtils.isEmpty(passwordField.getText())) {
-            passwordField.setText("");
-        }
-
         Map<String, Credential> credentials = myBatisGeneratorConfiguration.getCredentials();
         if (credentials == null) {
             credentials = new HashMap<>();
         }
-        credentials.put(url, new Credential(usernameField.getText()));
-        CredentialAttributes attributes = new CredentialAttributes(Constant.PLUGIN_NAME + "-" + url, usernameField.getText(), this.getClass(), false);
+        String dbUrl = urlField.getText();
+        credentials.put(dbUrl, new Credential(usernameField.getText()));
+
+        CredentialAttributes attributes = new CredentialAttributes(Constant.PLUGIN_NAME + "-" + dbUrl, usernameField.getText(), this.getClass(), false);
         Credentials saveCredentials = new Credentials(attributes.getUserName(), passwordField.getText());
         PasswordSafe.getInstance().set(attributes, saveCredentials);
         myBatisGeneratorConfiguration.setCredentials(credentials);
