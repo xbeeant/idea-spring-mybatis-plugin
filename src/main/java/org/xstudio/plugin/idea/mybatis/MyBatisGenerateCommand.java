@@ -265,9 +265,9 @@ public class MyBatisGenerateCommand {
                     try {
                         // 生成代码
                         myBatisGenerator.generate(null);
-                        VirtualFile baseDir = project.getWorkspaceFile();
+
                         // 刷新工程
-                        baseDir.refresh(false, true);
+                        project.getBaseDir().refresh(false, true);
 
                         NotificationGroup balloonNotifications = new NotificationGroup(Constant.TITLE, NotificationDisplayType.STICKY_BALLOON, true);
 
@@ -284,6 +284,8 @@ public class MyBatisGenerateCommand {
                             }
                         });
                         Notifications.Bus.notify(notification);
+
+
                     } catch (Exception e) {
                         e.printStackTrace();
                         balloon.hide();
@@ -350,7 +352,7 @@ public class MyBatisGenerateCommand {
         Credential credential = users.get(databaseUrl);
 
         username = credential.getUsername();
-        CredentialAttributes credentialAttributes = new CredentialAttributes(Constant.PLUGIN_NAME + databaseUrl, username, this.getClass(), false);
+        CredentialAttributes credentialAttributes = new CredentialAttributes(Constant.PLUGIN_NAME + "-" + databaseUrl, username, this.getClass(), false);
         String password = PasswordSafe.getInstance().getPassword(credentialAttributes);
 
         jdbcConfig.setUserId(username);
