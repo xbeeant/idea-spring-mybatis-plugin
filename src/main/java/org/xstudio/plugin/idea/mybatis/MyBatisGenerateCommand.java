@@ -484,12 +484,12 @@ public class MyBatisGenerateCommand {
             tableConfig.setCatalog(schema);
         }
 
-        if (!this.generatorConfig.isUseExample()) {
-            tableConfig.setUpdateByExampleStatementEnabled(false);
-            tableConfig.setCountByExampleStatementEnabled(false);
-            tableConfig.setDeleteByExampleStatementEnabled(false);
-            tableConfig.setSelectByExampleStatementEnabled(false);
-        }
+//        if (!this.generatorConfig.isUseExample()) {
+//            tableConfig.setUpdateByExampleStatementEnabled(false);
+//            tableConfig.setCountByExampleStatementEnabled(false);
+//            tableConfig.setDeleteByExampleStatementEnabled(false);
+//            tableConfig.setSelectByExampleStatementEnabled(false);
+//        }
 
         if (this.generatorConfig.isUseSchemaPrefix()) {
             if (DbType.MySQL.name().equals(databaseType)) {
