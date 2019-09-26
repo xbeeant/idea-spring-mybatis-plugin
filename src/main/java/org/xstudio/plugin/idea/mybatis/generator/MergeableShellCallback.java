@@ -23,15 +23,10 @@ public class MergeableShellCallback extends DefaultShellCallback {
 
     @Override
     public String mergeJavaFile(String newFileSource, File existingFile, String[] javadocTags, String fileEncoding) throws ShellException {
-        String filePath = existingFile.getAbsolutePath().replace(".java", "");
-        if (filePath.endsWith("Mapper")) {
-            try {
-                return new JavaFileMerger().getNewJavaFile(newFileSource, existingFile.getAbsolutePath());
-            } catch (FileNotFoundException e) {
-                throw new ShellException(e);
-            }
-        } else {
-            return newFileSource;
+        try {
+            return new JavaFileMerger().getNewJavaFile(newFileSource, existingFile.getAbsolutePath());
+        } catch (FileNotFoundException e) {
+            throw new ShellException(e);
         }
     }
 }

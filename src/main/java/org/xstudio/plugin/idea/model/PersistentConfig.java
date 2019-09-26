@@ -57,7 +57,7 @@ public class PersistentConfig extends MybatisPluginConfig {
     /**
      * 是否覆盖
      */
-    private boolean override = true;
+    private boolean override = false;
     /**
      * 是否使用Example
      */

@@ -270,7 +270,7 @@ public class MyBatisGenerateCommand {
             pluginConfiguration = new PluginConfiguration();
             pluginConfiguration.setConfigurationType("org.xstudio.plugin.mybatis.ServicePlugin");
             pluginConfiguration.addProperty("idGenerator", generatorConfig.getIdGenerator());
-            pluginConfiguration.addProperty("rootClient", generatorConfig.getBaseObject());
+            pluginConfiguration.addProperty("rootClient", generatorConfig.getIDao());
             pluginConfiguration.addProperty("rootService", generatorConfig.getIService());
             pluginConfiguration.addProperty("rootServiceImpl", generatorConfig.getServiceImpl());
             pluginConfiguration.addProperty("package", generatorConfig.getTargetPackage());
@@ -289,7 +289,6 @@ public class MyBatisGenerateCommand {
         if (generatorConfig.isFacadePlugin()) {
             pluginConfiguration = new PluginConfiguration();
             pluginConfiguration.setConfigurationType("org.xstudio.plugin.mybatis.FacadePlugin");
-            pluginConfiguration.addProperty("rootClient", generatorConfig.getBasePackage());
             pluginConfiguration.addProperty("rootService", generatorConfig.getIService());
             pluginConfiguration.addProperty("rootFacadeService", generatorConfig.getIFacade());
             pluginConfiguration.addProperty("rootFacadeServiceImpl", generatorConfig.getFacadeImpl());

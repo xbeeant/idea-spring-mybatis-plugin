@@ -6,6 +6,7 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.comments.Comment;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -38,7 +39,6 @@ public class JavaFileMerger {
         List<String> sources = Arrays.stream(newFileSource.split("\n")).collect(Collectors.toList());
 
         sources.addAll(newsImports.size() + 2, allImports.stream().map(importDeclaration -> importDeclaration.toString().replace("\r\n", "")).collect(Collectors.toList()));
-
 
         List<MethodDeclaration> newMethods = newCompilationUnit.getTypes().get(0).getMethods();
         List<MethodDeclaration> oldMethods = existingCompilationUnit.getTypes().get(0).getMethods();
