@@ -7,7 +7,6 @@ import org.mybatis.generator.api.dom.xml.Attribute;
 import org.mybatis.generator.api.dom.xml.Document;
 import org.mybatis.generator.api.dom.xml.TextElement;
 import org.mybatis.generator.api.dom.xml.XmlElement;
-import org.xstudio.plugin.mybatis.util.BeginEndPluginCheck;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,10 +46,11 @@ public class MapperFuzzySearchPlugin extends PluginAdapter {
         time.add("TIMESTAMP");
         time.add("TIME");
 
-        addBeginEnd = BeginEndPluginCheck.exist(this.getContext());
         if (null != properties.getProperty("nonFuzzyColumn")) {
             nonFuzzyColumn = properties.getProperty("nonFuzzyColumn");
         }
+
+        addBeginEnd = Boolean.valueOf(properties.getProperty("beginEndPluginEnable"));
         for (IntrospectedColumn column : introspectedTable.getPrimaryKeyColumns()) {
             keyColumns.add(column);
         }

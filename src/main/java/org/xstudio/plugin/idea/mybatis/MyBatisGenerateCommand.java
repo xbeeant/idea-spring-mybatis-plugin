@@ -235,6 +235,7 @@ public class MyBatisGenerateCommand {
             pluginConfiguration = new PluginConfiguration();
             pluginConfiguration.setConfigurationType("org.xstudio.plugin.mybatis.ClientRootPlugin");
             pluginConfiguration.addProperty("rootClient", generatorConfig.getIDao());
+            pluginConfiguration.addProperty("beginEndPluginEnable", "true");
             pluginConfiguration.addProperty("excludeMethods", "countByExample" +
                     ",deleteByExample,deleteByPrimaryKey," +
                     ",insert" +
@@ -262,6 +263,7 @@ public class MyBatisGenerateCommand {
             pluginConfiguration = new PluginConfiguration();
             pluginConfiguration.setConfigurationType("org.xstudio.plugin.mybatis.MapperFuzzySearchPlugin");
             pluginConfiguration.addProperty("nonFuzzyColumn", generatorConfig.getNonFuzzyColumn());
+            pluginConfiguration.addProperty("beginEndPluginEnable", "true");
             context.addPluginConfiguration(pluginConfiguration);
 
             // service 代码服务

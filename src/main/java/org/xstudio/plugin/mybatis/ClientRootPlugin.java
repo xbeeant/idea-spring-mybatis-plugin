@@ -9,7 +9,6 @@ import org.mybatis.generator.api.dom.java.Interface;
 import org.mybatis.generator.api.dom.java.Method;
 import org.mybatis.generator.api.dom.java.TopLevelClass;
 import org.mybatis.generator.api.dom.xml.*;
-import org.xstudio.plugin.mybatis.util.BeginEndPluginCheck;
 import org.xstudio.plugin.mybatis.util.PrimaryKeyUtil;
 
 import java.util.List;
@@ -44,7 +43,7 @@ public class ClientRootPlugin extends PluginAdapter {
         excludeMethods = properties.getProperty("excludeMethods");
         excludeMapper = properties.getProperty("excludeMapper");
         rootClientFqjt = new FullyQualifiedJavaType(rootClient);
-        beginEndPlugin = BeginEndPluginCheck.exist(this.getContext());
+        beginEndPlugin = Boolean.valueOf(properties.getProperty("beginEndPluginEnable"));
         super.initialized(introspectedTable);
     }
 
@@ -480,7 +479,7 @@ public class ClientRootPlugin extends PluginAdapter {
             foreachElement.addElement(setEl);
 
             String s = whereEl.getContent().replaceAll("#\\{", "#\\{item.");
-            if (introspectedTable.getPrimaryKeyColumns().size() > 1){
+            if (introspectedTable.getPrimaryKeyColumns().size() > 1) {
                 s = s.replaceAll("item.key.", "item.");
             }
             whereEl = new TextElement(s);
