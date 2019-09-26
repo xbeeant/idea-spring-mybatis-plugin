@@ -245,6 +245,7 @@ public class ProjectCodeGeneratorUi extends DialogWrapper {
 
     @Override
     protected void doOKAction() {
+        saveProjectConfig();
 
         connectionConfig = dbDataSource.getConnectionConfig();
 
@@ -317,6 +318,32 @@ public class ProjectCodeGeneratorUi extends DialogWrapper {
         super.doOKAction();
 
         new MyBatisGenerateCommand(tableConfig).execute(project, connectionConfig);
+    }
+
+    private void saveProjectConfig() {
+        tableConfig.setTablePrefix(tablePrefixField.getText());
+        tableConfig.setIdGenerator(idGeneratorField.getText());
+        tableConfig.setIService(serviceInterfaceField.getText());
+        tableConfig.setServiceImpl(serviceImplField.getText());
+        tableConfig.setIFacade(facadeInterfaceField.getText());
+        tableConfig.setFacadeImpl(facadeImplField.getText());
+        tableConfig.setIDao(daoInterfaceField.getText());
+        tableConfig.setBaseObject(rootObjectField.getText());
+        tableConfig.setIgnoreColumn(ignoreColumnsField.getText());
+        tableConfig.setNonFuzzyColumn(nonFuzzySearchColumnsField.getText());
+
+        tableConfig.setComment(commentBox.getSelectedObjects() != null);
+        tableConfig.setOverride(overrideBox.getSelectedObjects() != null);
+        tableConfig.setUseSchemaPrefix(useSchemaPrefixBox.getSelectedObjects() != null);
+        tableConfig.setToStringHashcodeEquals(needToStringHashcodeEqualsBox.getSelectedObjects() != null);
+        tableConfig.setUseTableNameAlias(useTableNameAliasBox.getSelectedObjects() != null);
+        tableConfig.setMysql8(mysql8Box.getSelectedObjects() != null);
+        tableConfig.setLombokPlugin(lombokAnnotationBox.getSelectedObjects() != null);
+        tableConfig.setSwagger2Plugin(swaggerAnnotationBox.getSelectedObjects() != null);
+        tableConfig.setFacadePlugin(generateFacadeBox.getSelectedObjects() != null);
+        tableConfig.setFastjsonPlugin(fastJsonBox.getSelectedObjects() != null);
+
+        projectPersistentConfiguration.saveProjectConfig(tableConfig.getTableName(), tableConfig);
     }
 
     private void initOptionsPanel() {

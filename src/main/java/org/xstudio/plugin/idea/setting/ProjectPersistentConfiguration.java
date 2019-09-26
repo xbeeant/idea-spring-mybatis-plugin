@@ -92,4 +92,8 @@ public class ProjectPersistentConfiguration implements PersistentStateComponent<
         }
         return tableConfig;
     }
+
+    public void saveProjectConfig(String tableName, TableConfig tableConfig) {
+        tableConfigs.put(tableName, tableConfig);
+    }
 }
