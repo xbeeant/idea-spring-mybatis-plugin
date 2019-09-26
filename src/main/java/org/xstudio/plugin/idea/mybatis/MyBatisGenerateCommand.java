@@ -17,6 +17,7 @@ import com.intellij.openapi.wm.StatusBar;
 import com.intellij.openapi.wm.WindowManager;
 import com.intellij.ui.awt.RelativePoint;
 import org.apache.commons.lang.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import org.mybatis.generator.api.MyBatisGenerator;
 import org.mybatis.generator.api.ShellCallback;
 import org.mybatis.generator.config.*;
@@ -131,6 +132,69 @@ public class MyBatisGenerateCommand {
         // plugins config
         // =====================================
 
+        buildPluginConfig(context);
+
+
+        try {
+            MyBatisGenerator myBatisGenerator = new MyBatisGenerator(configuration, shellCallback, warnings);
+
+            StatusBar statusBar = WindowManager.getInstance().getStatusBar(project);
+            Balloon balloon = JBPopupFactory.getInstance()
+                    .createHtmlTextBalloonBuilder("Generating Code...", MessageType.INFO, null)
+                    .createBalloon();
+            balloon.show(RelativePoint.getCenterOf(statusBar.getComponent()), Balloon.Position.atRight);
+
+            Task.Backgroundable generateTask = new Task.Backgroundable(project, Constant.TITLE, false) {
+                @Override
+                public void run(ProgressIndicator indicator) {
+                    indicator.setText(Constant.TITLE);
+                    indicator.setFraction(0.0);
+                    indicator.setIndeterminate(true);
+                    try {
+                        // 生成代码
+                        myBatisGenerator.generate(null);
+
+                        // 刷新工程
+                        project.getBaseDir().refresh(false, true);
+
+                        NotificationGroup balloonNotifications = new NotificationGroup(Constant.TITLE, NotificationDisplayType.STICKY_BALLOON, true);
+
+                        List<String> result = myBatisGenerator.getGeneratedJavaFiles().stream()
+                                .map(generatedJavaFile -> String.format("<a href=\"%s%s/%s/%s\" target=\"_blank\">%s</a>", getRelativePath(project), MyBatisGenerateCommand.this.generatorConfig.getSourcePath(), generatedJavaFile.getTargetPackage().replace(".", "/"), generatedJavaFile.getFileName(), generatedJavaFile.getFileName()))
+                                .collect(Collectors.toList());
+                        result.addAll(myBatisGenerator.getGeneratedXmlFiles().stream()
+                                .map(generatedXmlFile -> String.format("<a href=\"%s%s/%s/%s\" target=\"_blank\">%s</a>", getRelativePath(project).replace(project.getBasePath() + "/", ""), MyBatisGenerateCommand.this.generatorConfig.getMapperTargetPackage(), generatedXmlFile.getTargetPackage().replace(".", "/"), generatedXmlFile.getFileName(), generatedXmlFile.getFileName()))
+                                .collect(Collectors.toList()));
+
+                        Notification notification = balloonNotifications.createNotification("Generate Successfully", "<html>" + String.join("<br/>", result) + "</html>", NotificationType.INFORMATION, (notification1, hyperlinkEvent) -> {
+                            if (hyperlinkEvent.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
+                                new OpenFileDescriptor(project, Objects.requireNonNull(project.getBaseDir().findFileByRelativePath(hyperlinkEvent.getDescription()))).navigate(true);
+                            }
+                        });
+                        Notifications.Bus.notify(notification);
+
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        balloon.hide();
+                        Notification notification = new Notification(Constant.TITLE, null, NotificationType.ERROR);
+                        notification.setTitle("Generate Failed");
+                        notification.setContent("Cause:" + e.getMessage());
+                        Notifications.Bus.notify(notification);
+                    }
+                }
+            };
+            generateTask.setCancelText("Stop Generate Code").queue();
+            generateTask.setCancelTooltipText("Stop generate mybatis spring code");
+        } catch (Exception e) {
+            e.printStackTrace();
+            Messages.showMessageDialog(e.getMessage(), "Generate Failure", Messages.getInformationIcon());
+        }
+
+    }
+
+    @NotNull
+    private void buildPluginConfig(Context context) {
         PluginConfiguration pluginConfiguration;
 
         // swagger2 注解插件
@@ -170,7 +234,7 @@ public class MyBatisGenerateCommand {
             // dao 继承父类
             pluginConfiguration = new PluginConfiguration();
             pluginConfiguration.setConfigurationType("org.xstudio.plugin.mybatis.ClientRootPlugin");
-            pluginConfiguration.addProperty("rootClient", generatorConfig.getBaseObject());
+            pluginConfiguration.addProperty("rootClient", generatorConfig.getIDao());
             pluginConfiguration.addProperty("excludeMethods", "countByExample" +
                     ",deleteByExample,deleteByPrimaryKey," +
                     ",insert" +
@@ -246,63 +310,6 @@ public class MyBatisGenerateCommand {
         pluginConfiguration.addProperty("suppressJavaInterface", "false");
         pluginConfiguration.addProperty("addGWTInterface", "false");
         context.addPluginConfiguration(pluginConfiguration);
-
-        try {
-            MyBatisGenerator myBatisGenerator = new MyBatisGenerator(configuration, shellCallback, warnings);
-
-            StatusBar statusBar = WindowManager.getInstance().getStatusBar(project);
-            Balloon balloon = JBPopupFactory.getInstance()
-                    .createHtmlTextBalloonBuilder("Generating Code...", MessageType.INFO, null)
-                    .createBalloon();
-            balloon.show(RelativePoint.getCenterOf(statusBar.getComponent()), Balloon.Position.atRight);
-
-            Task.Backgroundable generateTask = new Task.Backgroundable(project, Constant.TITLE, false) {
-                @Override
-                public void run(ProgressIndicator indicator) {
-                    indicator.setText(Constant.TITLE);
-                    indicator.setFraction(0.0);
-                    indicator.setIndeterminate(true);
-                    try {
-                        // 生成代码
-                        myBatisGenerator.generate(null);
-
-                        // 刷新工程
-                        project.getBaseDir().refresh(false, true);
-
-                        NotificationGroup balloonNotifications = new NotificationGroup(Constant.TITLE, NotificationDisplayType.STICKY_BALLOON, true);
-
-                        List<String> result = myBatisGenerator.getGeneratedJavaFiles().stream()
-                                .map(generatedJavaFile -> String.format("<a href=\"%s%s/%s/%s\" target=\"_blank\">%s</a>", getRelativePath(project), MyBatisGenerateCommand.this.generatorConfig.getSourcePath(), generatedJavaFile.getTargetPackage().replace(".", "/"), generatedJavaFile.getFileName(), generatedJavaFile.getFileName()))
-                                .collect(Collectors.toList());
-                        result.addAll(myBatisGenerator.getGeneratedXmlFiles().stream()
-                                .map(generatedXmlFile -> String.format("<a href=\"%s%s/%s/%s\" target=\"_blank\">%s</a>", getRelativePath(project).replace(project.getBasePath() + "/", ""), MyBatisGenerateCommand.this.generatorConfig.getMapperTargetPackage(), generatedXmlFile.getTargetPackage().replace(".", "/"), generatedXmlFile.getFileName(), generatedXmlFile.getFileName()))
-                                .collect(Collectors.toList()));
-
-                        Notification notification = balloonNotifications.createNotification("Generate Successfully", "<html>" + String.join("<br/>", result) + "</html>", NotificationType.INFORMATION, (notification1, hyperlinkEvent) -> {
-                            if (hyperlinkEvent.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
-                                new OpenFileDescriptor(project, Objects.requireNonNull(project.getBaseDir().findFileByRelativePath(hyperlinkEvent.getDescription()))).navigate(true);
-                            }
-                        });
-                        Notifications.Bus.notify(notification);
-
-
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        balloon.hide();
-                        Notification notification = new Notification(Constant.TITLE, null, NotificationType.ERROR);
-                        notification.setTitle("Generate Failed");
-                        notification.setContent("Cause:" + e.getMessage());
-                        Notifications.Bus.notify(notification);
-                    }
-                }
-            };
-            generateTask.setCancelText("Stop Generate Code").queue();
-            generateTask.setCancelTooltipText("Stop generate mybatis spring code");
-        } catch (Exception e) {
-            e.printStackTrace();
-            Messages.showMessageDialog(e.getMessage(), "Generate Failure", Messages.getInformationIcon());
-        }
-
     }
 
     private String getRelativePath(Project project) {
