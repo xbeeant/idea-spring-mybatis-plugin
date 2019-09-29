@@ -1,5 +1,5 @@
 /**
- *    Copyright 2006-2018 the original author or authors.
+ *    Copyright 2006-2019 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -14,14 +14,6 @@
  *    limitations under the License.
  */
 package org.mybatis.generator.api.dom.java.render;
-
-import static org.mybatis.generator.api.dom.java.render.RenderingUtilities.JAVA_INDENT;
-import static org.mybatis.generator.api.dom.java.render.RenderingUtilities.renderClassOrEnumMethods;
-import static org.mybatis.generator.api.dom.java.render.RenderingUtilities.renderFields;
-import static org.mybatis.generator.api.dom.java.render.RenderingUtilities.renderInitializationBlocks;
-import static org.mybatis.generator.api.dom.java.render.RenderingUtilities.renderInnerClasses;
-import static org.mybatis.generator.api.dom.java.render.RenderingUtilities.renderInnerEnums;
-import static org.mybatis.generator.api.dom.java.render.RenderingUtilities.renderInnerInterfaces;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -41,17 +33,14 @@ public class InnerEnumRenderer {
         lines.addAll(innerEnum.getAnnotations());
         lines.add(renderFirstLine(innerEnum, compilationUnit));
         lines.addAll(renderEnumConstants(innerEnum));
-        lines.addAll(renderFields(innerEnum.getFields(), compilationUnit));
-        lines.addAll(renderInitializationBlocks(innerEnum.getInitializationBlocks()));
-        lines.addAll(renderClassOrEnumMethods(innerEnum.getMethods(), compilationUnit));
-        lines.addAll(renderInnerClasses(innerEnum.getInnerClasses(), compilationUnit));
-        lines.addAll(renderInnerInterfaces(innerEnum.getInnerInterfaces(), compilationUnit));
-        lines.addAll(renderInnerEnums(innerEnum.getInnerEnums(), compilationUnit));
+        lines.addAll(RenderingUtilities.renderFields(innerEnum.getFields(), compilationUnit));
+        lines.addAll(RenderingUtilities.renderInitializationBlocks(innerEnum.getInitializationBlocks()));
+        lines.addAll(RenderingUtilities.renderClassOrEnumMethods(innerEnum.getMethods(), compilationUnit));
+        lines.addAll(RenderingUtilities.renderInnerClasses(innerEnum.getInnerClasses(), compilationUnit));
+        lines.addAll(RenderingUtilities.renderInnerInterfaces(innerEnum.getInnerInterfaces(), compilationUnit));
+        lines.addAll(RenderingUtilities.renderInnerEnums(innerEnum.getInnerEnums(), compilationUnit));
 
-        // last line might be blank, remove it if so
-        if (lines.get(lines.size() - 1).isEmpty()) {
-            lines = lines.subList(0, lines.size() - 1);
-        }
+        lines = RenderingUtilities.removeLastEmptyLine(lines);
 
         lines.add("}"); //$NON-NLS-1$
 
@@ -83,9 +72,9 @@ public class InnerEnumRenderer {
             String enumConstant = iter.next();
 
             if (iter.hasNext()) {
-                answer.add(JAVA_INDENT + enumConstant + ","); //$NON-NLS-1$
+                answer.add(RenderingUtilities.JAVA_INDENT + enumConstant + ","); //$NON-NLS-1$
             } else {
-                answer.add(JAVA_INDENT + enumConstant + ";"); //$NON-NLS-1$
+                answer.add(RenderingUtilities.JAVA_INDENT + enumConstant + ";"); //$NON-NLS-1$
             }
         }
         

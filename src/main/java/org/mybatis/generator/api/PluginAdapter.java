@@ -1,5 +1,5 @@
 /**
- *    Copyright 2006-2018 the original author or authors.
+ *    Copyright 2006-2019 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  */
 package org.mybatis.generator.api;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 
@@ -65,24 +66,24 @@ public abstract class PluginAdapter implements Plugin {
 
     @Override
     public List<GeneratedJavaFile> contextGenerateAdditionalJavaFiles() {
-        return null;
+        return Collections.emptyList();
     }
 
     @Override
     public List<GeneratedJavaFile> contextGenerateAdditionalJavaFiles(
             IntrospectedTable introspectedTable) {
-        return null;
+        return Collections.emptyList();
     }
 
     @Override
     public List<GeneratedXmlFile> contextGenerateAdditionalXmlFiles() {
-        return null;
+        return Collections.emptyList();
     }
 
     @Override
     public List<GeneratedXmlFile> contextGenerateAdditionalXmlFiles(
             IntrospectedTable introspectedTable) {
-        return null;
+        return Collections.emptyList();
     }
 
     @Override
@@ -99,6 +100,18 @@ public abstract class PluginAdapter implements Plugin {
 
     @Override
     public boolean clientBasicInsertMethodGenerated(Method method, Interface interfaze,
+            IntrospectedTable introspectedTable) {
+        return true;
+    }
+
+    @Override
+    public boolean clientBasicInsertMultipleMethodGenerated(Method method, Interface interfaze,
+            IntrospectedTable introspectedTable) {
+        return true;
+    }
+
+    @Override
+    public boolean clientBasicInsertMultipleHelperMethodGenerated(Method method, Interface interfaze,
             IntrospectedTable introspectedTable) {
         return true;
     }
@@ -140,7 +153,43 @@ public abstract class PluginAdapter implements Plugin {
     }
 
     @Override
+    public boolean clientGeneralCountMethodGenerated(Method method, Interface interfaze,
+            IntrospectedTable introspectedTable) {
+        return true;
+    }
+
+    @Override
+    public boolean clientGeneralDeleteMethodGenerated(Method method, Interface interfaze,
+            IntrospectedTable introspectedTable) {
+        return true;
+    }
+
+    @Override
+    public boolean clientGeneralSelectDistinctMethodGenerated(Method method, Interface interfaze,
+            IntrospectedTable introspectedTable) {
+        return true;
+    }
+
+    @Override
+    public boolean clientGeneralSelectMethodGenerated(Method method, Interface interfaze,
+            IntrospectedTable introspectedTable) {
+        return true;
+    }
+
+    @Override
+    public boolean clientGeneralUpdateMethodGenerated(Method method, Interface interfaze,
+            IntrospectedTable introspectedTable) {
+        return true;
+    }
+
+    @Override
     public boolean clientInsertMethodGenerated(Method method, Interface interfaze,
+            IntrospectedTable introspectedTable) {
+        return true;
+    }
+
+    @Override
+    public boolean clientInsertMultipleMethodGenerated(Method method, Interface interfaze,
             IntrospectedTable introspectedTable) {
         return true;
     }
@@ -166,6 +215,30 @@ public abstract class PluginAdapter implements Plugin {
     @Override
     public boolean clientSelectByPrimaryKeyMethodGenerated(Method method,
             Interface interfaze, IntrospectedTable introspectedTable) {
+        return true;
+    }
+
+    @Override
+    public boolean clientSelectListFieldGenerated(Field field, Interface interfaze,
+            IntrospectedTable introspectedTable) {
+        return true;
+    }
+
+    @Override
+    public boolean clientSelectOneMethodGenerated(Method method, Interface interfaze,
+            IntrospectedTable introspectedTable) {
+        return true;
+    }
+
+    @Override
+    public boolean clientUpdateAllColumnsMethodGenerated(Method method, Interface interfaze,
+            IntrospectedTable introspectedTable) {
+        return true;
+    }
+
+    @Override
+    public boolean clientUpdateSelectiveColumnsMethodGenerated(Method method, Interface interfaze,
+            IntrospectedTable introspectedTable) {
         return true;
     }
 
@@ -471,6 +544,11 @@ public abstract class PluginAdapter implements Plugin {
     @Override
     public boolean sqlMapSelectAllElementGenerated(XmlElement element,
             IntrospectedTable introspectedTable) {
+        return true;
+    }
+
+    @Override
+    public boolean dynamicSqlSupportGenerated(TopLevelClass supportClass, IntrospectedTable introspectedTable) {
         return true;
     }
 }

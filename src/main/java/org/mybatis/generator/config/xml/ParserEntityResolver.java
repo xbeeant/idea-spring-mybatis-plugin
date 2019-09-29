@@ -1,5 +1,5 @@
 /**
- *    Copyright 2006-2018 the original author or authors.
+ *    Copyright 2006-2019 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -23,24 +23,12 @@ import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-/**
- * @author Jeff Butler
- */
 public class ParserEntityResolver implements EntityResolver {
 
-    /**
-     *  
-     */
     public ParserEntityResolver() {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.xml.sax.EntityResolver#resolveEntity(java.lang.String,
-     * java.lang.String)
-     */
     @Override
     public InputSource resolveEntity(String publicId, String systemId)
             throws SAXException, IOException {
@@ -50,9 +38,7 @@ public class ParserEntityResolver implements EntityResolver {
                     .getClassLoader()
                     .getResourceAsStream(
                             "org/mybatis/generator/config/xml/mybatis-generator-config_1_0.dtd"); //$NON-NLS-1$
-            InputSource ins = new InputSource(is);
-
-            return ins;
+            return new InputSource(is);
         } else {
             return null;
         }

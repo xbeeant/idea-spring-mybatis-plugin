@@ -1,5 +1,5 @@
 /**
- *    Copyright 2006-2017 the original author or authors.
+ *    Copyright 2006-2019 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -24,11 +24,6 @@ import org.mybatis.generator.codegen.mybatis3.ListUtilities;
 import org.mybatis.generator.codegen.mybatis3.MyBatis3FormattingUtilities;
 import org.mybatis.generator.config.GeneratedKey;
 
-/**
- * 
- * @author Jeff Butler
- * 
- */
 public class InsertSelectiveElementGenerator extends
         AbstractXmlElementGenerator {
 
@@ -53,19 +48,19 @@ public class InsertSelectiveElementGenerator extends
 
         GeneratedKey gk = introspectedTable.getGeneratedKey();
         if (gk != null) {
-            IntrospectedColumn introspectedColumn = introspectedTable
-                    .getColumn(gk.getColumn());
-            // if the column is null, then it's a configuration error. The
-            // warning has already been reported
-            if (introspectedColumn != null) {
+            introspectedTable.getColumn(gk.getColumn()).ifPresent(introspectedColumn -> {
+                // if the column is null, then it's a configuration error. The
+                // warning has already been reported
                 if (gk.isJdbcStandard()) {
                     answer.addAttribute(new Attribute("useGeneratedKeys", "true")); //$NON-NLS-1$ //$NON-NLS-2$
-                    answer.addAttribute(new Attribute("keyProperty", introspectedColumn.getJavaProperty())); //$NON-NLS-1$
-                    answer.addAttribute(new Attribute("keyColumn", introspectedColumn.getActualColumnName())); //$NON-NLS-1$
+                    answer.addAttribute(
+                            new Attribute("keyProperty", introspectedColumn.getJavaProperty())); //$NON-NLS-1$
+                    answer.addAttribute(
+                            new Attribute("keyColumn", introspectedColumn.getActualColumnName())); //$NON-NLS-1$
                 } else {
                     answer.addElement(getSelectKey(introspectedColumn, gk));
                 }
-            }
+            });
         }
 
         StringBuilder sb = new StringBuilder();
@@ -86,8 +81,8 @@ public class InsertSelectiveElementGenerator extends
         valuesTrimElement.addAttribute(new Attribute("suffixOverrides", ",")); //$NON-NLS-1$ //$NON-NLS-2$
         answer.addElement(valuesTrimElement);
 
-        for (IntrospectedColumn introspectedColumn : ListUtilities.removeIdentityAndGeneratedAlwaysColumns(introspectedTable
-                .getAllColumns())) {
+        for (IntrospectedColumn introspectedColumn :
+                ListUtilities.removeIdentityAndGeneratedAlwaysColumns(introspectedTable.getAllColumns())) {
 
             if (introspectedColumn.isSequenceColumn()
                     || introspectedColumn.getFullyQualifiedJavaType().isPrimitive()) {

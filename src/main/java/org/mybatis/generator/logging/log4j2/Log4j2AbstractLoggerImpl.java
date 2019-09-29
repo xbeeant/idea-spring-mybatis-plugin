@@ -1,5 +1,5 @@
 /**
- *    Copyright 2006-2018 the original author or authors.
+ *    Copyright 2006-2019 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -25,12 +25,9 @@ import org.apache.logging.log4j.spi.ExtendedLoggerWrapper;
 import org.mybatis.generator.logging.Log;
 import org.mybatis.generator.logging.LogFactory;
 
-/**
- * @author Eduardo Macarron
- */
 public class Log4j2AbstractLoggerImpl implements Log {
 
-    private static Marker MARKER = MarkerManager.getMarker(LogFactory.MARKER);
+    private static final Marker MARKER = MarkerManager.getMarker(LogFactory.MARKER);
 
     private static final String FQCN = Log4j2Impl.class.getName();
 

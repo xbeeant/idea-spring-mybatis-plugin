@@ -17,17 +17,6 @@ package org.mybatis.generator.api.dom;
 
 public class OutputUtilities {
 
-    /** The Constant lineSeparator. */
-    private static final String lineSeparator;
-
-    static {
-        String ls = System.getProperty("line.separator"); //$NON-NLS-1$
-        if (ls == null) {
-            ls = "\n"; //$NON-NLS-1$
-        }
-        lineSeparator = ls;
-    }
-
     /**
      * Utility class - no instances allowed.
      */
@@ -48,16 +37,6 @@ public class OutputUtilities {
         for (int i = 0; i < indentLevel; i++) {
             sb.append("    "); //$NON-NLS-1$
         }
-    }
-
-    /**
-     * Utility method. Adds a newline character to a StringBuilder.
-     *
-     * @param sb
-     *            the StringBuilder to be appended to
-     */
-    public static void newLine(StringBuilder sb) {
-        sb.append(lineSeparator);
     }
 
     /**
