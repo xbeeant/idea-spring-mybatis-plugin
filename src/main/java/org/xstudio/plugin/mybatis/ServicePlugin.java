@@ -170,8 +170,8 @@ public class ServicePlugin extends PluginAdapter {
         setDefaults.addBodyLine("// todo");
         topLevelClass.addImportedType(baseRecordType);
 
-        Method getKeyValue = new Method("getKeyValue");
-        Method setKeyValue = new Method("setKeyValue");
+        Method getKeyValue = new Method("valueOfKey");
+        Method setKeyValue = new Method("assignKeyValue");
         Method emptyKeyValue = new Method("emptyKeyValue");
 
         if (generateSetGetKeyValue) {

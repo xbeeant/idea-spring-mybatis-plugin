@@ -86,8 +86,8 @@ public class ModelRootObjectPlugin extends PluginAdapter {
             if (!generated && enableGenerateGetSetKey) {
                 List<IntrospectedColumn> primaryKeyColumns = introspectedTable.getPrimaryKeyColumns();
                 // set Key
-                Method setKey = new Method("setKey");
-                Method getKey = new Method("getKey");
+                Method setKey = new Method("assignKeyValue");
+                Method getKey = new Method("valueOfKey");
                 FullyQualifiedJavaType primaryKeyTypeFqjt = PrimaryKeyUtil.getFqjt(introspectedTable);
                 if (!primaryKeyColumns.isEmpty()) {
                     if (primaryKeyColumns.size() == 1) {
