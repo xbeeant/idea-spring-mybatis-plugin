@@ -4,10 +4,7 @@ import org.mybatis.generator.api.FullyQualifiedTable;
 import org.mybatis.generator.api.IntrospectedColumn;
 import org.mybatis.generator.api.IntrospectedTable;
 import org.mybatis.generator.api.PluginAdapter;
-import org.mybatis.generator.api.dom.java.FullyQualifiedJavaType;
-import org.mybatis.generator.api.dom.java.Interface;
-import org.mybatis.generator.api.dom.java.Method;
-import org.mybatis.generator.api.dom.java.TopLevelClass;
+import org.mybatis.generator.api.dom.java.*;
 import org.mybatis.generator.api.dom.xml.*;
 import org.xstudio.plugin.mybatis.util.PrimaryKeyUtil;
 
@@ -339,6 +336,27 @@ public class ClientRootPlugin extends PluginAdapter {
 
     @Override
     public boolean clientSelectByExampleWithBLOBsMethodGenerated(Method method, Interface interfaze, IntrospectedTable introspectedTable) {
+        method.getParameters().remove(0);
+        Parameter record = null;
+        for (Method interfazeMethod : interfaze.getMethods()) {
+            if ("insertSelective".equals(interfazeMethod.getName())) {
+                record = new Parameter(interfazeMethod.getParameters().get(0).getType(), "record");
+                record.addAnnotation("@Param(\"example\")");
+                break;
+            }
+        }
+
+
+        Parameter pageBounds = new Parameter(new FullyQualifiedJavaType("com.github.miemiedev.mybatis.paginator.domain.PageBounds"), "pageBounds");
+        pageBounds.addAnnotation("@Param(\"pageBounds\")");
+
+        method.addAnnotation("@Override");
+        method.addParameter(record);
+        method.addParameter(pageBounds);
+
+        interfaze.addImportedType(new FullyQualifiedJavaType("com.github.miemiedev.mybatis.paginator.domain.PageBounds"));
+        interfaze.addImportedType(new FullyQualifiedJavaType("org.apache.ibatis.annotations.Param"));
+        interfaze.addImportedType(new FullyQualifiedJavaType("java.util.List"));
         return super.clientSelectByExampleWithBLOBsMethodGenerated(method, interfaze, introspectedTable);
     }
 
