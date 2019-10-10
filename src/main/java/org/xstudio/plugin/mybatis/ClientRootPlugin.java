@@ -168,12 +168,6 @@ public class ClientRootPlugin extends PluginAdapter {
             return false;
         }
         element.getAttributes().removeIf(attribute -> "parameterType".equals(attribute.getName()));
-//        element.getElements().remove(5);
-//        element.getElements().remove(9);
-//        element.getElements().remove(9);
-        XmlElement whereElement = new XmlElement("where");
-        addInclude(whereElement, "Prefixed_Example_Where_Clause");
-        element.getElements().add(whereElement);
         return super.sqlMapResultMapWithBLOBsElementGenerated(element, introspectedTable);
     }
 
