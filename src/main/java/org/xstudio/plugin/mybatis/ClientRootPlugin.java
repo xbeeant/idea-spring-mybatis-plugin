@@ -49,7 +49,6 @@ public class ClientRootPlugin extends PluginAdapter {
 
     @Override
     public boolean sqlMapDocumentGenerated(Document document, IntrospectedTable introspectedTable) {
-        selectByExampleByPager(document, introspectedTable);
         batchInsertSelective(document, introspectedTable);
         batchDeleteByPrimaryKey(document, introspectedTable);
         batchUpdateByPrimaryKeySelective(document, introspectedTable);
@@ -171,6 +170,13 @@ public class ClientRootPlugin extends PluginAdapter {
         if (excludeMapper.contains(element.getAttributes().get(0).getValue())) {
             return false;
         }
+        element.getAttributes().removeIf(attribute -> "parameterType".equals(attribute.getName()));
+//        element.getElements().remove(5);
+//        element.getElements().remove(9);
+//        element.getElements().remove(9);
+        XmlElement whereElement = new XmlElement("where");
+        addInclude(whereElement, "Prefixed_Example_Where_Clause");
+        element.getElements().add(whereElement);
         return super.sqlMapResultMapWithBLOBsElementGenerated(element, introspectedTable);
     }
 
@@ -179,8 +185,9 @@ public class ClientRootPlugin extends PluginAdapter {
         if (excludeMapper.contains(element.getAttributes().get(0).getValue())) {
             return false;
         }
-        element.getElements().remove(element.getElements().get(8));
-        element.getElements().remove(element.getElements().get(8));
+        element.getElements().remove(element.getElements().get(5));
+        element.getElements().remove(element.getElements().get(7));
+        element.getElements().remove(element.getElements().get(7));
         XmlElement whereElement = new XmlElement("where");
         addInclude(whereElement, "Prefixed_Example_Where_Clause");
         element.getElements().add(whereElement);
@@ -409,27 +416,6 @@ public class ClientRootPlugin extends PluginAdapter {
         XmlElement includeElement = new XmlElement("include");
         includeElement.addAttribute(new Attribute("refid", include));
         xmlElement.addElement(includeElement);
-    }
-
-    private void selectByExampleByPager(Document document, IntrospectedTable introspectedTable) {
-        XmlElement element = new XmlElement("select");
-        element.addAttribute(new Attribute("id", "selectByExampleByPager"));
-        if (introspectedTable.getBLOBColumns() != null && introspectedTable.getBLOBColumns().size() > 1) {
-            element.addAttribute(new Attribute("resultMap", "ResultMapWithBLOBs"));
-        } else {
-            element.addAttribute(new Attribute("resultMap", "BaseResultMap"));
-        }
-        context.getCommentGenerator().addComment(element);
-
-        element.addElement(new TextElement("select * from " + introspectedTable.getFullyQualifiedTableNameAtRuntime()));
-
-        XmlElement xmlElement = new XmlElement("where");
-        XmlElement includeElement = new XmlElement("include");
-        includeElement.addAttribute(new Attribute("refid", "Prefixed_Example_Where_Clause"));
-        xmlElement.addElement(includeElement);
-        element.addElement(xmlElement);
-
-        document.getRootElement().addElement(element);
     }
 
     private void batchUpdateByPrimaryKeySelective(Document document, IntrospectedTable introspectedTable) {

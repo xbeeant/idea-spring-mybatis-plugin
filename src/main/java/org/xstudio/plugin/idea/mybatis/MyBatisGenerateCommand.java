@@ -242,7 +242,6 @@ public class MyBatisGenerateCommand {
                     ",insertSelective" +
                     ",selectByExample" +
                     ",selectByPrimaryKey" +
-                    ",selectByExampleWithBLOBs" +
                     ",updateByExampleSelective" +
                     ",updateByExample" +
                     ",updateByPrimaryKeySelective" +
