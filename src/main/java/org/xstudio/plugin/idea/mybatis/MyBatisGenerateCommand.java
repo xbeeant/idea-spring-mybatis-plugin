@@ -5,9 +5,11 @@ import com.intellij.database.model.RawConnectionConfig;
 import com.intellij.ide.passwordSafe.PasswordSafe;
 import com.intellij.notification.*;
 import com.intellij.openapi.fileEditor.OpenFileDescriptor;
+import com.intellij.openapi.module.Module;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.roots.ModuleRootManager;
 import com.intellij.openapi.ui.MessageType;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.ui.popup.Balloon;
@@ -74,9 +76,10 @@ public class MyBatisGenerateCommand {
      * 自动生成的主逻辑
      *
      * @param project          {@link Project}
+     * @param module           当前模块
      * @param connectionConfig {@link RawConnectionConfig}
      */
-    public void execute(Project project, RawConnectionConfig connectionConfig) {
+    public void execute(Project project, Module module, RawConnectionConfig connectionConfig) {
         this.projectPersistentConfiguration = ProjectPersistentConfiguration.getInstance(project);
 
         setDatabaseInfo(connectionConfig);
@@ -153,22 +156,22 @@ public class MyBatisGenerateCommand {
                     try {
                         // 生成代码
                         myBatisGenerator.generate(null);
-
+                        VirtualFile moduleFile = ModuleRootManager.getInstance(module).getContentRoots()[0];
                         // 刷新工程
                         project.getBaseDir().refresh(false, true);
 
                         NotificationGroup balloonNotifications = new NotificationGroup(Constant.TITLE, NotificationDisplayType.STICKY_BALLOON, true);
 
                         List<String> result = myBatisGenerator.getGeneratedJavaFiles().stream()
-                                .map(generatedJavaFile -> String.format("<a href=\"%s%s/%s/%s\" target=\"_blank\">%s</a>", getRelativePath(project), MyBatisGenerateCommand.this.generatorConfig.getSourcePath(), generatedJavaFile.getTargetPackage().replace(".", "/"), generatedJavaFile.getFileName(), generatedJavaFile.getFileName()))
+                                .map(generatedJavaFile -> String.format("<a href=\"%s%s/%s/%s\" target=\"_blank\">%s</a>", getRelativePath(module), MyBatisGenerateCommand.this.generatorConfig.getSourcePath(), generatedJavaFile.getTargetPackage().replace(".", "/"), generatedJavaFile.getFileName(), generatedJavaFile.getFileName()))
                                 .collect(Collectors.toList());
                         result.addAll(myBatisGenerator.getGeneratedXmlFiles().stream()
-                                .map(generatedXmlFile -> String.format("<a href=\"%s%s/%s/%s\" target=\"_blank\">%s</a>", getRelativePath(project).replace(project.getBasePath() + "/", ""), MyBatisGenerateCommand.this.generatorConfig.getMapperTargetPackage(), generatedXmlFile.getTargetPackage().replace(".", "/"), generatedXmlFile.getFileName(), generatedXmlFile.getFileName()))
+                                .map(generatedXmlFile -> String.format("<a href=\"%s%s/%s/%s\" target=\"_blank\">%s</a>", getRelativePath(module).replace(moduleFile.getPath() + "/", ""), MyBatisGenerateCommand.this.generatorConfig.getMapperTargetPackage(), generatedXmlFile.getTargetPackage().replace(".", "/"), generatedXmlFile.getFileName(), generatedXmlFile.getFileName()))
                                 .collect(Collectors.toList()));
 
                         Notification notification = balloonNotifications.createNotification("Generate Successfully", "<html>" + String.join("<br/>", result) + "</html>", NotificationType.INFORMATION, (notification1, hyperlinkEvent) -> {
                             if (hyperlinkEvent.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
-                                new OpenFileDescriptor(project, Objects.requireNonNull(project.getBaseDir().findFileByRelativePath(hyperlinkEvent.getDescription()))).navigate(true);
+                                new OpenFileDescriptor(project, Objects.requireNonNull(moduleFile.findFileByRelativePath(hyperlinkEvent.getDescription()))).navigate(true);
                             }
                         });
                         Notifications.Bus.notify(notification);
@@ -312,11 +315,12 @@ public class MyBatisGenerateCommand {
         context.addPluginConfiguration(pluginConfiguration);
     }
 
-    private String getRelativePath(Project project) {
-        if (generatorConfig.getModuleRootPath().equals(project.getBasePath())) {
+    private String getRelativePath(Module module) {
+        String path = ModuleRootManager.getInstance(module).getContentRoots()[0].getPath();
+        if (generatorConfig.getModuleRootPath().equals(path)) {
             return "";
         } else {
-            return generatorConfig.getModuleRootPath().replace(project.getBasePath() + "/", "") + "/";
+            return generatorConfig.getModuleRootPath().replace(path + "/", "") + "/";
         }
     }
 

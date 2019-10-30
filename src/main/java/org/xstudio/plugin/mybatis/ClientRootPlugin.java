@@ -257,7 +257,7 @@ public class ClientRootPlugin extends PluginAdapter {
         return super.sqlMapUpdateByPrimaryKeySelectiveElementGenerated(element, introspectedTable);
     }
 
-    private void setPrimaryKeyCondition(XmlElement element, boolean addPrefix, List<IntrospectedColumn> keyColumns) {
+    private void setPrimaryKeyCondition(XmlElement element, boolean addPrefix, List<IntrospectedColumn> keyColumns, boolean usingKey) {
         // key 查询条件添加key. 的前缀 满足多个key的情况
         List<VisitableElement> elements = element.getElements();
         for (VisitableElement elementElement : elements) {
@@ -266,16 +266,23 @@ public class ClientRootPlugin extends PluginAdapter {
                 String content = textElement.getContent();
                 if (keyColumns.size() > 1) {
                     if (addPrefix && content.contains("#{")) {
-                        textElement.setContent(content.replace("#{", "#{key."));
+                        if (usingKey) {
+                            textElement.setContent(content.replace("#{", "#{key."));
+                        } else {
+                            textElement.setContent(content.replace("#{", "#{" + keyColumns.get(0).getJavaProperty() + "."));
+                        }
                     }
                 } else {
                     if (addPrefix && content.contains("#{")) {
                         textElement.setContent(content.replace("#{" + keyColumns.get(0).getJavaProperty(), "#{key"));
                     }
                 }
-
             }
         }
+    }
+
+    private void setPrimaryKeyCondition(XmlElement element, boolean addPrefix, List<IntrospectedColumn> keyColumns) {
+        setPrimaryKeyCondition(element, addPrefix, keyColumns, true);
     }
 
     @Override
@@ -478,7 +485,7 @@ public class ClientRootPlugin extends PluginAdapter {
 
             String s = whereEl.getContent().replaceAll("#\\{", "#\\{item.");
             if (introspectedTable.getPrimaryKeyColumns().size() > 1) {
-                s = s.replaceAll("item.key.", "item.");
+                s = s.replaceAll("item." + introspectedTable.getPrimaryKeyColumns().get(0).getJavaProperty() + ".", "item.");
             }
             whereEl = new TextElement(s);
             foreachElement.addElement(whereEl);
