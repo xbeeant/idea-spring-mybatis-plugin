@@ -4,7 +4,7 @@ plugins {
 }
 
 group 'org.xstudio.plugin'
-version '1.0.0'
+version '1.0.1'
 
 sourceCompatibility = 1.8
 
@@ -34,16 +34,17 @@ dependencies {
 // See https://github.com/JetBrains/gradle-intellij-plugin/
 intellij {
     plugins 'java'
-    plugins "com.intellij.database:192.6262.44"
-    localPath "/Users/changan/Library/Application Support/JetBrains/Toolbox/apps/IDEA-U/ch-0/192.6603.28/IntelliJ IDEA.app"
+    plugins "com.intellij.database:193.5233.80"
+    localPath "/Users/changan/Library/Application Support/JetBrains/Toolbox/apps/IDEA-U/ch-0/193.5233.102/IntelliJ IDEA.app"
 //    version "IU-192.6603.28"
 //    type "IU"
     patchPluginXml {
-        sinceBuild '145.0'
+        sinceBuild '193.0'
     }
 }
 patchPluginXml {
     changeNotes """
+      idea 2019.3兼容
       ui release"""
 }
 
