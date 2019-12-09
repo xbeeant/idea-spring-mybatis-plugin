@@ -85,7 +85,11 @@ public class ProjectPersistentConfiguration implements PersistentStateComponent<
         PersistentConfig persistentConfig = persistentConfiguration.getPersistentConfig();
         TableConfig tableConfig = tableConfigs.get(tableName);
         if (null == tableConfig) {
-            tableConfig = JSON.parseObject(JSON.toJSONString(persistentConfig), TableConfig.class);
+            if (null != persistentConfig){
+                tableConfig = JSON.parseObject(JSON.toJSONString(persistentConfig), TableConfig.class);
+            } else {
+                tableConfig = new TableConfig();
+            }
             tableConfig.setDatabaseName(databaseName);
             tableConfig.setTableName(tableName);
             setTableGenerateTarget(tableConfig, tableConfig.getEntityName());

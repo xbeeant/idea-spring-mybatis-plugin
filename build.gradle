@@ -44,8 +44,8 @@ intellij {
 }
 patchPluginXml {
     changeNotes """
-      idea 2019.3兼容
-      ui release"""
+      1.0.1 idea 2019.3兼容<br />
+      1.0.0 ui release"""
 }
 
 // 指定编译的编码

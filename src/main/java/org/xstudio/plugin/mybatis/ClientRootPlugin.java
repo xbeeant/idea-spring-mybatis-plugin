@@ -253,7 +253,7 @@ public class ClientRootPlugin extends PluginAdapter {
         if (excludeMapper.contains(element.getAttributes().get(0).getValue())) {
             return false;
         }
-        setPrimaryKeyCondition(element, true, introspectedTable.getPrimaryKeyColumns());
+        setPrimaryKeyCondition(element, true, introspectedTable.getPrimaryKeyColumns(), false);
         return super.sqlMapUpdateByPrimaryKeySelectiveElementGenerated(element, introspectedTable);
     }
 
@@ -273,7 +273,7 @@ public class ClientRootPlugin extends PluginAdapter {
                         }
                     }
                 } else {
-                    if (addPrefix && content.contains("#{")) {
+                    if (addPrefix && usingKey && content.contains("#{")) {
                         textElement.setContent(content.replace("#{" + keyColumns.get(0).getJavaProperty(), "#{key"));
                     }
                 }
