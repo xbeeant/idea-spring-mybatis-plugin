@@ -268,6 +268,11 @@ public class MyBatisGenerateCommand {
             pluginConfiguration.addProperty("beginEndPluginEnable", "true");
             context.addPluginConfiguration(pluginConfiguration);
 
+            // mapper type handler插件
+            pluginConfiguration = new PluginConfiguration();
+            pluginConfiguration.setConfigurationType("org.xstudio.plugin.mybatis.MapperTypeHandlerPlugin");
+            context.addPluginConfiguration(pluginConfiguration);
+
             // service 代码服务
             pluginConfiguration = new PluginConfiguration();
             pluginConfiguration.setConfigurationType("org.xstudio.plugin.mybatis.ServicePlugin");

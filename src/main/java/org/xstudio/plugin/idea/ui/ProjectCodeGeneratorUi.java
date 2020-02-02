@@ -17,6 +17,7 @@ import com.intellij.openapi.roots.ModuleRootManager;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.ui.VerticalFlowLayout;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBPanel;
@@ -278,7 +279,7 @@ public class ProjectCodeGeneratorUi extends DialogWrapper {
         Callable<Exception> callable = new Callable<Exception>() {
             @Override
             public Exception call() {
-                String url = connectionConfig.getUrl();
+                String url = projectPersistentConfiguration.getDatabaseUrl();
                 CredentialAttributes credentialAttributes = new CredentialAttributes(Constant.PLUGIN_NAME + "-" + url, credential.getUsername(), this.getClass(), false);
                 String password = PasswordSafe.getInstance().getPassword(credentialAttributes);
                 try {
@@ -441,9 +442,13 @@ public class ProjectCodeGeneratorUi extends DialogWrapper {
         moduleRootField = new ModulesComboBox();
         moduleRootField.fillModules(this.project);
 
-        Module[] modules = moduleManager.getModules();
+        Module[] modules = moduleManager.getSortedModules();
         for (Module module : modules) {
-            String url = ModuleRootManager.getInstance(module).getContentRoots()[0].getPath();
+            VirtualFile[] contentRoots = ModuleRootManager.getInstance(module).getContentRoots();
+            if (contentRoots.length == 0) {
+                continue;
+            }
+            String url = contentRoots[0].getPath();
             if (url.equals(tableConfig.getModuleRootPath())) {
                 moduleRootField.setSelectedModule(module);
                 break;

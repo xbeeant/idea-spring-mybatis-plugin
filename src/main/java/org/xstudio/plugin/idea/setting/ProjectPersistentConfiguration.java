@@ -34,6 +34,10 @@ public class ProjectPersistentConfiguration implements PersistentStateComponent<
 
     @Getter
     @Setter
+    private String databaseUrl;
+
+    @Getter
+    @Setter
     private Map<String, TableConfig> tableConfigs = new HashMap<>(1);
 
     @Getter

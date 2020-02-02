@@ -1,11 +1,12 @@
 package org.xstudio.plugin.idea.mybatis.generator;
 
+import com.freetmp.mbg.merge.CompilationUnitMerger;
+import org.apache.commons.io.FileUtils;
 import org.mybatis.generator.exception.ShellException;
 import org.mybatis.generator.internal.DefaultShellCallback;
-import org.xstudio.plugin.idea.mybatis.util.JavaFileMerger;
 
 import java.io.File;
-import java.io.FileNotFoundException;
+import java.nio.charset.Charset;
 
 /**
  * @author LIQIU
@@ -24,8 +25,8 @@ public class MergeableShellCallback extends DefaultShellCallback {
     @Override
     public String mergeJavaFile(String newFileSource, File existingFile, String[] javadocTags, String fileEncoding) throws ShellException {
         try {
-            return new JavaFileMerger().getNewJavaFile(newFileSource, existingFile.getAbsolutePath());
-        } catch (FileNotFoundException e) {
+            return CompilationUnitMerger.merge(newFileSource, FileUtils.readFileToString(existingFile, Charset.defaultCharset()));
+        } catch (Exception e) {
             throw new ShellException(e);
         }
     }

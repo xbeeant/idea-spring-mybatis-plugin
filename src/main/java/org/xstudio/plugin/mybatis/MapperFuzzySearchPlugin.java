@@ -17,7 +17,7 @@ import java.util.List;
 public class MapperFuzzySearchPlugin extends PluginAdapter {
     private Boolean addBeginEnd = false;
 
-    private List<IntrospectedColumn> keyColumns = new ArrayList<IntrospectedColumn>();
+    private List<IntrospectedColumn> keyColumns = new ArrayList<>();
 
     private List<String> digit = new ArrayList<>();
 
@@ -51,9 +51,7 @@ public class MapperFuzzySearchPlugin extends PluginAdapter {
         }
 
         addBeginEnd = Boolean.valueOf(properties.getProperty("beginEndPluginEnable"));
-        for (IntrospectedColumn column : introspectedTable.getPrimaryKeyColumns()) {
-            keyColumns.add(column);
-        }
+        keyColumns.addAll(introspectedTable.getPrimaryKeyColumns());
         super.initialized(introspectedTable);
     }
 
@@ -74,9 +72,7 @@ public class MapperFuzzySearchPlugin extends PluginAdapter {
         XmlElement rootXmlElement;
         Attribute attribute;
         XmlElement ifElement;
-        for (IntrospectedColumn column : introspectedTable.getPrimaryKeyColumns()) {
-            keyColumns.add(column);
-        }
+        keyColumns.addAll(introspectedTable.getPrimaryKeyColumns());
 
         rootXmlElement = new XmlElement("sql");
         context.getCommentGenerator().addComment(rootXmlElement);
@@ -170,9 +166,7 @@ public class MapperFuzzySearchPlugin extends PluginAdapter {
         XmlElement rootXmlElement;
         Attribute attribute;
 
-        for (IntrospectedColumn column : introspectedTable.getPrimaryKeyColumns()) {
-            keyColumns.add(column);
-        }
+        keyColumns.addAll(introspectedTable.getPrimaryKeyColumns());
 
         rootXmlElement = new XmlElement("select");
         context.getCommentGenerator().addComment(rootXmlElement);
