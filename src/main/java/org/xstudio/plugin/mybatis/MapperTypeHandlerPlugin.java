@@ -125,7 +125,8 @@ public class MapperTypeHandlerPlugin extends PluginAdapter {
     @Override
     public boolean sqlMapUpdateByExampleSelectiveElementGenerated(XmlElement element, IntrospectedTable introspectedTable) {
         List<VisitableElement> elements = element.getElements();
-        XmlElement xmlElement = (XmlElement) elements.get(elements.size() - 2);
+        List<IntrospectedColumn> primaryKeyColumns = introspectedTable.getPrimaryKeyColumns();
+        XmlElement xmlElement = (XmlElement) elements.get(elements.size() - primaryKeyColumns.size());
         for (VisitableElement visitableElement : xmlElement.getElements()) {
             TextElement textElement = (TextElement) ((XmlElement) visitableElement).getElements().get(0);
             String content = textElement.getContent();
@@ -155,7 +156,8 @@ public class MapperTypeHandlerPlugin extends PluginAdapter {
     @Override
     public boolean sqlMapUpdateByPrimaryKeySelectiveElementGenerated(XmlElement element, IntrospectedTable introspectedTable) {
         List<VisitableElement> elements = element.getElements();
-        XmlElement xmlElement = (XmlElement) elements.get(elements.size() - 2);
+        List<IntrospectedColumn> primaryKeyColumns = introspectedTable.getPrimaryKeyColumns();
+        XmlElement xmlElement = (XmlElement) elements.get(elements.size() - primaryKeyColumns.size() - 1);
         for (VisitableElement visitableElement : xmlElement.getElements()) {
             TextElement textElement = (TextElement) ((XmlElement) visitableElement).getElements().get(0);
             String content = textElement.getContent();
