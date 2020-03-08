@@ -4,7 +4,7 @@ plugins {
 }
 
 group 'org.xstudio.plugin'
-version '1.0.3'
+version '1.0.0'
 
 sourceCompatibility = 1.8
 
@@ -40,19 +40,24 @@ dependencies {
 intellij {
     plugins 'java'
     plugins "com.intellij.database:193.5233.80"
-    localPath "/Users/changan/Library/Application Support/JetBrains/Toolbox/apps/IDEA-U/ch-0/193.5233.102/IntelliJ IDEA.app"
+    localPath "/Users/changan/Library/Application Support/JetBrains/Toolbox/apps/IDEA-U/ch-0/193.6494.35/IntelliJ IDEA.app"
 //    version "IU-192.6603.28"
 //    type "IU"
     patchPluginXml {
         sinceBuild '193.0'
     }
 }
+
+publishPlugin {
+    token intellijPublishToken
+}
+
 patchPluginXml {
+    pluginDescription """
+       spring + mybatis 基础代码[增删改查，批量增删改，模糊查询，字段唯一性校验]生成器，结合 https://github.com/beeant0512/xstudio 使用
+    """
     changeNotes """
-      1.0.3 支持mariadb<br />
-      1.0.2 支持typehandler<br />
-      1.0.1 idea 2019.3兼容<br />
-      1.0.0 ui release"""
+      1.0.0 release"""
 }
 
 // 指定编译的编码

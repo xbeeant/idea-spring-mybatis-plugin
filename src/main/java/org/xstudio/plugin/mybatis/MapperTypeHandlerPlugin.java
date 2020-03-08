@@ -23,9 +23,8 @@ import java.util.regex.Pattern;
  * @version 2019/12/30
  */
 public class MapperTypeHandlerPlugin extends PluginAdapter {
-    private String TYPE_HANDLER_EXPRESSION = "(#\\s*(typehandler\\s*:\\s*)([\\w\\d\\.\\=\\s]*)\\s*#)";
-
     Map<String, String> typeHandlersMap = new HashMap<>();
+    private String TYPE_HANDLER_EXPRESSION = "(#\\s*(typehandler\\s*:\\s*)([\\w\\d\\.\\=\\s]*)\\s*#)";
 
     @Override
     public boolean validate(List<String> warnings) {
@@ -126,7 +125,13 @@ public class MapperTypeHandlerPlugin extends PluginAdapter {
     public boolean sqlMapUpdateByExampleSelectiveElementGenerated(XmlElement element, IntrospectedTable introspectedTable) {
         List<VisitableElement> elements = element.getElements();
         List<IntrospectedColumn> primaryKeyColumns = introspectedTable.getPrimaryKeyColumns();
-        XmlElement xmlElement = (XmlElement) elements.get(elements.size() - primaryKeyColumns.size());
+        int size = primaryKeyColumns.size();
+        XmlElement xmlElement;
+        if (size > 1) {
+            xmlElement = (XmlElement) elements.get(elements.size() - size);
+        } else {
+            xmlElement = (XmlElement) elements.get(elements.size() - size - 1);
+        }
         for (VisitableElement visitableElement : xmlElement.getElements()) {
             TextElement textElement = (TextElement) ((XmlElement) visitableElement).getElements().get(0);
             String content = textElement.getContent();
