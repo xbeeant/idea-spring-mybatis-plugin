@@ -7,6 +7,7 @@ import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.intellij.openapi.project.Project;
 import com.intellij.util.xmlb.XmlSerializerUtil;
+import kotlin.reflect.jvm.internal.impl.descriptors.ModuleDescriptor;
 import lombok.Getter;
 import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
@@ -30,6 +31,10 @@ public class ProjectPersistentConfiguration implements PersistentStateComponent<
     @Getter
     @Setter
     private Map<String, Credential> credentials;
+
+    @Getter
+    @Setter
+    private String databaseUrl;
 
     @Getter
     @Setter
@@ -84,7 +89,11 @@ public class ProjectPersistentConfiguration implements PersistentStateComponent<
         PersistentConfig persistentConfig = persistentConfiguration.getPersistentConfig();
         TableConfig tableConfig = tableConfigs.get(tableName);
         if (null == tableConfig) {
-            tableConfig = JSON.parseObject(JSON.toJSONString(persistentConfig), TableConfig.class);
+            if (null != persistentConfig){
+                tableConfig = JSON.parseObject(JSON.toJSONString(persistentConfig), TableConfig.class);
+            } else {
+                tableConfig = new TableConfig();
+            }
             tableConfig.setDatabaseName(databaseName);
             tableConfig.setTableName(tableName);
             setTableGenerateTarget(tableConfig, tableConfig.getEntityName());

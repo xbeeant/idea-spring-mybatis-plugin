@@ -1,5 +1,6 @@
 package org.xstudio.plugin.idea.ui;
 
+import com.intellij.application.options.ModulesComboBox;
 import com.intellij.credentialStore.CredentialAttributes;
 import com.intellij.database.model.RawConnectionConfig;
 import com.intellij.database.psi.DbDataSource;
@@ -8,10 +9,15 @@ import com.intellij.ide.passwordSafe.PasswordSafe;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.LangDataKeys;
 import com.intellij.openapi.actionSystem.PlatformDataKeys;
-import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
+import com.intellij.openapi.module.Module;
+import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.ui.*;
+import com.intellij.openapi.roots.ModuleRootManager;
+import com.intellij.openapi.ui.DialogWrapper;
+import com.intellij.openapi.ui.Messages;
+import com.intellij.openapi.ui.VerticalFlowLayout;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBPanel;
@@ -31,7 +37,6 @@ import org.xstudio.plugin.idea.util.JavaUtil;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.sql.SQLException;
@@ -55,6 +60,10 @@ public class ProjectCodeGeneratorUi extends DialogWrapper {
      * IDEA当前工程对象
      */
     private Project project;
+    /**
+     * 项目模块管理
+     */
+    private ModuleManager moduleManager;
 
     private RawConnectionConfig connectionConfig;
 
@@ -62,7 +71,9 @@ public class ProjectCodeGeneratorUi extends DialogWrapper {
     /**
      * 当前模块
      */
-    private TextFieldWithBrowseButton moduleRootField = new TextFieldWithBrowseButton();
+    private ModulesComboBox moduleRootField;
+
+
     /**
      * 表
      */
@@ -131,6 +142,8 @@ public class ProjectCodeGeneratorUi extends DialogWrapper {
         super(event.getData(PlatformDataKeys.PROJECT));
 
         this.project = event.getData(PlatformDataKeys.PROJECT);
+        this.moduleManager = ModuleManager.getInstance(this.project);
+
         this.projectPersistentConfiguration = ProjectPersistentConfiguration.getInstance(this.project);
 
         this.event = event;
@@ -266,7 +279,7 @@ public class ProjectCodeGeneratorUi extends DialogWrapper {
         Callable<Exception> callable = new Callable<Exception>() {
             @Override
             public Exception call() {
-                String url = connectionConfig.getUrl();
+                String url = projectPersistentConfiguration.getDatabaseUrl();
                 CredentialAttributes credentialAttributes = new CredentialAttributes(Constant.PLUGIN_NAME + "-" + url, credential.getUsername(), this.getClass(), false);
                 String password = PasswordSafe.getInstance().getPassword(credentialAttributes);
                 try {
@@ -317,10 +330,12 @@ public class ProjectCodeGeneratorUi extends DialogWrapper {
 
         super.doOKAction();
 
-        new MyBatisGenerateCommand(tableConfig).execute(project, connectionConfig);
+        new MyBatisGenerateCommand(tableConfig).execute(project, moduleRootField.getSelectedModule(), connectionConfig);
     }
 
     private void saveProjectConfig() {
+        String path = ModuleRootManager.getInstance(moduleRootField.getSelectedModule()).getContentRoots()[0].getPath();
+        tableConfig.setModuleRootPath(path);
         tableConfig.setTablePrefix(tablePrefixField.getText());
         tableConfig.setIdGenerator(idGeneratorField.getText());
         tableConfig.setIService(serviceInterfaceField.getText());
@@ -423,19 +438,25 @@ public class ProjectCodeGeneratorUi extends DialogWrapper {
         moduleRootPanel.setLayout(new BoxLayout(moduleRootPanel, BoxLayout.X_AXIS));
         JBLabel projectRootLabel = new JBLabel("Module Root:");
         projectRootLabel.setPreferredSize(new Dimension(150, 10));
-        moduleRootField.addBrowseFolderListener(new TextBrowseFolderListener(FileChooserDescriptorFactory.createSingleFolderDescriptor()) {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                super.actionPerformed(e);
-                String moduleRootPath = moduleRootField.getText().replaceAll("\\\\", "/");
-                moduleRootField.setText(moduleRootPath);
-                tableConfig.setModuleRootPath(moduleRootPath);
-            }
-        });
 
-        moduleRootField.setText(project.getBasePath());
+        moduleRootField = new ModulesComboBox();
+        moduleRootField.fillModules(this.project);
+
+        Module[] modules = moduleManager.getSortedModules();
+        for (Module module : modules) {
+            VirtualFile[] contentRoots = ModuleRootManager.getInstance(module).getContentRoots();
+            if (contentRoots.length == 0) {
+                continue;
+            }
+            String url = contentRoots[0].getPath();
+            if (url.equals(tableConfig.getModuleRootPath())) {
+                moduleRootField.setSelectedModule(module);
+                break;
+            }
+        }
         moduleRootPanel.add(projectRootLabel);
         moduleRootPanel.add(moduleRootField);
+
 
         // Table
         JPanel tableNamePanel = JavaUtil.panelField("Table Name:", tableNameField, null, new Dimension(150, 10)).getPanel();

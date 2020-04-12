@@ -10,7 +10,6 @@ import org.mybatis.generator.internal.util.JavaBeansUtil;
 import org.xstudio.plugin.mybatis.util.PrimaryKeyUtil;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -91,7 +90,7 @@ public class ServicePlugin extends PluginAdapter {
         interfaze.addJavaDocLine(" * service for table " + introspectedTable.getFullyQualifiedTable().getIntrospectedTableName());
         interfaze.addJavaDocLine(" * ");
         interfaze.addJavaDocLine(" * @author mybatis generator");
-        interfaze.addJavaDocLine(" * @version " + new Date());
+        interfaze.addJavaDocLine(" * @version 1.0.0");
         interfaze.addJavaDocLine(" */");
 
         FullyQualifiedJavaType primaryKeyTypeFqjt = PrimaryKeyUtil.getFqjt(introspectedTable);
@@ -129,7 +128,7 @@ public class ServicePlugin extends PluginAdapter {
         topLevelClass.addJavaDocLine(" * service implements for table " + introspectedTable.getFullyQualifiedTable().getIntrospectedTableName());
         topLevelClass.addJavaDocLine(" * ");
         topLevelClass.addJavaDocLine(" * @author mybatis generator");
-        topLevelClass.addJavaDocLine(" * @version " + new Date());
+        topLevelClass.addJavaDocLine(" * @version 1.0.0");
         topLevelClass.addJavaDocLine(" */");
 
         // 设置父类

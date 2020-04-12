@@ -10,6 +10,7 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = false)
 public class PersistentConfig extends MybatisPluginConfig {
+    private String name;
     /**
      * base package
      */
@@ -93,10 +94,10 @@ public class PersistentConfig extends MybatisPluginConfig {
     /**
      * 源码地址
      */
-    private String sourcePath = "src/main/java";
+    private String sourcePath = "/java";
     /**
      * 资源文件地址
      */
-    private String resourcePath = "src/main/resources";
+    private String resourcePath = "/resources";
 
 }

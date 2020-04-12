@@ -4,11 +4,14 @@ plugins {
 }
 
 group 'org.xstudio.plugin'
-version '1.0.0'
+version '1.0.0.0'
 
 sourceCompatibility = 1.8
 
 repositories {
+    maven {
+        url "http://maven.aliyun.com/nexus/content/groups/public"
+    }
     mavenCentral()
 }
 
@@ -16,12 +19,17 @@ dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
 
     compile group: 'org.projectlombok', name: 'lombok', version: '1.18.10'
-    compile group: 'com.github.javaparser', name: 'javaparser-core', version: '3.14.14'
+    annotationProcessor "org.projectlombok:lombok:1.18.10"
 
+    compile group: 'com.github.javaparser', name: 'javaparser-core', version: '2.5.0'
 
+    compile group: 'commons-io', name: 'commons-io', version: '2.6'
+    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.9'
     // database driver
     compile group: 'mysql', name: 'mysql-connector-java', version: '8.0.11'
     compile group: 'mysql', name: 'mysql-connector-java', version: '5.1.48'
+    // https://mvnrepository.com/artifact/org.mariadb.jdbc/mariadb-java-client
+    compile group: 'org.mariadb.jdbc', name: 'mariadb-java-client', version: '2.4.4'
 
     compile group: 'com.alibaba', name: 'fastjson', version: "1.2.58"
 
@@ -34,17 +42,14 @@ dependencies {
 // See https://github.com/JetBrains/gradle-intellij-plugin/
 intellij {
     plugins 'java'
-    plugins "com.intellij.database:192.6262.44"
-    localPath "C:\\Users\\Beeant\\AppData\\Local\\JetBrains\\Toolbox\\apps\\IDEA-U\\ch-0\\192.6603.28"
-//    version "IU-192.6603.28"
-//    type "IU"
+    plugins "com.intellij.database:191.4212.27"
+//    localPath "C:\\Program Files\\JetBrains\\IntelliJ IDEA 2020.1\\"
+    version "IU-191.6707.61"
     patchPluginXml {
-        sinceBuild '145.0'
+        sinceBuild "191.6707.61"
+        untilBuild "193.*"
     }
-}
-patchPluginXml {
-    changeNotes """
-      ui release"""
+    type "IU"
 }
 
 // 指定编译的编码

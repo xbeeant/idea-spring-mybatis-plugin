@@ -108,6 +108,7 @@ public class DatabaseCredentialUI extends DialogWrapper {
         Credentials saveCredentials = new Credentials(attributes.getUserName(), passwordField.getText());
         PasswordSafe.getInstance().set(attributes, saveCredentials);
         projectPersistentConfiguration.setCredentials(credentials);
+        projectPersistentConfiguration.setDatabaseUrl(dbUrl);
         VirtualFile baseDir = project.getBaseDir();
         baseDir.refresh(false, true);
 

@@ -8,7 +8,7 @@ public enum DbType {
     PostgreSQL("org.postgresql.Driver", "jdbc:postgresql://%s:%s/%s", "postgresql-9.4.1209.jar"),
 	SqlServer("com.microsoft.sqlserver.jdbc.SQLServerDriver", "jdbc:sqlserver://%s:%s;databaseName=%s", "sqljdbc4-4.0.jar"),
 	Sqlite("org.sqlite.JDBC", "jdbc:sqlite:%s", "sqlite-jdbc-3.19.3.jar"),
-    MariaDB("org.mariadb.jdbc.Driver", "", "mariadb-java-client-2.3.0.jar");
+    MariaDB("org.mariadb.jdbc.Driver", "", "mariadb-java-client-2.4.4.jar");
 
     private final String driverClass;
     private final String connectionUrlPattern;

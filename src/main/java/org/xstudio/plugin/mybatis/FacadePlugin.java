@@ -7,11 +7,10 @@ import org.mybatis.generator.api.dom.java.*;
 import org.mybatis.generator.config.PropertyRegistry;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 /**
- * @author  xiaobiao
+ * @author xiaobiao
  * @date 2017/2/22.
  */
 public class FacadePlugin extends PluginAdapter {
@@ -74,7 +73,7 @@ public class FacadePlugin extends PluginAdapter {
         interfaze.addJavaDocLine(" * facade service for table " + introspectedTable.getFullyQualifiedTable().getIntrospectedTableName());
         interfaze.addJavaDocLine(" * ");
         interfaze.addJavaDocLine(" * @author mybatis generator");
-        interfaze.addJavaDocLine(" * @version " + new Date());
+        interfaze.addJavaDocLine(" * @version 1.0.0");
         interfaze.addJavaDocLine(" */");
 
         // 设置父类
@@ -106,7 +105,7 @@ public class FacadePlugin extends PluginAdapter {
         topLevelClass.addJavaDocLine(" * facade service implements for table " + introspectedTable.getFullyQualifiedTable().getIntrospectedTableName());
         topLevelClass.addJavaDocLine(" * ");
         topLevelClass.addJavaDocLine(" * @author mybatis generator");
-        topLevelClass.addJavaDocLine(" * @version " + new Date());
+        topLevelClass.addJavaDocLine(" * @version 1.0.0");
         topLevelClass.addJavaDocLine(" */");
 
         // 设置父类
@@ -116,7 +115,7 @@ public class FacadePlugin extends PluginAdapter {
         topLevelClass.addImportedType(baseRecordType);
 
 
-        // service repositoryAnnotation
+        // service repository Annotation
 
         String serviceInterfaceAlias = serviceInterface.getShortName().substring(1, 2).toLowerCase() + serviceInterface.getShortName().substring(2);
         Field service = new Field(serviceInterfaceAlias, serviceInterface);

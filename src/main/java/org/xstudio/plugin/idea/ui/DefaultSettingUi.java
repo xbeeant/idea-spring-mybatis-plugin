@@ -5,13 +5,17 @@ import com.intellij.ui.TitledSeparator;
 import com.intellij.ui.components.JBPanel;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.commons.lang.StringUtils;
 import org.xstudio.plugin.idea.Constant;
+import org.xstudio.plugin.idea.model.PanelLabel;
 import org.xstudio.plugin.idea.model.PersistentConfig;
 import org.xstudio.plugin.idea.setting.DefaultPersistentConfiguration;
 import org.xstudio.plugin.idea.util.JavaUtil;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 
 /**
  * @author xiaobiao
@@ -22,6 +26,7 @@ public class DefaultSettingUi extends JDialog {
     // =================
     // path
     // =================
+
     @Getter
     JPanel projectRootPanel = new JPanel();
 
@@ -30,6 +35,12 @@ public class DefaultSettingUi extends JDialog {
     @Setter
     @Getter
     private PersistentConfig persistentConfig;
+
+    /**
+     * name
+     */
+    private JTextField nameField = new JTextField();
+
     /**
      * source path
      */
@@ -91,9 +102,80 @@ public class DefaultSettingUi extends JDialog {
 
         persistentConfiguration = DefaultPersistentConfiguration.getInstance();
         persistentConfig = persistentConfiguration.getPersistentConfig();
+        initConfigGroup();
         initPathPanel();
         initProjectPanel();
         initOptionsPanel();
+    }
+
+    private void initConfigGroup() {
+        Dimension dimension = new Dimension(200, 20);
+        PanelLabel panelLabel = new PanelLabel();
+
+        nameField.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+                JTextField textField = (JTextField) e.getSource();
+                String text = textField.getText();
+                PersistentConfig config = persistentConfiguration.getConfigs().get(text);
+                if (null != config){
+                    sourcePathField.setText(config.getSourcePath());
+                    resourcePathField.setText(config.getResourcePath());
+                    tablePrefixField.setText(config.getTablePrefix());
+                    basePackageField.setText(config.getBasePackage());
+                    idGeneratorField.setText(config.getIdGenerator());
+                    serviceInterfaceField.setText(config.getIService());
+                    serviceImplField.setText(config.getServiceImpl());
+                    facadeInterfaceField.setText(config.getIFacade());
+                    facadeImplField.setText(config.getFacadeImpl());
+                    daoInterfaceField.setText(config.getIDao());
+                    rootObjectField.setText(config.getBaseObject());
+                    ignoreColumnsField.setText(config.getIgnoreColumn());
+                    nonFuzzyColumnField.setText(config.getNonFuzzyColumn());
+
+                    commentBox.setSelected(config.isComment());
+                    overrideBox.setSelected(config.isOverride());
+                    useSchemaPrefixBox.setSelected(config.isUseSchemaPrefix());
+                    needToStringHashcodeEqualsBox.setSelected(config.isToStringHashcodeEquals());
+                    useTableNameAliasBox.setSelected(config.isUseTableNameAlias());
+                    mysql8Box.setSelected(config.isMysql8());
+                    lombokAnnotationBox.setSelected(config.isLombokPlugin());
+                    swaggerAnnotationBox.setSelected(config.isSwagger2Plugin());
+                    generateFacadeBox.setSelected(config.isFacadePlugin());
+                    fastJsonBox.setSelected(config.isFastjsonPlugin());
+                }
+            }
+        });
+
+        if (!StringUtils.isEmpty(persistentConfig.getName())) {
+            nameField.setText(persistentConfig.getName());
+        }
+
+        if (StringUtils.isEmpty(nameField.getText())) {
+            nameField.setText("");
+        }
+
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
+        JLabel jlabel = new JLabel("Name:");
+        jlabel.setPreferredSize(dimension);
+        jlabel.setLabelFor(nameField);
+        panel.add(jlabel);
+        panel.add(nameField);
+
+        panelLabel.setPanel(panel);
+        panelLabel.setLabel(jlabel);
+        panelLabel.setField(nameField);
+
+        JPanel sourcePathPanel = panelLabel.getPanel();
+
+        JPanel pathPanel = new JPanel();
+        pathPanel.setLayout(new VerticalFlowLayout(VerticalFlowLayout.TOP));
+        TitledSeparator separator = new TitledSeparator();
+        separator.setText("Config");
+        pathPanel.add(sourcePathPanel);
+        contentPanel.add(separator);
+        contentPanel.add(pathPanel);
     }
 
     private void initPathPanel() {
@@ -195,6 +277,7 @@ public class DefaultSettingUi extends JDialog {
      */
     public boolean isModified() {
         boolean modified = !this.sourcePathField.getText().equals(persistentConfig.getSourcePath());
+        modified |= !this.nameField.getText().equals(persistentConfig.getName());
         modified |= !this.resourcePathField.getText().equals(persistentConfig.getResourcePath());
 
         modified |= !this.tablePrefixField.getText().equals(persistentConfig.getTablePrefix());
@@ -217,6 +300,7 @@ public class DefaultSettingUi extends JDialog {
     }
 
     public void apply() {
+        persistentConfig.setName(nameField.getText());
         persistentConfig.setSourcePath(sourcePathField.getText());
         persistentConfig.setResourcePath(resourcePathField.getText());
 

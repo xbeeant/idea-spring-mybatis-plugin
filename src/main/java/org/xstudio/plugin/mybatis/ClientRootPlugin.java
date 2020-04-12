@@ -4,10 +4,7 @@ import org.mybatis.generator.api.FullyQualifiedTable;
 import org.mybatis.generator.api.IntrospectedColumn;
 import org.mybatis.generator.api.IntrospectedTable;
 import org.mybatis.generator.api.PluginAdapter;
-import org.mybatis.generator.api.dom.java.FullyQualifiedJavaType;
-import org.mybatis.generator.api.dom.java.Interface;
-import org.mybatis.generator.api.dom.java.Method;
-import org.mybatis.generator.api.dom.java.TopLevelClass;
+import org.mybatis.generator.api.dom.java.*;
 import org.mybatis.generator.api.dom.xml.*;
 import org.xstudio.plugin.mybatis.util.PrimaryKeyUtil;
 
@@ -49,7 +46,6 @@ public class ClientRootPlugin extends PluginAdapter {
 
     @Override
     public boolean sqlMapDocumentGenerated(Document document, IntrospectedTable introspectedTable) {
-        selectByExampleByPager(document, introspectedTable);
         batchInsertSelective(document, introspectedTable);
         batchDeleteByPrimaryKey(document, introspectedTable);
         batchUpdateByPrimaryKeySelective(document, introspectedTable);
@@ -171,6 +167,7 @@ public class ClientRootPlugin extends PluginAdapter {
         if (excludeMapper.contains(element.getAttributes().get(0).getValue())) {
             return false;
         }
+        element.getAttributes().removeIf(attribute -> "parameterType".equals(attribute.getName()));
         return super.sqlMapResultMapWithBLOBsElementGenerated(element, introspectedTable);
     }
 
@@ -179,8 +176,9 @@ public class ClientRootPlugin extends PluginAdapter {
         if (excludeMapper.contains(element.getAttributes().get(0).getValue())) {
             return false;
         }
-        element.getElements().remove(element.getElements().get(8));
-        element.getElements().remove(element.getElements().get(8));
+        element.getElements().remove(element.getElements().get(5));
+        element.getElements().remove(element.getElements().get(7));
+        element.getElements().remove(element.getElements().get(7));
         XmlElement whereElement = new XmlElement("where");
         addInclude(whereElement, "Prefixed_Example_Where_Clause");
         element.getElements().add(whereElement);
@@ -255,11 +253,11 @@ public class ClientRootPlugin extends PluginAdapter {
         if (excludeMapper.contains(element.getAttributes().get(0).getValue())) {
             return false;
         }
-        setPrimaryKeyCondition(element, true, introspectedTable.getPrimaryKeyColumns());
+        setPrimaryKeyCondition(element, true, introspectedTable.getPrimaryKeyColumns(), false);
         return super.sqlMapUpdateByPrimaryKeySelectiveElementGenerated(element, introspectedTable);
     }
 
-    private void setPrimaryKeyCondition(XmlElement element, boolean addPrefix, List<IntrospectedColumn> keyColumns) {
+    private void setPrimaryKeyCondition(XmlElement element, boolean addPrefix, List<IntrospectedColumn> keyColumns, boolean usingKey) {
         // key 查询条件添加key. 的前缀 满足多个key的情况
         List<VisitableElement> elements = element.getElements();
         for (VisitableElement elementElement : elements) {
@@ -268,16 +266,23 @@ public class ClientRootPlugin extends PluginAdapter {
                 String content = textElement.getContent();
                 if (keyColumns.size() > 1) {
                     if (addPrefix && content.contains("#{")) {
-                        textElement.setContent(content.replace("#{", "#{key."));
+                        if (usingKey) {
+                            textElement.setContent(content.replace("#{", "#{key."));
+                        } else {
+                            textElement.setContent(content.replace("#{", "#{" + keyColumns.get(0).getJavaProperty() + "."));
+                        }
                     }
                 } else {
-                    if (addPrefix && content.contains("#{")) {
+                    if (addPrefix && usingKey && content.contains("#{")) {
                         textElement.setContent(content.replace("#{" + keyColumns.get(0).getJavaProperty(), "#{key"));
                     }
                 }
-
             }
         }
+    }
+
+    private void setPrimaryKeyCondition(XmlElement element, boolean addPrefix, List<IntrospectedColumn> keyColumns) {
+        setPrimaryKeyCondition(element, addPrefix, keyColumns, true);
     }
 
     @Override
@@ -332,6 +337,27 @@ public class ClientRootPlugin extends PluginAdapter {
 
     @Override
     public boolean clientSelectByExampleWithBLOBsMethodGenerated(Method method, Interface interfaze, IntrospectedTable introspectedTable) {
+        method.getParameters().remove(0);
+        Parameter record = null;
+        for (Method interfazeMethod : interfaze.getMethods()) {
+            if ("insertSelective".equals(interfazeMethod.getName())) {
+                record = new Parameter(interfazeMethod.getParameters().get(0).getType(), "record");
+                record.addAnnotation("@Param(\"example\")");
+                break;
+            }
+        }
+
+
+        Parameter pageBounds = new Parameter(new FullyQualifiedJavaType("com.github.miemiedev.mybatis.paginator.domain.PageBounds"), "pageBounds");
+        pageBounds.addAnnotation("@Param(\"pageBounds\")");
+
+        method.addAnnotation("@Override");
+        method.addParameter(record);
+        method.addParameter(pageBounds);
+
+        interfaze.addImportedType(new FullyQualifiedJavaType("com.github.miemiedev.mybatis.paginator.domain.PageBounds"));
+        interfaze.addImportedType(new FullyQualifiedJavaType("org.apache.ibatis.annotations.Param"));
+        interfaze.addImportedType(new FullyQualifiedJavaType("java.util.List"));
         return super.clientSelectByExampleWithBLOBsMethodGenerated(method, interfaze, introspectedTable);
     }
 
@@ -411,27 +437,6 @@ public class ClientRootPlugin extends PluginAdapter {
         xmlElement.addElement(includeElement);
     }
 
-    private void selectByExampleByPager(Document document, IntrospectedTable introspectedTable) {
-        XmlElement element = new XmlElement("select");
-        element.addAttribute(new Attribute("id", "selectByExampleByPager"));
-        if (introspectedTable.getBLOBColumns() != null && introspectedTable.getBLOBColumns().size() > 1) {
-            element.addAttribute(new Attribute("resultMap", "ResultMapWithBLOBs"));
-        } else {
-            element.addAttribute(new Attribute("resultMap", "BaseResultMap"));
-        }
-        context.getCommentGenerator().addComment(element);
-
-        element.addElement(new TextElement("select * from " + introspectedTable.getFullyQualifiedTableNameAtRuntime()));
-
-        XmlElement xmlElement = new XmlElement("where");
-        XmlElement includeElement = new XmlElement("include");
-        includeElement.addAttribute(new Attribute("refid", "Prefixed_Example_Where_Clause"));
-        xmlElement.addElement(includeElement);
-        element.addElement(xmlElement);
-
-        document.getRootElement().addElement(element);
-    }
-
     private void batchUpdateByPrimaryKeySelective(Document document, IntrospectedTable introspectedTable) {
         XmlElement element = new XmlElement("update");
         element.addAttribute(new Attribute("id", "batchUpdateByPrimaryKeySelective"));
@@ -480,7 +485,7 @@ public class ClientRootPlugin extends PluginAdapter {
 
             String s = whereEl.getContent().replaceAll("#\\{", "#\\{item.");
             if (introspectedTable.getPrimaryKeyColumns().size() > 1) {
-                s = s.replaceAll("item.key.", "item.");
+                s = s.replaceAll("item." + introspectedTable.getPrimaryKeyColumns().get(0).getJavaProperty() + ".", "item.");
             }
             whereEl = new TextElement(s);
             foreachElement.addElement(whereEl);
