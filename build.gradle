@@ -4,7 +4,7 @@ plugins {
 }
 
 group 'org.xstudio.plugin'
-version '1.0.0.0'
+version '1.0.0.1'
 
 sourceCompatibility = 1.8
 
@@ -47,7 +47,7 @@ intellij {
     version "IU-191.6707.61"
     patchPluginXml {
         sinceBuild "191.6707.61"
-        untilBuild "193.*"
+        untilBuild "201.*"
     }
     type "IU"
 }
