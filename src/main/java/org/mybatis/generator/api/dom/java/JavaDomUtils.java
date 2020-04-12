@@ -1,5 +1,5 @@
 /**
- *    Copyright 2006-2018 the original author or authors.
+ *    Copyright 2006-2019 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@ package org.mybatis.generator.api.dom.java;
 import java.util.stream.Collectors;
 
 public class JavaDomUtils {
+    private JavaDomUtils() {}
+    
     /**
      * Calculates type names for writing into generated Java.  We try to
      * use short names wherever possible.  If the type requires an import,
@@ -30,7 +32,16 @@ public class JavaDomUtils {
      */
     public static String calculateTypeName(CompilationUnit compilationUnit, FullyQualifiedJavaType fqjt) {
 
-        if (fqjt.getTypeArguments().size() > 0) {
+        if (fqjt.isArray()) {
+            // if array, then calculate the name of the base (non-array) type
+            // then add the array indicators back in
+            String fqn = fqjt.getFullyQualifiedName();
+            String typeName = calculateTypeName(compilationUnit,
+                    new FullyQualifiedJavaType(fqn.substring(0, fqn.indexOf('['))));
+            return typeName + fqn.substring(fqn.indexOf('['));
+        }
+        
+        if (!fqjt.getTypeArguments().isEmpty()) {
             return calculateParameterizedTypeName(compilationUnit, fqjt);
         }
         
@@ -68,8 +79,7 @@ public class JavaDomUtils {
     
     private static boolean typeIsAlreadyImported(CompilationUnit compilationUnit,
             FullyQualifiedJavaType fullyQualifiedJavaType) {
-        FullyQualifiedJavaType nonGenericType =
-                new FullyQualifiedJavaType(fullyQualifiedJavaType.getFullyQualifiedNameWithoutTypeParameters());
-        return compilationUnit.getImportedTypes().contains(nonGenericType);
+        String name = fullyQualifiedJavaType.getFullyQualifiedNameWithoutTypeParameters();
+        return compilationUnit.getImportedTypes().stream().anyMatch(e -> e.getImportList().contains(name));
     }
 }

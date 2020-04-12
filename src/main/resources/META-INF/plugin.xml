@@ -1,32 +1,46 @@
-<idea-plugin>
-    <id>org.xstudio.plugin.spring</id>
+<idea-plugin url="https://beeant0512.github.io">
+    <id>org.xstudio.plugin.idea</id>
     <name>spring mybatis code generator</name>
-    <vendor email="huangxb0512@gmail.com" url="https://beeant0512.github.io">xstudio</vendor>
+    <vendor email="huangxb0512@gmail.com" url="https://beeant0512.github.io">Beeant</vendor>
 
     <description><![CDATA[
-    spring boot project with mybatis code generator plugin
+    <p>a idea plugin for generate mybatis mapper(interface and mapper.xml files) and spring service, facade</p>
+    <p>modified from <a href="https://github.com/leecho/mybatis-generator-plus">https://github.com/leecho/mybatis-generator-plus</a></p>
+    <p>spring + mybatis 基础代码[增删改查，批量增删改，模糊查询，字段唯一性校验]生成器，结合 https://github.com/beeant0512/xstudio 使用</p>
     ]]></description>
 
-    <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
-         on how to target different products -->
-    <!-- uncomment to enable plugin in all products
-    <depends>com.intellij.modules.lang</depends>
-    -->
+    <change-notes>
+        <![CDATA[
+        Initial release of the plugin. <br />
+        generate:
+        <ul>
+            <li>service interface</li>
+            <li>service implements</li>
+            <li>mybatis dao interface</li>
+            <li>mybatis dao mapper</li>
+            <li>mybatis dao entity</li>
+        </ul>
+    ]]>
+    </change-notes>
+
+    <depends config-file="">com.intellij.database</depends>
 
     <extensions defaultExtensionNs="com.intellij">
         <!-- Add your extensions here -->
+        <applicationService serviceInterface="org.xstudio.plugin.idea.setting.DefaultPersistentConfiguration"
+                            serviceImplementation="org.xstudio.plugin.idea.setting.DefaultPersistentConfiguration" />
+        <projectService
+                serviceInterface="org.xstudio.plugin.idea.setting.ProjectPersistentConfiguration"
+                serviceImplementation="org.xstudio.plugin.idea.setting.ProjectPersistentConfiguration"/>
+        <applicationConfigurable groupId="tools" displayName="Mybatis Spring Generator Plus" id="Mybatis.Generator.Plus.Plugin"
+                             instance="org.xstudio.plugin.idea.setting.DefaultSettingConfigurable"/>
     </extensions>
 
     <actions>
         <!-- Add your actions here -->
-        <group id="XStudioPlugin.GeneratorMenu" text="XStudio" description="XStudio Plugins Menu">
-            <add-to-group group-id="MainMenu" anchor="last"/>
-            <action id="XStudioPlugin.MainUi" class="org.xstudio.plugins.idea.action.MainAction" text="项目配置"
-                    description="为该项目配置生成器使用的默认配置"/>
-            <action id="XStudioPlugin.Generate" class="org.xstudio.plugins.idea.action.GeneratorAction" text="后台代码生成"
-                    description="后台代码生成"/>
-            <action id="XStudioPlugin.GenerateWeb" class="org.xstudio.plugins.idea.action.GenerateWebAction"
-                    text="前端代码生成" description="前端代码生成"/>
-        </group>
+        <action id="mybatis-generator-action" class="org.xstudio.plugin.idea.action.MainAction" text="Mybatis Spring Code Generate">
+            <add-to-group group-id="DatabaseViewPopupMenu" anchor="first"/>
+            <keyboard-shortcut keymap="$default" first-keystroke="shift meta G"/>
+        </action>
     </actions>
 </idea-plugin>

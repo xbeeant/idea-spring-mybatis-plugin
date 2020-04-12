@@ -15,7 +15,7 @@ public class EnumDeclarationMerger extends AbstractMerger<EnumDeclaration> {
         EnumDeclaration ed = new EnumDeclaration();
 
         ed.setModifiers(mergeModifiers(first.getModifiers(), second.getModifiers()));
-        ed.setJavaDoc(mergeSingle(first.getJavaDoc(), second.getJavaDoc()));
+        ed.setComment(mergeSingle(first.getJavaDoc(), second.getJavaDoc()));
         ed.setAnnotations(mergeCollections(first.getAnnotations(), second.getAnnotations()));
 
         ed.setImplements(mergeCollections(first.getImplements(), second.getImplements()));

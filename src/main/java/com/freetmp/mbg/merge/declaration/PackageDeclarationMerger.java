@@ -19,7 +19,8 @@ public class PackageDeclarationMerger extends AbstractMerger<PackageDeclaration>
 
   @Override public boolean doIsEquals(PackageDeclaration first, PackageDeclaration second) {
 
-    return first.getName().equals(second.getName());
+    if(!first.getName().equals(second.getName())) return false;
 
+    return true;
   }
 }

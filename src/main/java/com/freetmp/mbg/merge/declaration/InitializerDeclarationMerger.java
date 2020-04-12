@@ -12,7 +12,7 @@ public class InitializerDeclarationMerger extends AbstractMerger<InitializerDecl
 
         InitializerDeclaration id = new InitializerDeclaration();
 
-        id.setJavaDoc(mergeSingle(first.getJavaDoc(),second.getJavaDoc()));
+        id.setComment(mergeSingle(first.getJavaDoc(),second.getJavaDoc()));
         id.setStatic(first.isStatic());
         id.setAnnotations(mergeCollections(first.getAnnotations(),second.getAnnotations()));
         id.setBlock(mergeSingle(first.getBlock(),second.getBlock()));
@@ -22,9 +22,7 @@ public class InitializerDeclarationMerger extends AbstractMerger<InitializerDecl
 
     @Override public boolean doIsEquals(InitializerDeclaration first, InitializerDeclaration second) {
 
-        if(first.isStatic() != second.isStatic()) {
-            return false;
-        }
+        if(first.isStatic() != second.isStatic()) return false;
 
         return false;
     }

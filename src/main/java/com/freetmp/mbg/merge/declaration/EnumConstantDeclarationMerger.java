@@ -15,7 +15,7 @@ public class EnumConstantDeclarationMerger extends AbstractMerger<EnumConstantDe
 
         ecd.setName(first.getName());
         ecd.setArgs(mergeListInOrder(first.getArgs(), second.getArgs()));
-        ecd.setJavaDoc(mergeSingle(first.getJavaDoc(), second.getJavaDoc()));
+        ecd.setComment(mergeSingle(first.getJavaDoc(), second.getJavaDoc()));
 
         ecd.setAnnotations(mergeCollections(first.getAnnotations(), second.getAnnotations()));
         ecd.setClassBody(mergeCollections(first.getClassBody(), second.getClassBody()));

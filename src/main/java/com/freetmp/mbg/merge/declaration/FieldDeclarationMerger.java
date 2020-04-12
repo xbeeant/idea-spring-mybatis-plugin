@@ -11,7 +11,7 @@ public class FieldDeclarationMerger extends AbstractMerger<FieldDeclaration> {
     @Override public FieldDeclaration doMerge(FieldDeclaration first, FieldDeclaration second) {
 
         FieldDeclaration fd = new FieldDeclaration();
-        fd.setJavaDoc(mergeSingle(first.getJavaDoc(),second.getJavaDoc()));
+        fd.setComment(mergeSingle(first.getJavaDoc(),second.getJavaDoc()));
         fd.setType(mergeSingle(first.getType(),second.getType()));
         fd.setModifiers(mergeModifiers(first.getModifiers(),second.getModifiers()));
         fd.setAnnotations(mergeCollections(first.getAnnotations(),second.getAnnotations()));

@@ -15,7 +15,7 @@ public class ConstructorDeclarationMerger extends AbstractMerger<ConstructorDecl
     ConstructorDeclaration cd = new ConstructorDeclaration();
 
     cd.setName(first.getName());
-    cd.setJavaDoc(mergeSingle(first.getJavaDoc(), second.getJavaDoc()));
+    cd.setComment(mergeSingle(first.getJavaDoc(), second.getJavaDoc()));
     cd.setModifiers(mergeModifiers(first.getModifiers(), second.getModifiers()));
     cd.setAnnotations(mergeCollections(first.getAnnotations(), second.getAnnotations()));
     cd.setParameters(mergeCollectionsInOrder(first.getParameters(), second.getParameters()));
@@ -29,15 +29,12 @@ public class ConstructorDeclarationMerger extends AbstractMerger<ConstructorDecl
   @Override
   public boolean doIsEquals(ConstructorDeclaration first, ConstructorDeclaration second) {
 
-    if (!StringUtils.equals(first.getName(), second.getName())) {
-      return false;
-    }
+    if (!StringUtils.equals(first.getName(), second.getName())) return false;
 
-    if (!isParametersEquals(first.getParameters(), second.getParameters())) {
-      return false;
-    }
+    if (!isParametersEquals(first.getParameters(), second.getParameters())) return false;
 
-    return isTypeParameterEquals(first.getTypeParameters(), second.getTypeParameters());
+    if (!isTypeParameterEquals(first.getTypeParameters(), second.getTypeParameters())) return false;
 
+    return true;
   }
 }

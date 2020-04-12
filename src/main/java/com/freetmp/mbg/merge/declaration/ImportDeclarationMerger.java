@@ -9,7 +9,7 @@ import com.github.javaparser.ast.ImportDeclaration;
 public class ImportDeclarationMerger extends AbstractMerger<ImportDeclaration> {
 
   @Override public ImportDeclaration doMerge(ImportDeclaration first, ImportDeclaration second) {
-    ImportDeclaration id = new ImportDeclaration();
+    ImportDeclaration id = ImportDeclaration.createEmptyDeclaration();
     id.setName(mergeSingle(first.getName(),second.getName()));
     id.setAsterisk(first.isAsterisk());
     id.setStatic(first.isStatic());

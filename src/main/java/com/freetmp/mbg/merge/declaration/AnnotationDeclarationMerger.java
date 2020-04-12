@@ -14,7 +14,7 @@ public class AnnotationDeclarationMerger extends AbstractMerger<AnnotationDeclar
 
     AnnotationDeclaration ad = new AnnotationDeclaration();
 
-    ad.setJavaDoc(mergeSingle(first.getJavaDoc(), second.getJavaDoc()));
+    ad.setComment(mergeSingle(first.getJavaDoc(), second.getJavaDoc()));
     ad.setMembers(mergeCollections(first.getMembers(), second.getMembers()));
     ad.setAnnotations(mergeCollections(first.getAnnotations(), second.getAnnotations()));
     ad.setModifiers(mergeModifiers(first.getModifiers(), second.getModifiers()));

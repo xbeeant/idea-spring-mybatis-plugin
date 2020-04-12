@@ -14,7 +14,7 @@ public class AnnotationMemberDeclarationMerger extends AbstractMerger<Annotation
     AnnotationMemberDeclaration amd = new AnnotationMemberDeclaration();
     amd.setName(first.getName());
     amd.setType(mergeSingle(first.getType(),second.getType()));
-    amd.setJavaDoc(mergeSingle(first.getJavaDoc(), second.getJavaDoc()));
+    amd.setComment(mergeSingle(first.getJavaDoc(), second.getJavaDoc()));
 
     amd.setModifiers(mergeModifiers(first.getModifiers(), second.getModifiers()));
     amd.setAnnotations(mergeCollections(first.getAnnotations(), second.getAnnotations()));

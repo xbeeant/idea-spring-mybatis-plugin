@@ -1,5 +1,5 @@
 /**
- *    Copyright 2006-2017 the original author or authors.
+ *    Copyright 2006-2019 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -28,9 +28,9 @@ import org.mybatis.generator.config.JDBCConnectionConfiguration;
 
 /**
  * This class assumes that classes are cached elsewhere for performance reasons,
- * but also to make sure that any native libraries are only loaded one time
- * (avoids the dreaded UnsatisfiedLinkError library loaded in another
- * classloader)
+ * but also to make sure that any native libraries are only loaded one time.
+ * This avoids the dreaded UnsatisfiedLinkError library loaded in another
+ * classloader.
  * 
  * @author Jeff Butler
  */
@@ -95,7 +95,7 @@ public class JDBCConnectionFactory implements ConnectionFactory {
 
         try {
             Class<?> clazz = ObjectFactory.externalClassForName(driverClass);
-            driver = (Driver) clazz.newInstance();
+            driver = (Driver) clazz.getConstructor().newInstance();
         } catch (Exception e) {
             throw new RuntimeException(getString("RuntimeError.8"), e); //$NON-NLS-1$
         }

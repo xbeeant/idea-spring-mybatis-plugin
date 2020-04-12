@@ -3,6 +3,7 @@ package com.freetmp.mbg.merge.parameter;
 import com.freetmp.mbg.merge.AbstractMerger;
 import com.github.javaparser.ast.body.MultiTypeParameter;
 import com.github.javaparser.ast.body.VariableDeclaratorId;
+import com.github.javaparser.ast.type.ReferenceType;
 import com.github.javaparser.ast.type.Type;
 
 import java.util.List;
@@ -20,7 +21,7 @@ public class MultiTypeParameterMerger extends AbstractMerger<MultiTypeParameter>
         mtp.setModifiers(mergeModifiers(first.getModifiers(), second.getModifiers()));
         mtp.setId(first.getId());
         mtp.setAnnotations(mergeCollections(first.getAnnotations(), second.getAnnotations()));
-        mtp.setTypes(first.getTypes());
+        mtp.setType(first.getType());
 
         return mtp;
     }
@@ -29,15 +30,23 @@ public class MultiTypeParameterMerger extends AbstractMerger<MultiTypeParameter>
     @Override
     public boolean doIsEquals(MultiTypeParameter first, MultiTypeParameter second) {
 
-        if(!getMerger(VariableDeclaratorId.class).isEquals(first.getId(),second.getId())) return false;
+        if(!getMerger(VariableDeclaratorId.class).isEquals(first.getId(),second.getId())) {
+            return false;
+        }
 
-        List<Type> firstTypes = first.getTypes();
-        List<Type> secondTypes = second.getTypes();
+        List<ReferenceType> firstTypes = first.getType().getElements();
+        List<ReferenceType> secondTypes = second.getType().getElements();
 
-        if(firstTypes == null) return secondTypes == null;
-        if(secondTypes == null) return false;
+        if(firstTypes == null) {
+            return secondTypes == null;
+        }
+        if(secondTypes == null) {
+            return false;
+        }
 
-        if(firstTypes.size() != secondTypes.size()) return false;
+        if(firstTypes.size() != secondTypes.size()) {
+            return false;
+        }
 
         for(Type ft : firstTypes){
             boolean found = false;
@@ -47,7 +56,9 @@ public class MultiTypeParameterMerger extends AbstractMerger<MultiTypeParameter>
                     found = true; break;
                 }
             }
-            if(!found) return false;
+            if(!found) {
+                return false;
+            }
         }
 
         return true;
