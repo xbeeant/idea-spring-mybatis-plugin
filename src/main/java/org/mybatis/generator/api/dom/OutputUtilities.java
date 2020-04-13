@@ -40,6 +40,19 @@ public class OutputUtilities {
     }
 
     /**
+     * Utility method that indents the buffer by the default amount for Kotlin
+     * (four spaces per indent level).
+     * 
+     * @param sb
+     *            a StringBuilder to append to
+     * @param indentLevel
+     *            the required indent level
+     */
+    public static void kotlinIndent(StringBuilder sb, int indentLevel) {
+        javaIndent(sb, indentLevel);
+    }
+
+    /**
      * Utility method that indents the buffer by the default amount for XML (two
      * spaces per indent level).
      * 

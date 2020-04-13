@@ -22,15 +22,8 @@ package org.mybatis.generator.api;
  */
 public abstract class GeneratedFile {
 
-    /** The target project. */
     protected String targetProject;
 
-    /**
-     * Instantiates a new generated file.
-     *
-     * @param targetProject
-     *            the target project
-     */
     public GeneratedFile(String targetProject) {
         super();
         this.targetProject = targetProject;

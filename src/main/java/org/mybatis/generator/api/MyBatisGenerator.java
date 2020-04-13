@@ -15,20 +15,6 @@
  */
 package org.mybatis.generator.api;
 
-import static org.mybatis.generator.internal.util.ClassloaderUtility.getCustomClassloader;
-import static org.mybatis.generator.internal.util.messages.Messages.getString;
-
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import org.mybatis.generator.codegen.RootClassInfo;
 import org.mybatis.generator.config.Configuration;
 import org.mybatis.generator.config.Context;
@@ -39,6 +25,16 @@ import org.mybatis.generator.internal.DefaultShellCallback;
 import org.mybatis.generator.internal.NullProgressCallback;
 import org.mybatis.generator.internal.ObjectFactory;
 import org.mybatis.generator.internal.XmlFileMergerJaxp;
+
+import java.io.*;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import static org.mybatis.generator.internal.util.ClassloaderUtility.getCustomClassloader;
+import static org.mybatis.generator.internal.util.messages.Messages.getString;
 
 /**
  * This class is the main interface to MyBatis generator. A typical execution of the tool involves these steps:
@@ -55,23 +51,19 @@ import org.mybatis.generator.internal.XmlFileMergerJaxp;
  */
 public class MyBatisGenerator {
 
-    /** The configuration. */
     private Configuration configuration;
 
-    /** The shell callback. */
     private ShellCallback shellCallback;
 
-    /** The generated java files. */
-    private List<GeneratedJavaFile> generatedJavaFiles;
+    private List<GeneratedJavaFile> generatedJavaFiles = new ArrayList<>();
 
-    /** The generated xml files. */
-    private List<GeneratedXmlFile> generatedXmlFiles;
+    private List<GeneratedXmlFile> generatedXmlFiles = new ArrayList<>();
 
-    /** The warnings. */
+    private List<GeneratedKotlinFile> generatedKotlinFiles = new ArrayList<>();
+    
     private List<String> warnings;
 
-    /** The projects. */
-    private Set<String> projects;
+    private Set<String> projects = new HashSet<>();
 
     /**
      * Constructs a MyBatisGenerator object.
@@ -112,9 +104,6 @@ public class MyBatisGenerator {
         } else {
             this.warnings = warnings;
         }
-        generatedJavaFiles = new ArrayList<>();
-        generatedXmlFiles = new ArrayList<>();
-        projects = new HashSet<>();
 
         this.configuration.validate();
     }
@@ -267,7 +256,7 @@ public class MyBatisGenerator {
 
         for (Context context : contextsToRun) {
             context.generateFiles(callback, generatedJavaFiles,
-                    generatedXmlFiles, warnings);
+                    generatedXmlFiles, generatedKotlinFiles, warnings);
         }
 
         // now save the files
@@ -283,6 +272,11 @@ public class MyBatisGenerator {
             for (GeneratedJavaFile gjf : generatedJavaFiles) {
                 projects.add(gjf.getTargetProject());
                 writeGeneratedJavaFile(gjf, callback);
+            }
+
+            for (GeneratedKotlinFile gkf : generatedKotlinFiles) {
+                projects.add(gkf.getTargetProject());
+                writeGeneratedKotlinFile(gkf, callback);
             }
 
             for (String project : projects) {
@@ -326,6 +320,39 @@ public class MyBatisGenerator {
             callback.startTask(getString(
                     "Progress.15", targetFile.getName())); //$NON-NLS-1$
             writeFile(targetFile, source, gjf.getFileEncoding());
+        } catch (ShellException e) {
+            warnings.add(e.getMessage());
+        }
+    }
+
+    private void writeGeneratedKotlinFile(GeneratedKotlinFile gkf, ProgressCallback callback)
+            throws InterruptedException, IOException {
+        File targetFile;
+        String source;
+        try {
+            File directory = shellCallback.getDirectory(gkf
+                    .getTargetProject(), gkf.getTargetPackage());
+            targetFile = new File(directory, gkf.getFileName());
+            if (targetFile.exists()) {
+                if (shellCallback.isOverwriteEnabled()) {
+                    source = gkf.getFormattedContent();
+                    warnings.add(getString("Warning.11", //$NON-NLS-1$
+                            targetFile.getAbsolutePath()));
+                } else {
+                    source = gkf.getFormattedContent();
+                    targetFile = getUniqueFileName(directory, gkf
+                            .getFileName());
+                    warnings.add(getString(
+                            "Warning.2", targetFile.getAbsolutePath())); //$NON-NLS-1$
+                }
+            } else {
+                source = gkf.getFormattedContent();
+            }
+
+            callback.checkCancel();
+            callback.startTask(getString(
+                    "Progress.15", targetFile.getName())); //$NON-NLS-1$
+            writeFile(targetFile, source, gkf.getFileEncoding());
         } catch (ShellException e) {
             warnings.add(e.getMessage());
         }
@@ -437,6 +464,17 @@ public class MyBatisGenerator {
      */
     public List<GeneratedJavaFile> getGeneratedJavaFiles() {
         return generatedJavaFiles;
+    }
+
+    /**
+     * Returns the list of generated Kotlin files after a call to one of the generate methods.
+     * This is useful if you prefer to process the generated files yourself and do not want
+     * the generator to write them to disk.
+     *  
+     * @return the list of generated Kotlin files
+     */
+    public List<GeneratedKotlinFile> getGeneratedKotlinFiles() {
+        return generatedKotlinFiles;
     }
 
     /**

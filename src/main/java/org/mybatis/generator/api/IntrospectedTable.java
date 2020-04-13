@@ -94,7 +94,8 @@ public abstract class IntrospectedTable {
         ATTR_BLOB_COLUMN_LIST_ID,
         ATTR_MYBATIS3_UPDATE_BY_EXAMPLE_WHERE_CLAUSE_ID,
         ATTR_MYBATIS3_SQL_PROVIDER_TYPE,
-        ATTR_MYBATIS_DYNAMIC_SQL_SUPPORT_TYPE
+        ATTR_MYBATIS_DYNAMIC_SQL_SUPPORT_TYPE,
+        ATTR_KOTLIN_RECORD_TYPE
     }
 
     protected TableConfiguration tableConfiguration;
@@ -277,6 +278,10 @@ public abstract class IntrospectedTable {
      */
     public String getBaseRecordType() {
         return internalAttributes.get(InternalAttribute.ATTR_BASE_RECORD_TYPE);
+    }
+
+    public String getKotlinRecordType() {
+        return internalAttributes.get(InternalAttribute.ATTR_KOTLIN_RECORD_TYPE);
     }
 
     /**
@@ -642,25 +647,6 @@ public abstract class IntrospectedTable {
                 .get(InternalAttribute.ATTR_COUNT_BY_EXAMPLE_STATEMENT_ID);
     }
 
-    protected String calculateJavaClientImplementationPackage() {
-        JavaClientGeneratorConfiguration config = context
-                .getJavaClientGeneratorConfiguration();
-        if (config == null) {
-            return null;
-        }
-
-        StringBuilder sb = new StringBuilder();
-        if (stringHasValue(config.getImplementationPackage())) {
-            sb.append(config.getImplementationPackage());
-        } else {
-            sb.append(config.getTargetPackage());
-        }
-
-        sb.append(fullyQualifiedTable.getSubPackageForClientOrSqlMap(isSubPackagesEnabled(config)));
-
-        return sb.toString();
-    }
-
     private boolean isSubPackagesEnabled(PropertyHolder propertyHolder) {
         return isTrue(propertyHolder.getProperty(PropertyRegistry.ANY_ENABLE_SUB_PACKAGES));
     }
@@ -749,6 +735,13 @@ public abstract class IntrospectedTable {
         sb.append('.');
         sb.append(fullyQualifiedTable.getDomainObjectName());
         setBaseRecordType(sb.toString());
+
+        sb.setLength(0);
+        sb.append(pakkage);
+        sb.append('.');
+        sb.append(fullyQualifiedTable.getDomainObjectName());
+        sb.append("Record"); //$NON-NLS-1$
+        setKotlinRecordType(sb.toString());
 
         sb.setLength(0);
         sb.append(pakkage);
@@ -888,6 +881,14 @@ public abstract class IntrospectedTable {
      * @return the list of generated XML files for this table
      */
     public abstract List<GeneratedXmlFile> getGeneratedXmlFiles();
+    
+    /**
+     * This method should return a list of generated Kotlin files related to this
+     * table. This list could include a data classes, a mapper interface, extension methods, etc.
+     * 
+     * @return the list of generated Kotlin files for this table
+     */
+    public abstract List<GeneratedKotlinFile> getGeneratedKotlinFiles();
 
     /**
      * This method should return the number of progress messages that will be
@@ -919,6 +920,11 @@ public abstract class IntrospectedTable {
     public void setBaseRecordType(String baseRecordType) {
         internalAttributes.put(InternalAttribute.ATTR_BASE_RECORD_TYPE,
                 baseRecordType);
+    }
+
+    public void setKotlinRecordType(String kotlinRecordType) {
+        internalAttributes.put(InternalAttribute.ATTR_KOTLIN_RECORD_TYPE,
+                kotlinRecordType);
     }
 
     public void setRecordWithBLOBsType(String recordWithBLOBsType) {
