@@ -6,7 +6,6 @@ import com.intellij.ide.passwordSafe.PasswordSafe;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.VerticalFlowLayout;
-import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.components.JBPasswordField;
@@ -109,8 +108,7 @@ public class DatabaseCredentialUI extends DialogWrapper {
         PasswordSafe.getInstance().set(attributes, saveCredentials);
         projectPersistentConfiguration.setCredentials(credentials);
         projectPersistentConfiguration.setDatabaseUrl(dbUrl);
-        VirtualFile baseDir = project.getBaseDir();
-        baseDir.refresh(false, true);
+        project.getProjectFile().refresh(false, true);
 
         super.doOKAction();
     }

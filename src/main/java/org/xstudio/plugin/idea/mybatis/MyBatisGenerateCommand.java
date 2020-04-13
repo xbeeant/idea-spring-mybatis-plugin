@@ -158,8 +158,7 @@ public class MyBatisGenerateCommand {
                         myBatisGenerator.generate(null);
                         VirtualFile moduleFile = ModuleRootManager.getInstance(module).getContentRoots()[0];
                         // 刷新工程
-                        project.getBaseDir().refresh(false, true);
-
+                        project.getProjectFile().refresh(false, true);
                         NotificationGroup balloonNotifications = new NotificationGroup(Constant.TITLE, NotificationDisplayType.STICKY_BALLOON, true);
 
                         List<String> result = myBatisGenerator.getGeneratedJavaFiles().stream()
