@@ -379,7 +379,7 @@ public class MyBatisGenerateCommand {
             driverClass = DbType.MySQL_8.getDriverClass();
             databaseUrl += "?serverTimezone=UTC&useSSL=false";
         } else {
-            databaseUrl += "?useSSL=false";
+            databaseUrl += "";
         }
 
         jdbcConfig.setDriverClass(driverClass);
