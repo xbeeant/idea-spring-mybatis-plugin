@@ -317,12 +317,12 @@ public class ProjectCodeGeneratorUi extends DialogWrapper {
         }
 
         if (overrideBox.getSelectedObjects() != null) {
-            int confirm = Messages.showOkCancelDialog(project, "The exists file will be overwrite ,Confirm generate?", Constant.TITLE, Messages.getQuestionIcon());
+            int confirm = Messages.showOkCancelDialog("The exists file will be overwrite ,Confirm generate?", Constant.TITLE, "Ok", "Cancel", Messages.getQuestionIcon());
             if (confirm == 2) {
                 return;
             }
         } else {
-            int confirm = Messages.showOkCancelDialog(project, "Confirm generate mybatis spring code?", Constant.TITLE, Messages.getQuestionIcon());
+            int confirm = Messages.showOkCancelDialog("Confirm generate mybatis spring code?", Constant.TITLE, "Ok", "Cancel", Messages.getQuestionIcon());
             if (confirm == 2) {
                 return;
             }
