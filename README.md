@@ -3,9 +3,13 @@
 ### 简介
 spring + mybatis的基础代码生成器，生成`service`和`dao`层  
 
-该生成器结合[https://github.com/beeant0512/xstudio](https://github.com/beeant0512/xstudio)的[mybatis-pagehelper](https://github.com/beeant0512/xstudio/blob/master/mybatis-pagehelper/src/main/java/com/xstudio/spring/mybatis/pagehelper/)下的`IMybatisPageHelperService` ,`IMybatisPageHelperDao` ,`AbstractMybatisPageHelperServiceImpl`使用，也可自行继承实现[core](https://github.com/beeant0512/xstudio/tree/master/core/src/main/java/com/xstudio/core/service)下的`IAbstractDao`,`AbstractServiceImpl`,`IAbstractService`使用或结合
+该生成器结合[xstudio项目](https://github.com/xbeeant/xstudio)的[mybatis-pagehelper](https://github.com/xbeeant/xstudio/tree/master/mybatis-pagehelper/src/main/java/com/xstudio/spring/mybatis/pagehelper)下的`IMybatisPageHelperService` ,`IMybatisPageHelperDao` ,`AbstractMybatisPageHelperServiceImpl`使用，也可自行继承实现[core](https://github.com/xbeeant/xstudio/blob/master/core/src/main/java/com/xstudio/core/)下的`IAbstractDao`,`AbstractServiceImpl`,`IAbstractService`使用或结合
 
-要求数据库各表都需要有 `create_at`字段，默认使用此字段进行排序, 如果没有，请自行实现修改源码[https://github.com/beeant0512/xstudio](https://github.com/beeant0512/xstudio)，建议提供：`update_at`,`create_by`,`update_by` 
+要求数据库各表都需要有 `create_at`字段，默认使用此字段进行排序, 如果没有，请自行实现修改源码[xstudio项目](https://github.com/xbeeant/xstudio)，建议提供：`update_at`,`create_by`,`update_by` 
+
+交流群：
+QQ:977611117  
+![](./doc/群二维码.png)
 
 #### IAbstractDao 支持方法
 
