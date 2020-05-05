@@ -1,12 +1,9 @@
 package org.xstudio.plugin.idea.model;
 
-import lombok.Data;
-
 /**
  * @author xiaobiao
  * @version 2019/9/23
  */
-@Data
 public class MybatisPluginConfig {
     private boolean lombokPlugin = true;
 
@@ -25,4 +22,76 @@ public class MybatisPluginConfig {
     private boolean fastjsonPlugin = true;
 
     private boolean toStringHashcodeEquals = false;
+
+    public boolean isLombokPlugin() {
+        return lombokPlugin;
+    }
+
+    public void setLombokPlugin(boolean lombokPlugin) {
+        this.lombokPlugin = lombokPlugin;
+    }
+
+    public boolean isFacadePlugin() {
+        return facadePlugin;
+    }
+
+    public void setFacadePlugin(boolean facadePlugin) {
+        this.facadePlugin = facadePlugin;
+    }
+
+    public boolean isPrefixPlugin() {
+        return prefixPlugin;
+    }
+
+    public void setPrefixPlugin(boolean prefixPlugin) {
+        this.prefixPlugin = prefixPlugin;
+    }
+
+    public boolean isSwagger2Plugin() {
+        return swagger2Plugin;
+    }
+
+    public void setSwagger2Plugin(boolean swagger2Plugin) {
+        this.swagger2Plugin = swagger2Plugin;
+    }
+
+    public boolean isMarkDeletePlugin() {
+        return markDeletePlugin;
+    }
+
+    public void setMarkDeletePlugin(boolean markDeletePlugin) {
+        this.markDeletePlugin = markDeletePlugin;
+    }
+
+    public boolean isBaseServicePlugin() {
+        return baseServicePlugin;
+    }
+
+    public void setBaseServicePlugin(boolean baseServicePlugin) {
+        this.baseServicePlugin = baseServicePlugin;
+    }
+
+    public boolean isRootObjectPlugin() {
+        return rootObjectPlugin;
+    }
+
+    public void setRootObjectPlugin(boolean rootObjectPlugin) {
+        this.rootObjectPlugin = rootObjectPlugin;
+    }
+
+    public boolean isFastjsonPlugin() {
+        return fastjsonPlugin;
+    }
+
+    public void setFastjsonPlugin(boolean fastjsonPlugin) {
+        this.fastjsonPlugin = fastjsonPlugin;
+    }
+
+    public boolean isToStringHashcodeEquals() {
+        return toStringHashcodeEquals;
+    }
+
+    public void setToStringHashcodeEquals(boolean toStringHashcodeEquals) {
+        this.toStringHashcodeEquals = toStringHashcodeEquals;
+    }
 }

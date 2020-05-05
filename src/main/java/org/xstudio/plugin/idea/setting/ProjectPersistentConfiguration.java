@@ -7,9 +7,6 @@ import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.intellij.openapi.project.Project;
 import com.intellij.util.xmlb.XmlSerializerUtil;
-import kotlin.reflect.jvm.internal.impl.descriptors.ModuleDescriptor;
-import lombok.Getter;
-import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.xstudio.plugin.idea.model.Credential;
@@ -28,21 +25,49 @@ public class ProjectPersistentConfiguration implements PersistentStateComponent<
     /**
      * 账号密码信息
      */
-    @Getter
-    @Setter
+
     private Map<String, Credential> credentials;
 
-    @Getter
-    @Setter
+
     private String databaseUrl;
 
-    @Getter
-    @Setter
+
     private Map<String, TableConfig> tableConfigs = new HashMap<>(1);
 
-    @Getter
-    @Setter
+
     private PersistentConfig persistentConfig = new PersistentConfig();
+
+    public Map<String, Credential> getCredentials() {
+        return credentials;
+    }
+
+    public void setCredentials(Map<String, Credential> credentials) {
+        this.credentials = credentials;
+    }
+
+    public String getDatabaseUrl() {
+        return databaseUrl;
+    }
+
+    public void setDatabaseUrl(String databaseUrl) {
+        this.databaseUrl = databaseUrl;
+    }
+
+    public Map<String, TableConfig> getTableConfigs() {
+        return tableConfigs;
+    }
+
+    public void setTableConfigs(Map<String, TableConfig> tableConfigs) {
+        this.tableConfigs = tableConfigs;
+    }
+
+    public PersistentConfig getPersistentConfig() {
+        return persistentConfig;
+    }
+
+    public void setPersistentConfig(PersistentConfig persistentConfig) {
+        this.persistentConfig = persistentConfig;
+    }
 
     @Nullable
     public static ProjectPersistentConfiguration getInstance(Project project) {

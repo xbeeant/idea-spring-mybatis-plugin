@@ -3,8 +3,6 @@ package org.xstudio.plugin.idea.ui;
 import com.intellij.openapi.ui.VerticalFlowLayout;
 import com.intellij.ui.TitledSeparator;
 import com.intellij.ui.components.JBPanel;
-import lombok.Getter;
-import lombok.Setter;
 import org.apache.commons.lang.StringUtils;
 import org.xstudio.plugin.idea.Constant;
 import org.xstudio.plugin.idea.model.PanelLabel;
@@ -27,14 +25,24 @@ public class DefaultSettingUi extends JDialog {
     // path
     // =================
 
-    @Getter
     JPanel projectRootPanel = new JPanel();
+
+    public JPanel getProjectRootPanel() {
+        return projectRootPanel;
+    }
 
     private DefaultPersistentConfiguration persistentConfiguration;
 
-    @Setter
-    @Getter
+
     private PersistentConfig persistentConfig;
+
+    public PersistentConfig getPersistentConfig() {
+        return persistentConfig;
+    }
+
+    public void setPersistentConfig(PersistentConfig persistentConfig) {
+        this.persistentConfig = persistentConfig;
+    }
 
     /**
      * name

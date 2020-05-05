@@ -1,7 +1,5 @@
 package org.xstudio.plugin.idea.model;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
 import org.mybatis.generator.internal.util.JavaBeansUtil;
 
 import java.util.HashMap;
@@ -12,8 +10,6 @@ import java.util.Map;
  *
  * @author xiaobiao
  */
-@Data
-@EqualsAndHashCode(callSuper = false)
 public class TableConfig extends PersistentConfig {
     /**
      * 配置名称
@@ -65,5 +61,105 @@ public class TableConfig extends PersistentConfig {
 
     public String getMapperTargetPackage() {
         return getResourcePath() + "/mybatis/" + databaseType + "/";
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getDatabaseType() {
+        return databaseType;
+    }
+
+    public void setDatabaseType(String databaseType) {
+        this.databaseType = databaseType;
+    }
+
+    public String getDatabaseName() {
+        return databaseName;
+    }
+
+    public void setDatabaseName(String databaseName) {
+        this.databaseName = databaseName;
+    }
+
+    public String getTableName() {
+        return tableName;
+    }
+
+    public void setTableName(String tableName) {
+        this.tableName = tableName;
+    }
+
+    public void setEntityName(String entityName) {
+        this.entityName = entityName;
+    }
+
+    public Map<String, ColumnSetting> getColumnSettings() {
+        return columnSettings;
+    }
+
+    public void setColumnSettings(Map<String, ColumnSetting> columnSettings) {
+        this.columnSettings = columnSettings;
+    }
+
+    public String getModelClass() {
+        return modelClass;
+    }
+
+    public void setModelClass(String modelClass) {
+        this.modelClass = modelClass;
+    }
+
+    public String getServiceInterfaceClass() {
+        return serviceInterfaceClass;
+    }
+
+    public void setServiceInterfaceClass(String serviceInterfaceClass) {
+        this.serviceInterfaceClass = serviceInterfaceClass;
+    }
+
+    public String getServiceImplClass() {
+        return serviceImplClass;
+    }
+
+    public void setServiceImplClass(String serviceImplClass) {
+        this.serviceImplClass = serviceImplClass;
+    }
+
+    public String getFacadeInterfaceClass() {
+        return facadeInterfaceClass;
+    }
+
+    public void setFacadeInterfaceClass(String facadeInterfaceClass) {
+        this.facadeInterfaceClass = facadeInterfaceClass;
+    }
+
+    public String getFacadeImplClass() {
+        return facadeImplClass;
+    }
+
+    public void setFacadeImplClass(String facadeImplClass) {
+        this.facadeImplClass = facadeImplClass;
+    }
+
+    public String getMapperClass() {
+        return mapperClass;
+    }
+
+    public void setMapperClass(String mapperClass) {
+        this.mapperClass = mapperClass;
+    }
+
+    public String getMapperImplClass() {
+        return mapperImplClass;
+    }
+
+    public void setMapperImplClass(String mapperImplClass) {
+        this.mapperImplClass = mapperImplClass;
     }
 }

@@ -21,6 +21,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * 账号密码输入界面
@@ -108,7 +109,7 @@ public class DatabaseCredentialUI extends DialogWrapper {
         PasswordSafe.getInstance().set(attributes, saveCredentials);
         projectPersistentConfiguration.setCredentials(credentials);
         projectPersistentConfiguration.setDatabaseUrl(dbUrl);
-        project.getProjectFile().refresh(false, true);
+        Objects.requireNonNull(project.getProjectFile()).refresh(true, true);
 
         super.doOKAction();
     }

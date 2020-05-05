@@ -4,13 +4,24 @@
     <vendor email="huangxb0512@gmail.com" url="https://beeant0512.github.io">Beeant</vendor>
 
     <description><![CDATA[
-    <p>a idea plugin for generate mybatis mapper(interface and mapper.xml files) and spring service, facade</p>
+    <p>a idea plugin for generate mybatis mapper(model, interface and mapper.xml files) and spring service, facade files</p>
     <p>modified from <a href="https://github.com/leecho/mybatis-generator-plus">https://github.com/leecho/mybatis-generator-plus</a></p>
-    <p>spring + mybatis 基础代码[增删改查，批量增删改，模糊查询，字段唯一性校验]生成器，结合 https://github.com/beeant0512/xstudio 使用</p>
+    <p>using with <a href="https://github.com/xbeeant/xstudio">xstudio</a></p>
+
+    <p>spring + mybatis 基础代码[增删改查，批量增删改，模糊查询，字段唯一性校验]生成器，结合 <a href="https://github.com/xbeeant/xstudio">xstudio</a> 使用</p>
+
+    <p>WELCOME TO JOIN QQ Group: 977611117 </p>
     ]]></description>
 
     <change-notes>
         <![CDATA[
+        1.0.0.1:
+        <ul>
+          <li>fix bugs</li>
+          <li>initial default config</li>
+        </ul>
+
+        1.0.0.0:
         Initial release of the plugin. <br />
         generate:
         <ul>

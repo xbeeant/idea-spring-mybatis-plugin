@@ -438,59 +438,64 @@ public class ClientRootPlugin extends PluginAdapter {
     }
 
     private void batchUpdateByPrimaryKeySelective(Document document, IntrospectedTable introspectedTable) {
+        if (introspectedTable.getPrimaryKeyColumns() == null) {
+            return;
+        }
         XmlElement element = new XmlElement("update");
         element.addAttribute(new Attribute("id", "batchUpdateByPrimaryKeySelective"));
         element.addAttribute(new Attribute("parameterType", "java.util.List"));
-        if (introspectedTable.getPrimaryKeyColumns() != null && !introspectedTable.getPrimaryKeyColumns().isEmpty()) {
+        if (introspectedTable.getPrimaryKeyColumns().size() == 1) {
+            if (introspectedTable.getPrimaryKeyColumns() != null && !introspectedTable.getPrimaryKeyColumns().isEmpty()) {
 
-            XmlElement foreachElement = new XmlElement("foreach");
-            foreachElement.addAttribute(new Attribute("collection", "list"));
-            foreachElement.addAttribute(new Attribute("index", "index"));
-            foreachElement.addAttribute(new Attribute("item", "item"));
-            foreachElement.addAttribute(new Attribute("separator", ";"));
-            context.getCommentGenerator().addComment(element);
-            TextElement whereEl = new TextElement("");
-            foreachElement.addElement(new TextElement("update " + introspectedTable.getFullyQualifiedTableNameAtRuntime()));
-            XmlElement set = new XmlElement("set");
-            for (VisitableElement el : updateByPrimaryKeySelectiveElement.getElements()) {
-                if (el instanceof XmlElement) {
-                    boolean isSetEl = ((XmlElement) el).getName().equalsIgnoreCase("set");
-                    if (isSetEl) {
-                        set = (XmlElement) el;
-                    }
-                } else {
-                    if (((TextElement) el).getContent().contains("where")) {
-                        whereEl = (TextElement) el;
+                XmlElement foreachElement = new XmlElement("foreach");
+                foreachElement.addAttribute(new Attribute("collection", "list"));
+                foreachElement.addAttribute(new Attribute("index", "index"));
+                foreachElement.addAttribute(new Attribute("item", "item"));
+                foreachElement.addAttribute(new Attribute("separator", ";"));
+                context.getCommentGenerator().addComment(element);
+                TextElement whereEl = new TextElement("");
+                foreachElement.addElement(new TextElement("update " + introspectedTable.getFullyQualifiedTableNameAtRuntime()));
+                XmlElement set = new XmlElement("set");
+                for (VisitableElement el : updateByPrimaryKeySelectiveElement.getElements()) {
+                    if (el instanceof XmlElement) {
+                        boolean isSetEl = ((XmlElement) el).getName().equalsIgnoreCase("set");
+                        if (isSetEl) {
+                            set = (XmlElement) el;
+                        }
+                    } else {
+                        if (((TextElement) el).getContent().contains("where")) {
+                            whereEl = (TextElement) el;
+                        }
                     }
                 }
+
+                XmlElement setEl = new XmlElement("set");
+
+                List<VisitableElement> ifEls = set.getElements();
+                for (VisitableElement ifEl : ifEls) {
+                    XmlElement ifxEl = (XmlElement) ifEl;
+                    String value = ifxEl.getAttributes().get(0).getValue();
+                    String[] split = value.split(" ");
+                    XmlElement ifel0 = new XmlElement("if");
+                    String s = value.replaceAll(split[0], "item." + split[0]);
+                    ifel0.addAttribute(new Attribute("test", s));
+                    TextElement tx = (TextElement) ((XmlElement) ifEl).getElements().get(0);
+                    String s1 = tx.getContent().replaceAll("#\\{" + split[0], "#{item." + split[0]);
+                    ifel0.addElement(new TextElement(s1));
+                    setEl.addElement(ifel0);
+                }
+
+                foreachElement.addElement(setEl);
+
+                String s = whereEl.getContent().replaceAll("#\\{", "#\\{item.");
+                if (introspectedTable.getPrimaryKeyColumns().size() > 1) {
+                    s = s.replaceAll("item." + introspectedTable.getPrimaryKeyColumns().get(0).getJavaProperty() + ".", "item.");
+                }
+                whereEl = new TextElement(s);
+                foreachElement.addElement(whereEl);
+
+                element.addElement(foreachElement);
             }
-
-            XmlElement setEl = new XmlElement("set");
-
-            List<VisitableElement> ifEls = set.getElements();
-            for (VisitableElement ifEl : ifEls) {
-                XmlElement ifxEl = (XmlElement) ifEl;
-                String value = ifxEl.getAttributes().get(0).getValue();
-                String[] split = value.split(" ");
-                XmlElement ifel0 = new XmlElement("if");
-                String s = value.replaceAll(split[0], "item." + split[0]);
-                ifel0.addAttribute(new Attribute("test", s));
-                TextElement tx = (TextElement) ((XmlElement) ifEl).getElements().get(0);
-                String s1 = tx.getContent().replaceAll("#\\{" + split[0], "#{item." + split[0]);
-                ifel0.addElement(new TextElement(s1));
-                setEl.addElement(ifel0);
-            }
-
-            foreachElement.addElement(setEl);
-
-            String s = whereEl.getContent().replaceAll("#\\{", "#\\{item.");
-            if (introspectedTable.getPrimaryKeyColumns().size() > 1) {
-                s = s.replaceAll("item." + introspectedTable.getPrimaryKeyColumns().get(0).getJavaProperty() + ".", "item.");
-            }
-            whereEl = new TextElement(s);
-            foreachElement.addElement(whereEl);
-
-            element.addElement(foreachElement);
         }
         // todo 多主键的更新语句
         document.getRootElement().addElement(element);

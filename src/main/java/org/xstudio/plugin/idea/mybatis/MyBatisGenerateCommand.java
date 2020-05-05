@@ -158,7 +158,8 @@ public class MyBatisGenerateCommand {
                         myBatisGenerator.generate(null);
                         VirtualFile moduleFile = ModuleRootManager.getInstance(module).getContentRoots()[0];
                         // 刷新工程
-                        project.getProjectFile().refresh(false, true);
+
+                        Objects.requireNonNull(project.getProjectFile()).refresh(true, true);
                         NotificationGroup balloonNotifications = new NotificationGroup(Constant.TITLE, NotificationDisplayType.STICKY_BALLOON, true);
 
                         List<String> result = myBatisGenerator.getGeneratedJavaFiles().stream()
@@ -392,13 +393,14 @@ public class MyBatisGenerateCommand {
      * @return {@link JavaModelGeneratorConfiguration}
      */
     private JavaModelGeneratorConfiguration buildModelConfig() {
-        String projectFolder = generatorConfig.getModuleRootPath();
+        String projectFolder = handleProjectFolder(generatorConfig.getModuleRootPath());
+
         String sourcePath = generatorConfig.getSourcePath();
 
         JavaModelGeneratorConfiguration modelConfig = new JavaModelGeneratorConfiguration();
 
         modelConfig.setTargetPackage(generatorConfig.getTargetPackage() + ".model");
-        modelConfig.setTargetProject(projectFolder + "/" + sourcePath);
+        modelConfig.setTargetProject(targetPath(projectFolder, sourcePath));
         return modelConfig;
     }
 
@@ -409,13 +411,13 @@ public class MyBatisGenerateCommand {
      */
     private SqlMapGeneratorConfiguration buildMapperXmlConfig() {
 
-        String projectFolder = generatorConfig.getModuleRootPath();
+        String projectFolder = handleProjectFolder(generatorConfig.getModuleRootPath());
 
         SqlMapGeneratorConfiguration mapperConfig = new SqlMapGeneratorConfiguration();
 
         mapperConfig.setTargetPackage(generatorConfig.getDatabaseNamePackage());
 
-        String mapperPath = projectFolder + "/" + generatorConfig.getMapperTargetPackage();
+        String mapperPath = targetPath(projectFolder, generatorConfig.getMapperTargetPackage());
         mapperConfig.setTargetProject(mapperPath);
 
         File file = new File(mapperPath);
@@ -532,15 +534,14 @@ public class MyBatisGenerateCommand {
      */
     private JavaClientGeneratorConfiguration buildMapperConfig() {
 
-        String projectFolder = generatorConfig.getModuleRootPath();
-
+        String projectFolder = handleProjectFolder(generatorConfig.getModuleRootPath());
         JavaClientGeneratorConfiguration mapperConfig = new JavaClientGeneratorConfiguration();
         mapperConfig.setConfigurationType("XMLMAPPER");
 
         mapperConfig.addProperty("enableSubPackages", "false");
         mapperConfig.setTargetPackage(generatorConfig.getTargetPackage() + ".mapper");
 
-        mapperConfig.setTargetProject(projectFolder + "/" + generatorConfig.getSourcePath());
+        mapperConfig.setTargetProject(targetPath(projectFolder, generatorConfig.getSourcePath()));
         return mapperConfig;
     }
 
@@ -563,5 +564,20 @@ public class MyBatisGenerateCommand {
         }
 
         return commentConfig;
+    }
+
+    private String handleProjectFolder(String projectFolder) {
+        if (projectFolder.endsWith("/src/main")) {
+            projectFolder = projectFolder.substring(0, projectFolder.length() - 9);
+        }
+        return projectFolder;
+    }
+
+    private String targetPath(String projectFolder, String path) {
+        if (path.startsWith("/")) {
+            return projectFolder + path;
+        }
+
+        return projectFolder + "/" + generatorConfig.getSourcePath();
     }
 }

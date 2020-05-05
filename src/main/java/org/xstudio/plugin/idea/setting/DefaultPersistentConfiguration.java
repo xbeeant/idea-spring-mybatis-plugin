@@ -6,9 +6,6 @@ import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.intellij.util.xmlb.XmlSerializerUtil;
-import lombok.Getter;
-import lombok.Setter;
-import org.apache.commons.collections.BeanMap;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.xstudio.plugin.idea.model.PersistentConfig;
@@ -23,13 +20,22 @@ import java.util.Map;
 @State(name = "MybatisSpringGeneratorPersistentConfiguration", storages = {@Storage("mybatis-spring-generator-config.xml")})
 public class DefaultPersistentConfiguration implements PersistentStateComponent<DefaultPersistentConfiguration> {
 
-    @Getter
     private PersistentConfig persistentConfig = new PersistentConfig();
 
-    @Getter
-    @Setter
+    public PersistentConfig getPersistentConfig() {
+        return persistentConfig;
+    }
+
+
     private Map<String, PersistentConfig> configs = new HashMap<>();
 
+    public Map<String, PersistentConfig> getConfigs() {
+        return configs;
+    }
+
+    public void setConfigs(Map<String, PersistentConfig> configs) {
+        this.configs = configs;
+    }
 
     @Nullable
     public static DefaultPersistentConfiguration getInstance() {
