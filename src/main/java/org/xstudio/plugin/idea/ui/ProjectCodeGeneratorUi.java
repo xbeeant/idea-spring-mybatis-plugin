@@ -492,10 +492,10 @@ public class ProjectCodeGeneratorUi extends DialogWrapper {
 
                 projectPersistentConfiguration.setTableGenerateTarget(tableConfig, entityName);
 
-                serviceInterfaceField.setText(tableConfig.getServiceInterfaceClass());
-                serviceImplField.setText(tableConfig.getServiceImplClass());
-                facadeInterfaceField.setText(tableConfig.getFacadeInterfaceClass());
-                facadeImplField.setText(tableConfig.getFacadeImplClass());
+                tableServiceInterfaceField.setText(tableConfig.getServiceInterfaceClass());
+                tableServiceImplField.setText(tableConfig.getServiceImplClass());
+                tableFacadeInterfaceField.setText(tableConfig.getFacadeInterfaceClass());
+                tableFacadeImplField.setText(tableConfig.getFacadeImplClass());
                 tableEntityField.setText(tableConfig.getModelClass());
                 tableMapperField.setText(tableConfig.getMapperClass());
                 tableMapperFileField.setText(tableConfig.getMapperImplClass());
