@@ -9,7 +9,7 @@ import com.github.javaparser.ast.ImportDeclaration;
 public class ImportDeclarationMerger extends AbstractMerger<ImportDeclaration> {
 
   @Override public ImportDeclaration doMerge(ImportDeclaration first, ImportDeclaration second) {
-    ImportDeclaration id = ImportDeclaration.createEmptyDeclaration();
+    ImportDeclaration id = new ImportDeclaration();
     id.setName(mergeSingle(first.getName(),second.getName()));
     id.setAsterisk(first.isAsterisk());
     id.setStatic(first.isStatic());
@@ -17,12 +17,9 @@ public class ImportDeclarationMerger extends AbstractMerger<ImportDeclaration> {
   }
 
   @Override public boolean doIsEquals(ImportDeclaration first, ImportDeclaration second) {
-    if(!isEqualsUseMerger(first.getName(),second.getName())) {
-      return false;
-    }
-    if(first.isStatic() != second.isStatic()) {
-      return false;
-    }
-    return first.isAsterisk() == second.isAsterisk();
+    if(!isEqualsUseMerger(first.getName(),second.getName())) return false;
+    if(first.isStatic() != second.isStatic()) return false;
+    if(first.isAsterisk() != second.isAsterisk()) return false;
+    return true;
   }
 }

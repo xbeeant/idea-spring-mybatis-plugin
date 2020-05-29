@@ -1,7 +1,6 @@
 package com.freetmp.mbg.merge.type;
 
 import com.freetmp.mbg.merge.AbstractMerger;
-import com.github.javaparser.ast.type.ReferenceType;
 import com.github.javaparser.ast.type.WildcardType;
 
 /**

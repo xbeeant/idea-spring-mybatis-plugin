@@ -1,10 +1,7 @@
 package com.freetmp.mbg.merge.expression;
 
 import com.freetmp.mbg.merge.AbstractMerger;
-import com.github.javaparser.ast.expr.MemberValuePair;
 import com.github.javaparser.ast.expr.NormalAnnotationExpr;
-
-import java.util.List;
 
 /**
  * Created by pin on 2015/4/19.

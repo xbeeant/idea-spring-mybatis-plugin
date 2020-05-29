@@ -15,7 +15,11 @@
 
     <change-notes>
         <![CDATA[
-        1.0.0.1:
+        1.0.0.3:
+        <ul>
+          <li>fix bugs</li>
+        </ul>
+        1.0.0.2:
         <ul>
           <li>fix bugs</li>
           <li>initial default config</li>

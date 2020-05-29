@@ -12,7 +12,7 @@ public class InitializerDeclarationMerger extends AbstractMerger<InitializerDecl
 
         InitializerDeclaration id = new InitializerDeclaration();
 
-        id.setComment(mergeSingle(first.getJavaDoc(),second.getJavaDoc()));
+        id.setJavaDoc(mergeSingle(first.getJavaDoc(),second.getJavaDoc()));
         id.setStatic(first.isStatic());
         id.setAnnotations(mergeCollections(first.getAnnotations(),second.getAnnotations()));
         id.setBlock(mergeSingle(first.getBlock(),second.getBlock()));

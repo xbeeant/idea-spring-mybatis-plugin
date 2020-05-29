@@ -32,18 +32,29 @@ public class MapperFuzzySearchPlugin extends PluginAdapter {
 
     @Override
     public void initialized(IntrospectedTable introspectedTable) {
-        digit.add("INTEGER");
-        digit.add("FLOAT");
-        digit.add("BIGINT");
-        digit.add("TINYINT");
         digit.add("BYTE");
+        // float
+        digit.add("FLOAT");
+        digit.add("DOUBLE");
+        // long
+        digit.add("BIGINT");
+        // float
+        digit.add("REAL");
+        // int
+        digit.add("INTEGER");
+        // byte
+        digit.add("TINYINT");
+        // short
+        digit.add("SMALLINT");
+        // boolean
         digit.add("BIT");
         digit.add("BOOLEAN");
-        digit.add("DOUBLE");
+        // BigDecimal
+        digit.add("NUMERIC");
+        digit.add("DECIMAL");
 
-
-        time.add("DATE");
         time.add("TIMESTAMP");
+        time.add("DATE");
         time.add("TIME");
 
         if (null != properties.getProperty("nonFuzzyColumn")) {

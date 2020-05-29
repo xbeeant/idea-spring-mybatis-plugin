@@ -11,15 +11,15 @@ public class CatchClauseMerger extends AbstractMerger<CatchClause> {
   @Override public CatchClause doMerge(CatchClause first, CatchClause second) {
     CatchClause cc = new CatchClause();
     cc.setCatchBlock(mergeSingle(first.getCatchBlock(),second.getCatchBlock()));
-    cc.setParam(mergeSingle(first.getParam(),second.getParam()));
+    cc.setExcept(mergeSingle(first.getExcept(),second.getExcept()));
     return cc;
   }
 
   @Override public boolean doIsEquals(CatchClause first, CatchClause second) {
 
-    if(!isEqualsUseMerger(first.getParam(),second.getParam())) {
-      return false;
-    }
-    return isEqualsUseMerger(first.getCatchBlock(), second.getCatchBlock());
+    if(!isEqualsUseMerger(first.getExcept(),second.getExcept())) return false;
+    if(!isEqualsUseMerger(first.getCatchBlock(),second.getCatchBlock())) return false;
+
+    return true;
   }
 }

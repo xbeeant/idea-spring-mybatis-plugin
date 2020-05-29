@@ -2,10 +2,7 @@ package com.freetmp.mbg.merge.declaration;
 
 import com.freetmp.mbg.merge.AbstractMerger;
 import com.github.javaparser.ast.body.MethodDeclaration;
-import com.github.javaparser.ast.comments.Comment;
 import org.apache.commons.lang3.StringUtils;
-
-import java.util.List;
 
 /**
  * Created by LiuPin on 2015/4/20.
@@ -17,7 +14,7 @@ public class MethodDeclarationMerger extends AbstractMerger<MethodDeclaration> {
     MethodDeclaration md = new MethodDeclaration();
     md.setName(first.getName());
     md.setType(mergeSingle(first.getType(), second.getType()));
-    md.setComment(mergeSingle(first.getJavaDoc(), second.getJavaDoc()));
+    md.setJavaDoc(mergeSingle(first.getJavaDoc(), second.getJavaDoc()));
     md.setModifiers(mergeModifiers(first.getModifiers(), second.getModifiers()));
 
     md.setDefault(first.isDefault() || second.isDefault());

@@ -17,7 +17,7 @@ public class ClassOrInterfaceDeclarationMerger extends AbstractMerger<ClassOrInt
     declaration.setName(first.getName());
 
     declaration.setModifiers(mergeModifiers(first.getModifiers(), second.getModifiers()));
-    declaration.setComment(mergeSingle(first.getJavaDoc(), second.getJavaDoc()));
+    declaration.setJavaDoc(mergeSingle(first.getJavaDoc(), second.getJavaDoc()));
     declaration.setTypeParameters(mergeCollections(first.getTypeParameters(), second.getTypeParameters()));
 
     declaration.setImplements(mergeCollections(first.getImplements(), second.getImplements()));

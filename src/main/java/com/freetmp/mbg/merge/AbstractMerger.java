@@ -3,9 +3,13 @@ package com.freetmp.mbg.merge;
 import com.freetmp.mbg.merge.comment.BlockCommentMerger;
 import com.freetmp.mbg.merge.comment.JavadocCommentMerger;
 import com.freetmp.mbg.merge.comment.LineCommentMerger;
+import com.freetmp.mbg.merge.declaration.*;
+import com.freetmp.mbg.merge.expression.*;
 import com.freetmp.mbg.merge.parameter.MultiTypeParameterMerger;
 import com.freetmp.mbg.merge.parameter.ParameterMerger;
 import com.freetmp.mbg.merge.parameter.TypeParameterMerger;
+import com.freetmp.mbg.merge.statement.*;
+import com.freetmp.mbg.merge.type.*;
 import com.freetmp.mbg.merge.variable.VariableDeclaratorIdMerger;
 import com.freetmp.mbg.merge.variable.VariableDeclaratorMerger;
 import com.github.javaparser.ast.*;
@@ -38,58 +42,58 @@ public abstract class AbstractMerger<M extends Node> {
         map.put(LineComment.class, new LineCommentMerger());
 
         // declaration
-        map.put(AnnotationDeclaration.class, new com.freetmp.mbg.merge.declaration.AnnotationDeclarationMerger());
-        map.put(AnnotationMemberDeclaration.class, new com.freetmp.mbg.merge.declaration.AnnotationDeclarationMerger());
-        map.put(BodyDeclaration.class, new com.freetmp.mbg.merge.declaration.BodyDeclarationMerger());
-        map.put(ClassOrInterfaceDeclaration.class, new com.freetmp.mbg.merge.declaration.ClassOrInterfaceDeclarationMerger());
-        map.put(ConstructorDeclaration.class, new com.freetmp.mbg.merge.declaration.ConstructorDeclarationMerger());
-        map.put(EmptyMemberDeclaration.class, new com.freetmp.mbg.merge.declaration.EmptyMemberDeclarationMerger());
-        map.put(EmptyTypeDeclaration.class, new com.freetmp.mbg.merge.declaration.EmptyTypeDeclarationMerger());
-        map.put(EnumConstantDeclaration.class, new com.freetmp.mbg.merge.declaration.EnumConstantDeclarationMerger());
-        map.put(EnumDeclaration.class, new com.freetmp.mbg.merge.declaration.EnumDeclarationMerger());
-        map.put(FieldDeclaration.class, new com.freetmp.mbg.merge.declaration.FieldDeclarationMerger());
-        map.put(InitializerDeclaration.class, new com.freetmp.mbg.merge.declaration.InitializerDeclarationMerger());
-        map.put(MethodDeclaration.class, new com.freetmp.mbg.merge.declaration.MethodDeclarationMerger());
-        map.put(PackageDeclaration.class, new com.freetmp.mbg.merge.declaration.PackageDeclarationMerger());
-        map.put(ImportDeclaration.class, new com.freetmp.mbg.merge.declaration.ImportDeclarationMerger());
+        map.put(AnnotationDeclaration.class, new AnnotationDeclarationMerger());
+        map.put(AnnotationMemberDeclaration.class, new AnnotationDeclarationMerger());
+        map.put(BodyDeclaration.class, new BodyDeclarationMerger());
+        map.put(ClassOrInterfaceDeclaration.class, new ClassOrInterfaceDeclarationMerger());
+        map.put(ConstructorDeclaration.class, new ConstructorDeclarationMerger());
+        map.put(EmptyMemberDeclaration.class, new EmptyMemberDeclarationMerger());
+        map.put(EmptyTypeDeclaration.class, new EmptyTypeDeclarationMerger());
+        map.put(EnumConstantDeclaration.class, new EnumConstantDeclarationMerger());
+        map.put(EnumDeclaration.class, new EnumDeclarationMerger());
+        map.put(FieldDeclaration.class, new FieldDeclarationMerger());
+        map.put(InitializerDeclaration.class, new InitializerDeclarationMerger());
+        map.put(MethodDeclaration.class, new MethodDeclarationMerger());
+        map.put(PackageDeclaration.class, new PackageDeclarationMerger());
+        map.put(ImportDeclaration.class, new ImportDeclarationMerger());
 
         // expression
-        map.put(Expression.class, new com.freetmp.mbg.merge.expression.ExpressionMerger());
-        map.put(MarkerAnnotationExpr.class, new com.freetmp.mbg.merge.expression.MarkerAnnotationExprMerger());
-        map.put(NormalAnnotationExpr.class, new com.freetmp.mbg.merge.expression.NormalAnnotationExprMerger());
-        map.put(SingleMemberAnnotationExpr.class, new com.freetmp.mbg.merge.expression.SingleMemberAnnotationExprMerger());
-        map.put(ArrayAccessExpr.class, new com.freetmp.mbg.merge.expression.ArrayAccessExprMerger());
-        map.put(ArrayCreationExpr.class, new com.freetmp.mbg.merge.expression.ArrayAccessExprMerger());
-        map.put(ArrayInitializerExpr.class, new com.freetmp.mbg.merge.expression.ArrayInitializerExprMerger());
-        map.put(AssignExpr.class, new com.freetmp.mbg.merge.expression.AssignExprMerger());
-        map.put(BinaryExpr.class, new com.freetmp.mbg.merge.expression.BinaryExprMerger());
-        map.put(BooleanLiteralExpr.class, new com.freetmp.mbg.merge.expression.BooleanLiteralExprMerger());
-        map.put(CastExpr.class, new com.freetmp.mbg.merge.expression.CastExprMerger());
-        map.put(CharLiteralExpr.class, new com.freetmp.mbg.merge.expression.CharLiteralExprMerger());
-        map.put(ClassExpr.class, new com.freetmp.mbg.merge.expression.ClassExprMerger());
-        map.put(ConditionalExpr.class, new com.freetmp.mbg.merge.expression.ConditionalExprMerger());
-        map.put(DoubleLiteralExpr.class, new com.freetmp.mbg.merge.expression.DoubleLiteralExprMerger());
-        map.put(EnclosedExpr.class, new com.freetmp.mbg.merge.expression.EnclosedExprMerger());
-        map.put(FieldAccessExpr.class, new com.freetmp.mbg.merge.expression.FieldAccessExprMerger());
-        map.put(InstanceOfExpr.class, new com.freetmp.mbg.merge.expression.InstanceOfExprMerger());
-        map.put(IntegerLiteralExpr.class, new com.freetmp.mbg.merge.expression.IntegerLiteralExprMerger());
-        map.put(IntegerLiteralMinValueExpr.class, new com.freetmp.mbg.merge.expression.IntegerLiteralMinValueExprMerger());
-        map.put(LambdaExpr.class, new com.freetmp.mbg.merge.expression.LambdaExprMerger());
-        map.put(LongLiteralExpr.class, new com.freetmp.mbg.merge.expression.LongLiteralExprMerger());
-        map.put(LongLiteralMinValueExpr.class, new com.freetmp.mbg.merge.expression.LongLiteralMinValueExprMerger());
-        map.put(MemberValuePair.class, new com.freetmp.mbg.merge.expression.MemberValuePairMerger());
-        map.put(MethodCallExpr.class, new com.freetmp.mbg.merge.expression.MethodCallExprMerger());
-        map.put(MethodReferenceExpr.class, new com.freetmp.mbg.merge.expression.MethodReferenceExprMerger());
-        map.put(NameExpr.class, new com.freetmp.mbg.merge.expression.NameExprMerger());
-        map.put(NullLiteralExpr.class, new com.freetmp.mbg.merge.expression.NullLiteralExprMerger());
-        map.put(ObjectCreationExpr.class, new com.freetmp.mbg.merge.expression.ObjectCreationExprMerger());
-        map.put(QualifiedNameExpr.class, new com.freetmp.mbg.merge.expression.QualifiedNameExprMerger());
-        map.put(StringLiteralExpr.class, new com.freetmp.mbg.merge.expression.StringLiteralExprMerger());
-        map.put(SuperExpr.class, new com.freetmp.mbg.merge.expression.SuperExprMerger());
-        map.put(ThisExpr.class, new com.freetmp.mbg.merge.expression.ThisExprMerger());
-        map.put(TypeExpr.class, new com.freetmp.mbg.merge.expression.TypeExprMerger());
-        map.put(UnaryExpr.class, new com.freetmp.mbg.merge.expression.UnaryExprMerger());
-        map.put(VariableDeclarationExpr.class, new com.freetmp.mbg.merge.expression.VariableDeclarationExprMerger());
+        map.put(Expression.class, new ExpressionMerger());
+        map.put(MarkerAnnotationExpr.class, new MarkerAnnotationExprMerger());
+        map.put(NormalAnnotationExpr.class, new NormalAnnotationExprMerger());
+        map.put(SingleMemberAnnotationExpr.class, new SingleMemberAnnotationExprMerger());
+        map.put(ArrayAccessExpr.class, new ArrayAccessExprMerger());
+        map.put(ArrayCreationExpr.class, new ArrayAccessExprMerger());
+        map.put(ArrayInitializerExpr.class, new ArrayInitializerExprMerger());
+        map.put(AssignExpr.class, new AssignExprMerger());
+        map.put(BinaryExpr.class, new BinaryExprMerger());
+        map.put(BooleanLiteralExpr.class, new BooleanLiteralExprMerger());
+        map.put(CastExpr.class, new CastExprMerger());
+        map.put(CharLiteralExpr.class, new CharLiteralExprMerger());
+        map.put(ClassExpr.class, new ClassExprMerger());
+        map.put(ConditionalExpr.class, new ConditionalExprMerger());
+        map.put(DoubleLiteralExpr.class, new DoubleLiteralExprMerger());
+        map.put(EnclosedExpr.class, new EnclosedExprMerger());
+        map.put(FieldAccessExpr.class, new FieldAccessExprMerger());
+        map.put(InstanceOfExpr.class, new InstanceOfExprMerger());
+        map.put(IntegerLiteralExpr.class, new IntegerLiteralExprMerger());
+        map.put(IntegerLiteralMinValueExpr.class, new IntegerLiteralMinValueExprMerger());
+        map.put(LambdaExpr.class, new LambdaExprMerger());
+        map.put(LongLiteralExpr.class, new LongLiteralExprMerger());
+        map.put(LongLiteralMinValueExpr.class, new LongLiteralMinValueExprMerger());
+        map.put(MemberValuePair.class, new MemberValuePairMerger());
+        map.put(MethodCallExpr.class, new MethodCallExprMerger());
+        map.put(MethodReferenceExpr.class, new MethodReferenceExprMerger());
+        map.put(NameExpr.class, new NameExprMerger());
+        map.put(NullLiteralExpr.class, new NullLiteralExprMerger());
+        map.put(ObjectCreationExpr.class, new ObjectCreationExprMerger());
+        map.put(QualifiedNameExpr.class, new QualifiedNameExprMerger());
+        map.put(StringLiteralExpr.class, new StringLiteralExprMerger());
+        map.put(SuperExpr.class, new SuperExprMerger());
+        map.put(ThisExpr.class, new ThisExprMerger());
+        map.put(TypeExpr.class, new TypeExprMerger());
+        map.put(UnaryExpr.class, new UnaryExprMerger());
+        map.put(VariableDeclarationExpr.class, new VariableDeclarationExprMerger());
 
         // parameter
         map.put(Parameter.class, new ParameterMerger());
@@ -97,67 +101,41 @@ public abstract class AbstractMerger<M extends Node> {
         map.put(TypeParameter.class, new TypeParameterMerger());
 
         // statement
-        map.put(BlockStmt.class, new com.freetmp.mbg.merge.statement.BlockStmtMerger());
-        map.put(AssertStmt.class, new com.freetmp.mbg.merge.statement.AssertStmtMerger());
-        map.put(BreakStmt.class, new com.freetmp.mbg.merge.statement.BreakStmtMerger());
-        map.put(CatchClause.class, new com.freetmp.mbg.merge.statement.CatchClauseMerger());
-        map.put(ContinueStmt.class, new com.freetmp.mbg.merge.statement.ContinueStmtMerger());
-        map.put(DoStmt.class, new com.freetmp.mbg.merge.statement.DoStmtMerger());
-        map.put(EmptyStmt.class, new com.freetmp.mbg.merge.statement.EmptyStmtMerger());
-        map.put(ExplicitConstructorInvocationStmt.class, new com.freetmp.mbg.merge.statement.ExplicitConstructorInvocationStmtMerger());
-        map.put(ExpressionStmt.class, new com.freetmp.mbg.merge.statement.ExpressionStmtMerger());
-        map.put(ForeachStmt.class, new com.freetmp.mbg.merge.statement.ForeachStmtMerger());
-        map.put(ForStmt.class, new com.freetmp.mbg.merge.statement.ForStmtMerger());
-        map.put(IfStmt.class, new com.freetmp.mbg.merge.statement.IfStmtMerger());
-        map.put(LabeledStmt.class, new com.freetmp.mbg.merge.statement.LabeledStmtMerger());
-        map.put(ReturnStmt.class, new com.freetmp.mbg.merge.statement.ReturnStmtMerger());
-        map.put(SwitchEntryStmt.class, new com.freetmp.mbg.merge.statement.SwitchEntryStmtMerger());
-        map.put(SwitchStmt.class, new com.freetmp.mbg.merge.statement.SwitchStmtMerger());
-        map.put(SynchronizedStmt.class, new com.freetmp.mbg.merge.statement.SynchronizedStmtMerger());
-        map.put(ThrowStmt.class, new com.freetmp.mbg.merge.statement.ThrowStmtMerger());
-        map.put(TryStmt.class, new com.freetmp.mbg.merge.statement.TryStmtMerger());
-        map.put(TypeDeclarationStmt.class, new com.freetmp.mbg.merge.statement.TypeDeclarationStmtMerger());
-        map.put(WhileStmt.class, new com.freetmp.mbg.merge.statement.WhileStmtMerger());
+        map.put(BlockStmt.class, new BlockStmtMerger());
+        map.put(AssertStmt.class, new AssertStmtMerger());
+        map.put(BreakStmt.class, new BreakStmtMerger());
+        map.put(CatchClause.class, new CatchClauseMerger());
+        map.put(ContinueStmt.class, new ContinueStmtMerger());
+        map.put(DoStmt.class, new DoStmtMerger());
+        map.put(EmptyStmt.class, new EmptyStmtMerger());
+        map.put(ExplicitConstructorInvocationStmt.class, new ExplicitConstructorInvocationStmtMerger());
+        map.put(ExpressionStmt.class, new ExpressionStmtMerger());
+        map.put(ForeachStmt.class, new ForeachStmtMerger());
+        map.put(ForStmt.class, new ForStmtMerger());
+        map.put(IfStmt.class, new IfStmtMerger());
+        map.put(LabeledStmt.class, new LabeledStmtMerger());
+        map.put(ReturnStmt.class, new ReturnStmtMerger());
+        map.put(SwitchEntryStmt.class, new SwitchEntryStmtMerger());
+        map.put(SwitchStmt.class, new SwitchStmtMerger());
+        map.put(SynchronizedStmt.class, new SynchronizedStmtMerger());
+        map.put(ThrowStmt.class, new ThrowStmtMerger());
+        map.put(TryStmt.class, new TryStmtMerger());
+        map.put(TypeDeclarationStmt.class, new TypeDeclarationStmtMerger());
+        map.put(WhileStmt.class, new WhileStmtMerger());
 
         // type
-        map.put(ClassOrInterfaceType.class, new com.freetmp.mbg.merge.type.ClassOrInterfaceTypeMerger());
-        map.put(PrimitiveType.class, new com.freetmp.mbg.merge.type.PrimitiveTypeMerger());
-        map.put(ReferenceType.class, new com.freetmp.mbg.merge.type.ReferenceTypeMerger());
-        map.put(VoidType.class, new com.freetmp.mbg.merge.type.VoidTypeMerger());
-        map.put(WildcardType.class, new com.freetmp.mbg.merge.type.WildcardTypeMerger());
+        map.put(ClassOrInterfaceType.class, new ClassOrInterfaceTypeMerger());
+        map.put(PrimitiveType.class, new PrimitiveTypeMerger());
+        map.put(ReferenceType.class, new ReferenceTypeMerger());
+        map.put(VoidType.class, new VoidTypeMerger());
+        map.put(WildcardType.class, new WildcardTypeMerger());
 
         //variable
         map.put(VariableDeclaratorId.class, new VariableDeclaratorIdMerger());
         map.put(VariableDeclarator.class, new VariableDeclaratorMerger());
 
         // compile unit
-        map.put(CompilationUnit.class, new com.freetmp.mbg.merge.CompilationUnitMerger());
-    }
-
-    /**
-     * first check if mapper of the type T exist, if existed return it
-     * else check if mapper of the supper type exist, then return it
-     *
-     * @param <T>   the generic type which extends from Node
-     * @param clazz The class of type T
-     * @return null if not found else the merger of the type T
-     */
-    public static <T extends Node> AbstractMerger<T> getMerger(Class<T> clazz) {
-
-        AbstractMerger<T> merger = null;
-
-        Class<?> type = clazz;
-
-        while (merger == null && type != null) {
-            merger = map.get(type);
-            type = type.getSuperclass();
-        }
-
-        return merger;
-    }
-
-    protected static <T extends Node> void register(Class<T> clazz, AbstractMerger<T> abstractMerger) {
-        map.put(clazz, abstractMerger);
+        map.put(CompilationUnit.class, new CompilationUnitMerger());
     }
 
     public <T> boolean isAllNull(T one, T two) {
@@ -204,9 +182,7 @@ public abstract class AbstractMerger<M extends Node> {
         if (one == two) return true;
         if (one == null || two == null) return false;
 
-        if (one.size() != two.size()) {
-            return false;
-        }
+        if (one.size() != two.size()) return false;
 
         for (int i = 0; i < one.size(); i++) {
 
@@ -214,9 +190,7 @@ public abstract class AbstractMerger<M extends Node> {
             T t = two.get(i);
 
             AbstractMerger merger = getMerger(o.getClass());
-            if (!merger.isEquals(o, t)) {
-                return false;
-            }
+            if (!merger.isEquals(o, t)) return false;
         }
 
         return true;
@@ -349,6 +323,33 @@ public abstract class AbstractMerger<M extends Node> {
 
         return results;
     }
+
+    /**
+     * first check if mapper of the type T exist, if existed return it
+     * else check if mapper of the supper type exist, then return it
+     *
+     * @param <T>   the generic type which extends from Node
+     * @param clazz The class of type T
+     * @return null if not found else the merger of the type T
+     */
+    public static <T extends Node> AbstractMerger<T> getMerger(Class<T> clazz) {
+
+        AbstractMerger<T> merger = null;
+
+        Class<?> type = clazz;
+
+        while (merger == null && type != null) {
+            merger = map.get(type);
+            type = type.getSuperclass();
+        }
+
+        return merger;
+    }
+
+    protected static <T extends Node> void register(Class<T> clazz, AbstractMerger<T> abstractMerger) {
+        map.put(clazz, abstractMerger);
+    }
+
 
     protected <T extends Node> List<T> mergeCollections(List<T> first, List<T> second) {
 
@@ -484,9 +485,9 @@ public abstract class AbstractMerger<M extends Node> {
      * The Levenshtein distance, or edit distance, between two words is the
      * minimum number of single-character edits (insertions, deletions or
      * substitutions) required to change one word into the other.
-     * <p>
+     *
      * http://en.wikipedia.org/wiki/Levenshtein_distance
-     * <p>
+     *
      * It is always at least the difference of the sizes of the two strings.
      * It is at most the length of the longer string.
      * It is zero if and only if the strings are equal.
@@ -495,7 +496,7 @@ public abstract class AbstractMerger<M extends Node> {
      * The Levenshtein distance verifies the triangle inequality (the distance
      * between two strings is no greater than the sum Levenshtein distances from
      * a third string).
-     * <p>
+     *
      * Implementation uses dynamic programming (Wagner–Fischer algorithm), with
      * only 2 rows of data. The space requirement is thus O(m) and the algorithm
      * runs in O(mn).

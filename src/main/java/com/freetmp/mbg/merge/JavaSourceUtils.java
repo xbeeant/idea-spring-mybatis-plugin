@@ -36,9 +36,7 @@ public class JavaSourceUtils {
 
     public static <T> T findFirstNotNull(T... types) {
         for (T type : types) {
-            if (type != null) {
-                return type;
-            }
+            if (type != null) return type;
         }
         return null;
     }
@@ -56,9 +54,7 @@ public class JavaSourceUtils {
     }
 
     public static <T> boolean isEitherContains(List<T> one, List<T> two) {
-        if (!isAllNotNull(one, two)) {
-            return true;
-        }
+        if (!isAllNotNull(one, two)) return true;
 
         List<T> longer = one.size() > two.size() ? one : two;
         List<T> shorter = one.size() > two.size() ? two : one;
@@ -209,9 +205,7 @@ public class JavaSourceUtils {
     public static AnnotationMemberDeclaration mergeAnnotationMember(
             AnnotationMemberDeclaration one, AnnotationMemberDeclaration two) {
 
-        if (isAllNull(one, two)) {
-            return null;
-        }
+        if (isAllNull(one, two)) return null;
 
         AnnotationMemberDeclaration amd = null;
 
@@ -219,7 +213,7 @@ public class JavaSourceUtils {
 
             amd = new AnnotationMemberDeclaration();
 
-            amd.setComment(mergeSelective(one.getJavaDoc(), two.getJavaDoc()));
+            amd.setJavaDoc(mergeSelective(one.getJavaDoc(), two.getJavaDoc()));
             amd.setComment(mergeSelective(one.getComment(), two.getComment()));
             amd.setAnnotations(mergeListNoDuplicate(one.getAnnotations(), two.getAnnotations()));
             amd.setModifiers(mergeModifiers(one.getModifiers(), two.getModifiers()));
@@ -243,9 +237,7 @@ public class JavaSourceUtils {
      */
     public static BlockStmt mergeBlock(BlockStmt one, BlockStmt two) {
 
-        if (isAllNull(one, two)) {
-            return null;
-        }
+        if (isAllNull(one, two)) return null;
 
         BlockStmt blockStmt = null;
         if (isAllNotNull(one, two)) {
@@ -292,9 +284,7 @@ public class JavaSourceUtils {
      */
     public static ConstructorDeclaration mergeConstructor(ConstructorDeclaration one, ConstructorDeclaration two) {
 
-        if (isAllNull(one, two)) {
-            return null;
-        }
+        if (isAllNull(one, two)) return null;
 
         ConstructorDeclaration cd = null;
 
@@ -306,7 +296,7 @@ public class JavaSourceUtils {
             cd.setComment(mergeSelective(one.getComment(), two.getComment()));
             cd.setAnnotations(mergeListNoDuplicate(one.getAnnotations(), two.getAnnotations()));
             cd.setModifiers(mergeModifiers(one.getModifiers(), two.getModifiers()));
-            cd.setComment(mergeSelective(one.getJavaDoc(), two.getJavaDoc()));
+            cd.setJavaDoc(mergeSelective(one.getJavaDoc(), two.getJavaDoc()));
             cd.setThrows(mergeListNoDuplicate(one.getThrows(), two.getThrows()));
             cd.setTypeParameters(findFirstNotNull(one.getTypeParameters(), two.getTypeParameters()));
             cd.setParameters(mergeParameters(one.getParameters(), two.getParameters()));
@@ -328,9 +318,7 @@ public class JavaSourceUtils {
      */
     public static EnumConstantDeclaration mergeEnumConstant(EnumConstantDeclaration one, EnumConstantDeclaration two) {
 
-        if (isAllNull(one, two)) {
-            return null;
-        }
+        if (isAllNull(one, two)) return null;
 
         EnumConstantDeclaration ecd = null;
 
@@ -339,7 +327,7 @@ public class JavaSourceUtils {
             ecd = new EnumConstantDeclaration();
 
             ecd.setName(one.getName());
-            ecd.setComment(mergeSelective(one.getJavaDoc(), two.getJavaDoc()));
+            ecd.setJavaDoc(mergeSelective(one.getJavaDoc(), two.getJavaDoc()));
             ecd.setComment(mergeSelective(one.getComment(), two.getComment()));
             ecd.setAnnotations(mergeListNoDuplicate(one.getAnnotations(), two.getAnnotations()));
             ecd.setArgs(mergeListInOrder(one.getArgs(), two.getArgs()));
@@ -360,9 +348,7 @@ public class JavaSourceUtils {
      */
     public static FieldDeclaration mergeField(FieldDeclaration one, FieldDeclaration two) {
 
-        if (isAllNull(one, two)) {
-            return null;
-        }
+        if (isAllNull(one, two)) return null;
 
         FieldDeclaration fd = null;
 
@@ -373,7 +359,7 @@ public class JavaSourceUtils {
             fd.setComment(mergeSelective(one.getComment(), two.getComment()));
             fd.setAnnotations(mergeListNoDuplicate(one.getAnnotations(), two.getAnnotations()));
             fd.setModifiers(mergeModifiers(one.getModifiers(), two.getModifiers()));
-            fd.setComment(mergeSelective(one.getJavaDoc(), two.getJavaDoc()));
+            fd.setJavaDoc(mergeSelective(one.getJavaDoc(), two.getJavaDoc()));
             fd.setVariables(mergeListNoDuplicate(one.getVariables(), two.getVariables()));
 
             LOG.info("merge FieldDeclaration --> {}", fd.getVariables());
@@ -390,21 +376,17 @@ public class JavaSourceUtils {
      */
     public static InitializerDeclaration mergeInitializer(InitializerDeclaration one, InitializerDeclaration two) {
 
-        if (isAllNull(one, two)) {
-            return null;
-        }
+        if (isAllNull(one, two)) return null;
 
         InitializerDeclaration id = null;
 
         if (isAllNotNull(one, two)) {
-            if (one.isStatic() != two.isStatic()) {
-                return id;
-            }
+            if (one.isStatic() != two.isStatic()) return id;
 
             id = new InitializerDeclaration();
             id.setStatic(one.isStatic());
             id.setComment(mergeSelective(one.getComment(), two.getComment()));
-            id.setComment(mergeSelective(one.getJavaDoc(), two.getJavaDoc()));
+            id.setJavaDoc(mergeSelective(one.getJavaDoc(), two.getJavaDoc()));
             id.setAnnotations(mergeListNoDuplicate(one.getAnnotations(), two.getAnnotations()));
             id.setBlock(mergeBlock(one.getBlock(), two.getBlock()));
             LOG.info("merge InitializerDeclaration --> {}", id.isStatic() ? "static { }" : "{ }");
@@ -420,9 +402,7 @@ public class JavaSourceUtils {
      * 合并方法声明
      */
     public static MethodDeclaration mergeMethod(MethodDeclaration one, MethodDeclaration two) {
-        if (isAllNull(one, two)) {
-            return null;
-        }
+        if (isAllNull(one, two)) return null;
 
         MethodDeclaration md = null;
 
@@ -440,7 +420,7 @@ public class JavaSourceUtils {
 
             md.setModifiers(mergeModifiers(one.getModifiers(), two.getModifiers()));
             md.setBody(mergeBlock(one.getBody(), two.getBody()));
-            md.setComment(mergeSelective(one.getJavaDoc(), two.getJavaDoc()));
+            md.setJavaDoc(mergeSelective(one.getJavaDoc(), two.getJavaDoc()));
 
             LOG.info("merge MethodDeclaration --> {}", md.getName());
         } else {
@@ -580,9 +560,7 @@ public class JavaSourceUtils {
      */
     public static AnnotationDeclaration mergeType(AnnotationDeclaration one, AnnotationDeclaration two) {
 
-        if (isAllNull(one, two)) {
-            return null;
-        }
+        if (isAllNull(one, two)) return null;
 
         AnnotationDeclaration annotationDeclaration = null;
 
@@ -593,8 +571,8 @@ public class JavaSourceUtils {
             annotationDeclaration.setModifiers(
                     mergeModifiers(one.getModifiers(), two.getModifiers()));
 
-//            annotationDeclaration.setComment(
-//                    (JavadocComment) mergeSelective(one.getJavaDoc(), two.getJavaDoc()));
+            annotationDeclaration.setJavaDoc(
+                    (JavadocComment) mergeSelective(one.getJavaDoc(), two.getJavaDoc()));
 
             annotationDeclaration.setComment(mergeSelective(one.getComment(), two.getComment()));
 
@@ -618,9 +596,7 @@ public class JavaSourceUtils {
      * 合并类或接口类型声明
      */
     public static ClassOrInterfaceDeclaration mergeType(ClassOrInterfaceDeclaration one, ClassOrInterfaceDeclaration two) {
-        if (isAllNull(one, two)) {
-            return null;
-        }
+        if (isAllNull(one, two)) return null;
 
         ClassOrInterfaceDeclaration coid = null;
 
@@ -628,7 +604,7 @@ public class JavaSourceUtils {
 
             coid = new ClassOrInterfaceDeclaration();
             coid.setName(one.getName());
-            coid.setComment(mergeSelective(one.getJavaDoc(), two.getJavaDoc()));
+            coid.setJavaDoc(mergeSelective(one.getJavaDoc(), two.getJavaDoc()));
             coid.setComment(mergeSelective(one.getComment(), two.getComment()));
             coid.setAnnotations(mergeListNoDuplicate(one.getAnnotations(), two.getAnnotations()));
             coid.setModifiers(mergeModifiers(one.getModifiers(), two.getModifiers()));
@@ -651,9 +627,7 @@ public class JavaSourceUtils {
      * 合并空类型声明
      */
     public static EmptyTypeDeclaration mergeType(EmptyTypeDeclaration one, EmptyTypeDeclaration two) {
-        if (isAllNull(one, two)) {
-            return null;
-        }
+        if (isAllNull(one, two)) return null;
 
         EmptyTypeDeclaration etd = null;
 
@@ -661,7 +635,7 @@ public class JavaSourceUtils {
 
             etd = new EmptyTypeDeclaration();
             etd.setName(one.getName());
-            etd.setComment(mergeSelective(one.getJavaDoc(), two.getJavaDoc()));
+            etd.setJavaDoc(mergeSelective(one.getJavaDoc(), two.getJavaDoc()));
             etd.setComment(mergeSelective(one.getComment(), two.getComment()));
             etd.setAnnotations(mergeListNoDuplicate(one.getAnnotations(), two.getAnnotations()));
             etd.setMembers(mergeBodies(one.getMembers(), two.getMembers()));
@@ -730,16 +704,14 @@ public class JavaSourceUtils {
      */
     public static EnumDeclaration mergeType(EnumDeclaration one, EnumDeclaration two) {
 
-        if (isAllNull(one, two)) {
-            return null;
-        }
+        if (isAllNull(one, two)) return null;
 
         EnumDeclaration ed = null;
 
         if (isAllNotNull(one, two)) {
 
             ed = new EnumDeclaration();
-            ed.setComment(mergeSelective(one.getJavaDoc(), two.getJavaDoc()));
+            ed.setJavaDoc(mergeSelective(one.getJavaDoc(), two.getJavaDoc()));
             ed.setComment(mergeSelective(one.getComment(), one.getComment()));
             ed.setModifiers(mergeModifiers(one.getModifiers(), two.getModifiers()));
             ed.setAnnotations(mergeListNoDuplicate(one.getAnnotations(), two.getAnnotations()));
@@ -764,9 +736,7 @@ public class JavaSourceUtils {
     public static TypeDeclaration mergeType(TypeDeclaration one, TypeDeclaration two) {
         TypeDeclaration type = null;
 
-        if (isAllNull(one, two)) {
-            return null;
-        }
+        if (isAllNull(one, two)) return null;
 
         if (isAllNotNull(one, two)) {
             // just ignore when class type are not same
@@ -828,9 +798,7 @@ public class JavaSourceUtils {
     public static String mergeContent(CompilationUnit one, CompilationUnit two) throws Exception {
 
         // 包声明不同，返回null
-        if (!one.getPackage().equals(two.getPackage())) {
-            return null;
-        }
+        if (!one.getPackage().equals(two.getPackage())) return null;
 
         CompilationUnit cu = new CompilationUnit();
 

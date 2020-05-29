@@ -11,7 +11,7 @@ public class EmptyMemberDeclarationMerger extends AbstractMerger<EmptyMemberDecl
   @Override public EmptyMemberDeclaration doMerge(EmptyMemberDeclaration first, EmptyMemberDeclaration second) {
     EmptyMemberDeclaration emd = new EmptyMemberDeclaration();
 
-    emd.setComment(mergeSingle(first.getJavaDoc(),second.getJavaDoc()));
+    emd.setJavaDoc(mergeSingle(first.getJavaDoc(),second.getJavaDoc()));
     emd.setAnnotations(mergeCollections(first.getAnnotations(),second.getAnnotations()));
 
     return emd;

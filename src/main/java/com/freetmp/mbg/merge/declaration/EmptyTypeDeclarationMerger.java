@@ -12,7 +12,7 @@ public class EmptyTypeDeclarationMerger extends AbstractMerger<EmptyTypeDeclarat
   public EmptyTypeDeclaration doMerge(EmptyTypeDeclaration first, EmptyTypeDeclaration second) {
     EmptyTypeDeclaration etd = new EmptyTypeDeclaration();
 
-    etd.setComment(mergeSingle(first.getJavaDoc(),second.getJavaDoc()));
+    etd.setJavaDoc(mergeSingle(first.getJavaDoc(),second.getJavaDoc()));
     etd.setAnnotations(mergeCollections(first.getAnnotations(),second.getAnnotations()));
     etd.setModifiers(mergeModifiers(first.getModifiers(),second.getModifiers()));
     etd.setNameExpr(mergeSingle(first.getNameExpr(),second.getNameExpr()));

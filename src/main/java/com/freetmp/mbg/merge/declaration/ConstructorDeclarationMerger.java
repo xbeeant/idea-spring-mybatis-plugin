@@ -15,7 +15,7 @@ public class ConstructorDeclarationMerger extends AbstractMerger<ConstructorDecl
     ConstructorDeclaration cd = new ConstructorDeclaration();
 
     cd.setName(first.getName());
-    cd.setComment(mergeSingle(first.getJavaDoc(), second.getJavaDoc()));
+    cd.setJavaDoc(mergeSingle(first.getJavaDoc(), second.getJavaDoc()));
     cd.setModifiers(mergeModifiers(first.getModifiers(), second.getModifiers()));
     cd.setAnnotations(mergeCollections(first.getAnnotations(), second.getAnnotations()));
     cd.setParameters(mergeCollectionsInOrder(first.getParameters(), second.getParameters()));

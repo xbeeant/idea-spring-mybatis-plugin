@@ -159,7 +159,9 @@ public class MyBatisGenerateCommand {
                         VirtualFile moduleFile = ModuleRootManager.getInstance(module).getContentRoots()[0];
                         // 刷新工程
 
-                        Objects.requireNonNull(project.getProjectFile()).refresh(true, true);
+//                        Objects.requireNonNull(project.getProjectFile()).refresh(true, true);
+                        project.getBaseDir().refresh(false, true);
+
                         NotificationGroup balloonNotifications = new NotificationGroup(Constant.TITLE, NotificationDisplayType.STICKY_BALLOON, true);
 
                         List<String> result = myBatisGenerator.getGeneratedJavaFiles().stream()
@@ -175,15 +177,9 @@ public class MyBatisGenerateCommand {
                             }
                         });
                         Notifications.Bus.notify(notification);
-
-
                     } catch (Exception e) {
                         e.printStackTrace();
                         balloon.hide();
-                        Notification notification = new Notification(Constant.TITLE, null, NotificationType.ERROR);
-                        notification.setTitle("Generate Failed");
-                        notification.setContent("Cause:" + e.getMessage());
-                        Notifications.Bus.notify(notification);
                     }
                 }
             };
