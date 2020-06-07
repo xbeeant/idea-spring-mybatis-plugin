@@ -4,7 +4,10 @@ package org.xstudio.plugin.idea.model;
  * @author xiaobiao
  * @version 2019/9/23
  */
-public class MybatisPluginConfig {
+public class MybatisPluginConfig extends MybatisEnable {
+
+    private static final long serialVersionUID = -4974530965013552854L;
+
     private boolean lombokPlugin = true;
 
     private boolean facadePlugin = false;

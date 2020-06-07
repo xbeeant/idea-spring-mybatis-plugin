@@ -3,6 +3,7 @@ package org.xstudio.plugin.idea.model;
 import com.intellij.database.model.DasColumn;
 import com.intellij.database.psi.DbTable;
 import com.intellij.database.util.DasUtil;
+import com.intellij.database.util.DbUtil;
 import com.intellij.util.containers.JBIterable;
 
 import java.util.ArrayList;
@@ -11,22 +12,27 @@ import java.util.List;
 import java.util.Set;
 
 public class TableInfo {
+    /**
+     * 数据库类型
+     */
+    private final String typeName;
 
-    public final DbTable tableElement;
+    private final DbTable tableElement;
     /**
      * 字段
      */
-    private List<DasColumn> columns;
+    private final List<DasColumn> columns;
     /**
      * 主键
      */
-    private List<String> primaryKeys = new ArrayList<String>();
-
+    private final List<String> primaryKeys = new ArrayList<String>();
 
     public TableInfo(DbTable tableElement) {
         this.tableElement = tableElement;
         List<DasColumn> columns = new ArrayList<DasColumn>();
-
+        String dbClaszName = DbUtil.getDasObject(tableElement).getClass().getName();
+        String[] split = dbClaszName.split("\\.");
+        this.typeName = split[4];
         JBIterable<? extends DasColumn> columnsIter = DasUtil.getColumns(tableElement);
         List<? extends DasColumn> dasColumns = columnsIter.toList();
         for (DasColumn dasColumn : dasColumns) {
@@ -75,5 +81,13 @@ public class TableInfo {
         }
 
         return ret;
+    }
+
+    public String getTypeName() {
+        return typeName;
+    }
+
+    public DbTable getTableElement() {
+        return tableElement;
     }
 }

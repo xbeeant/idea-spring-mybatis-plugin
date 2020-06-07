@@ -5,11 +5,14 @@ package org.xstudio.plugin.idea.model;
  * @version 2019/9/23
  */
 public class PersistentConfig extends MybatisPluginConfig {
-    private String name;
+    /**
+     * 配置名称
+     */
+    private String configName;
     /**
      * base package
      */
-    private String basePackage;
+    private String rootPackage;
     /**
      * ID generator
      */
@@ -17,23 +20,23 @@ public class PersistentConfig extends MybatisPluginConfig {
     /**
      * 基础 service interface
      */
-    private String iService = "com.xstudio.spring.mybatis.pagehelper.IMybatisPageHelperService";
+    private String serviceInterface = "com.xstudio.spring.mybatis.pagehelper.IMybatisPageHelperService";
     /**
      * 基础service实现
      */
-    private String serviceImpl = "com.xstudio.discuzx.config.AbstractSecurityMybatisPageHelperServiceImpl";
+    private String serviceImplement = "com.xstudio.discuzx.config.AbstractSecurityMybatisPageHelperServiceImpl";
     /**
      * 基础facade interface
      */
-    private String iFacade;
+    private String facadeInterface;
     /**
      * 基础facade实现
      */
-    private String facadeImpl;
+    private String facadeImplement;
     /**
      * 基础dao
      */
-    private String iDao = "com.xstudio.spring.mybatis.pagehelper.IMybatisPageHelperDao";
+    private String daoInterface = "com.xstudio.spring.mybatis.pagehelper.IMybatisPageHelperDao";
     /**
      * 基础对象
      */
@@ -50,38 +53,7 @@ public class PersistentConfig extends MybatisPluginConfig {
      * 表前缀
      */
     private String tablePrefix;
-    /**
-     * 是否覆盖
-     */
-    private boolean override = false;
-    /**
-     * 是否使用Example
-     */
-    private boolean useExample = false;
-    /**
-     * 是否使用Schema前缀
-     */
-    private boolean useSchemaPrefix;
-    /**
-     * 是否使用实际的列名
-     */
-    private boolean useActualColumnNames;
-    /**
-     * 是否启用as别名查询
-     */
-    private boolean useTableNameAlias;
-    /**
-     * 是否生成实体注释（来自表）
-     */
-    private boolean comment = true;
-    /**
-     * 是否生成JPA注解
-     */
-    private boolean annotation;
-    /**
-     * 是否是mysql8数据库
-     */
-    private boolean mysql8;
+
     /**
      * 工程目录
      */
@@ -95,20 +67,20 @@ public class PersistentConfig extends MybatisPluginConfig {
      */
     private String resourcePath = "/src/main/resources";
 
-    public String getName() {
-        return name;
+    public String getConfigName() {
+        return configName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setConfigName(String configName) {
+        this.configName = configName;
     }
 
-    public String getBasePackage() {
-        return basePackage;
+    public String getRootPackage() {
+        return rootPackage;
     }
 
-    public void setBasePackage(String basePackage) {
-        this.basePackage = basePackage;
+    public void setRootPackage(String rootPackage) {
+        this.rootPackage = rootPackage;
     }
 
     public String getIdGenerator() {
@@ -119,44 +91,44 @@ public class PersistentConfig extends MybatisPluginConfig {
         this.idGenerator = idGenerator;
     }
 
-    public String getIService() {
-        return iService;
+    public String getServiceInterface() {
+        return serviceInterface;
     }
 
-    public void setIService(String iService) {
-        this.iService = iService;
+    public void setServiceInterface(String serviceInterface) {
+        this.serviceInterface = serviceInterface;
     }
 
-    public String getServiceImpl() {
-        return serviceImpl;
+    public String getServiceImplement() {
+        return serviceImplement;
     }
 
-    public void setServiceImpl(String serviceImpl) {
-        this.serviceImpl = serviceImpl;
+    public void setServiceImplement(String serviceImplement) {
+        this.serviceImplement = serviceImplement;
     }
 
-    public String getIFacade() {
-        return iFacade;
+    public String getFacadeInterface() {
+        return facadeInterface;
     }
 
-    public void setIFacade(String iFacade) {
-        this.iFacade = iFacade;
+    public void setFacadeInterface(String facadeInterface) {
+        this.facadeInterface = facadeInterface;
     }
 
-    public String getFacadeImpl() {
-        return facadeImpl;
+    public String getFacadeImplement() {
+        return facadeImplement;
     }
 
-    public void setFacadeImpl(String facadeImpl) {
-        this.facadeImpl = facadeImpl;
+    public void setFacadeImplement(String facadeImplement) {
+        this.facadeImplement = facadeImplement;
     }
 
-    public String getIDao() {
-        return iDao;
+    public String getDaoInterface() {
+        return daoInterface;
     }
 
-    public void setIDao(String iDao) {
-        this.iDao = iDao;
+    public void setDaoInterface(String daoInterface) {
+        this.daoInterface = daoInterface;
     }
 
     public String getBaseObject() {
@@ -189,70 +161,6 @@ public class PersistentConfig extends MybatisPluginConfig {
 
     public void setTablePrefix(String tablePrefix) {
         this.tablePrefix = tablePrefix;
-    }
-
-    public boolean isOverride() {
-        return override;
-    }
-
-    public void setOverride(boolean override) {
-        this.override = override;
-    }
-
-    public boolean isUseExample() {
-        return useExample;
-    }
-
-    public void setUseExample(boolean useExample) {
-        this.useExample = useExample;
-    }
-
-    public boolean isUseSchemaPrefix() {
-        return useSchemaPrefix;
-    }
-
-    public void setUseSchemaPrefix(boolean useSchemaPrefix) {
-        this.useSchemaPrefix = useSchemaPrefix;
-    }
-
-    public boolean isUseActualColumnNames() {
-        return useActualColumnNames;
-    }
-
-    public void setUseActualColumnNames(boolean useActualColumnNames) {
-        this.useActualColumnNames = useActualColumnNames;
-    }
-
-    public boolean isUseTableNameAlias() {
-        return useTableNameAlias;
-    }
-
-    public void setUseTableNameAlias(boolean useTableNameAlias) {
-        this.useTableNameAlias = useTableNameAlias;
-    }
-
-    public boolean isComment() {
-        return comment;
-    }
-
-    public void setComment(boolean comment) {
-        this.comment = comment;
-    }
-
-    public boolean isAnnotation() {
-        return annotation;
-    }
-
-    public void setAnnotation(boolean annotation) {
-        this.annotation = annotation;
-    }
-
-    public boolean isMysql8() {
-        return mysql8;
-    }
-
-    public void setMysql8(boolean mysql8) {
-        this.mysql8 = mysql8;
     }
 
     public String getModuleRootPath() {

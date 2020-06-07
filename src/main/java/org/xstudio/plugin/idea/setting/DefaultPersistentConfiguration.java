@@ -26,7 +26,6 @@ public class DefaultPersistentConfiguration implements PersistentStateComponent<
         return persistentConfig;
     }
 
-
     private Map<String, PersistentConfig> configs = new HashMap<>();
 
     public Map<String, PersistentConfig> getConfigs() {
@@ -46,8 +45,8 @@ public class DefaultPersistentConfiguration implements PersistentStateComponent<
         PersistentConfig newConfig = JSON.parseObject(JSON.toJSONString(persistentConfig), PersistentConfig.class);
         this.persistentConfig = persistentConfig;
         String name = "default";
-        if (null != persistentConfig.getName() && !"".equals(persistentConfig.getName())) {
-            name = persistentConfig.getName();
+        if (null != persistentConfig.getConfigName() && !"".equals(persistentConfig.getConfigName())) {
+            name = persistentConfig.getConfigName();
         }
         configs.put(name, newConfig);
     }

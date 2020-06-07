@@ -25,15 +25,11 @@ public class ProjectPersistentConfiguration implements PersistentStateComponent<
     /**
      * 账号密码信息
      */
-
     private Map<String, Credential> credentials;
-
 
     private String databaseUrl;
 
-
     private Map<String, TableConfig> tableConfigs = new HashMap<>(1);
-
 
     private PersistentConfig persistentConfig = new PersistentConfig();
 
@@ -74,20 +70,7 @@ public class ProjectPersistentConfiguration implements PersistentStateComponent<
         return ServiceManager.getService(project, ProjectPersistentConfiguration.class);
     }
 
-    public void setTableGenerateTarget(TableConfig tableConfig, String entityName) {
-        String databaseName = tableConfig.getDatabaseName();
-        String databaseNamePackage = tableConfig.getDatabaseNamePackage();
-        String basePackage = tableConfig.getBasePackage() + "." + databaseNamePackage;
-        String resourcePath = tableConfig.getResourcePath();
-
-        tableConfig.setModelClass(basePackage + ".model." + entityName);
-        tableConfig.setServiceInterfaceClass(basePackage + ".service.I" + entityName + "Service");
-        tableConfig.setServiceImplClass(basePackage + ".service.impl." + entityName + "ServiceImpl");
-        tableConfig.setFacadeInterfaceClass(basePackage + ".facade.I" + entityName + "Facade");
-        tableConfig.setFacadeImplClass(basePackage + ".facade.impl." + entityName + "FacadeImpl");
-        tableConfig.setMapperClass(basePackage + ".mapper.I" + entityName + "Mapper");
-        tableConfig.setMapperImplClass(resourcePath + "/mybatis/" + databaseName + "/" + entityName + "Mapper.xml");
-
+    public void setTableGenerateTarget(TableConfig tableConfig) {
         tableConfigs.put(tableConfig.getTableName(), tableConfig);
     }
 
@@ -110,8 +93,8 @@ public class ProjectPersistentConfiguration implements PersistentStateComponent<
     }
 
     public TableConfig getTableConfig(String tableName, String databaseName) {
-        DefaultPersistentConfiguration persistentConfiguration = ServiceManager.getService(DefaultPersistentConfiguration.class);
-        PersistentConfig persistentConfig = persistentConfiguration.getPersistentConfig();
+        DefaultPersistentConfiguration defaultPersistentConfiguration = ServiceManager.getService(DefaultPersistentConfiguration.class);
+        PersistentConfig persistentConfig = defaultPersistentConfiguration.getPersistentConfig();
         TableConfig tableConfig = tableConfigs.get(tableName);
         if (null == tableConfig) {
             if (null != persistentConfig){
@@ -121,7 +104,7 @@ public class ProjectPersistentConfiguration implements PersistentStateComponent<
             }
             tableConfig.setDatabaseName(databaseName);
             tableConfig.setTableName(tableName);
-            setTableGenerateTarget(tableConfig, tableConfig.getEntityName());
+            setTableGenerateTarget(tableConfig);
             return tableConfig;
         }
         return tableConfig;

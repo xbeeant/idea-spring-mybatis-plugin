@@ -110,42 +110,4 @@ public class JavaUtil {
 
         return sb.toString();
     }
-
-    public static void boxListener(JCheckBox checkBox, Integer index, String property, boolean[] boxChanged, PersistentConfig config) {
-        checkBox.addItemListener(e -> {
-            // 1 check 2 uncheck
-            int stateChange = e.getStateChange();
-            Object getter = JavaUtil.getter(config, property);
-            boxChanged[index] = (stateChange == 2) == (Boolean) getter;
-        });
-    }
-
-    public static PanelLabel panelField(String label, JTextField field, String defaultValue) {
-        return panelField(label, field, defaultValue, new Dimension(200, 20));
-    }
-
-    public static PanelLabel panelField(String label, JTextField field, String defaultValue, Dimension dimension) {
-        PanelLabel panelLabel = new PanelLabel();
-        if (!StringUtils.isEmpty(defaultValue)) {
-            field.setText(defaultValue);
-        }
-
-        if (StringUtils.isEmpty(field.getText())) {
-            field.setText("");
-        }
-
-        JPanel panel = new JPanel();
-        panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
-        JLabel jlabel = new JLabel(label);
-        jlabel.setPreferredSize(dimension);
-        jlabel.setLabelFor(field);
-        panel.add(jlabel);
-        panel.add(field);
-
-        panelLabel.setPanel(panel);
-        panelLabel.setLabel(jlabel);
-        panelLabel.setField(field);
-
-        return panelLabel;
-    }
 }

@@ -15,6 +15,10 @@
 
     <change-notes>
         <![CDATA[
+        1.0.0.5:
+        <ul>
+          <li>fix link bug</li>
+        </ul>
         1.0.0.4:
         <ul>
           <li>fix merge java file bug</li>
@@ -46,12 +50,11 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <!-- Add your extensions here -->
-        <applicationService serviceInterface="org.xstudio.plugin.idea.setting.DefaultPersistentConfiguration"
-                            serviceImplementation="org.xstudio.plugin.idea.setting.DefaultPersistentConfiguration" />
+        <applicationService
+                serviceImplementation="org.xstudio.plugin.idea.setting.DefaultPersistentConfiguration" />
         <projectService
-                serviceInterface="org.xstudio.plugin.idea.setting.ProjectPersistentConfiguration"
                 serviceImplementation="org.xstudio.plugin.idea.setting.ProjectPersistentConfiguration"/>
-        <applicationConfigurable groupId="tools" displayName="Mybatis Spring Generator Plus" id="Mybatis.Generator.Plus.Plugin"
+        <applicationConfigurable groupId="tools" displayName="Mybatis Spring Generator" id="Mybatis.Generator.Plugin"
                              instance="org.xstudio.plugin.idea.setting.DefaultSettingConfigurable"/>
     </extensions>
 

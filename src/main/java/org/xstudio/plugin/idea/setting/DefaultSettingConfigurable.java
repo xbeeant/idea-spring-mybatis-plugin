@@ -6,7 +6,7 @@ import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.xstudio.plugin.idea.Constant;
-import org.xstudio.plugin.idea.ui.DefaultSettingUi;
+import org.xstudio.plugin.idea.ui.DefaultSettingUI;
 
 import javax.swing.*;
 
@@ -15,7 +15,7 @@ import javax.swing.*;
  * @version 2019/9/23
  */
 public class DefaultSettingConfigurable implements SearchableConfigurable {
-    private DefaultSettingUi mainPanel;
+    private DefaultSettingUI mainPanel;
 
     @Nullable
     @Override
@@ -38,8 +38,8 @@ public class DefaultSettingConfigurable implements SearchableConfigurable {
     @Nullable
     @Override
     public JComponent createComponent() {
-        mainPanel = new DefaultSettingUi();
-        return mainPanel.getContentPanel();
+        mainPanel = new DefaultSettingUI();
+        return mainPanel.getMainPanel();
     }
 
     @Nullable

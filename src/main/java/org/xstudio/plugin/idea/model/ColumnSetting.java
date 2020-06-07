@@ -27,11 +27,11 @@ public class ColumnSetting {
 
     private String comment;
 
-    public ColumnSetting(){
+    public ColumnSetting() {
 
     }
 
-	public String getColumn() {
+    public String getColumn() {
         return column;
     }
 
@@ -63,27 +63,27 @@ public class ColumnSetting {
         this.javaProperty = javaProperty;
     }
 
-	public Boolean getChanged() {
-		return changed;
-	}
+    public Boolean getChanged() {
+        return changed;
+    }
 
-	public void setChanged(Boolean changed) {
-		this.changed = changed;
-	}
+    public void setChanged(Boolean changed) {
+        this.changed = changed;
+    }
 
-	public Boolean getIgnore() {
-		return ignore;
-	}
+    public Boolean getIgnore() {
+        return ignore;
+    }
 
-	public void setIgnore(Boolean ignore) {
-		this.ignore = ignore;
-	}
+    public void setIgnore(Boolean ignore) {
+        this.ignore = ignore;
+    }
 
-	public String getComment() {
-		return comment;
-	}
+    public String getComment() {
+        return comment;
+    }
 
-	public void setComment(String comment) {
-		this.comment = comment;
-	}
+    public void setComment(String comment) {
+        this.comment = comment;
+    }
 }

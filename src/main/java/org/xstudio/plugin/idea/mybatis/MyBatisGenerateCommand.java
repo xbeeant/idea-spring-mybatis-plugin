@@ -9,16 +9,13 @@ import com.intellij.openapi.module.Module;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.roots.ModuleRootManager;
 import com.intellij.openapi.ui.MessageType;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.ui.popup.Balloon;
 import com.intellij.openapi.ui.popup.JBPopupFactory;
-import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.StatusBar;
 import com.intellij.openapi.wm.WindowManager;
 import com.intellij.ui.awt.RelativePoint;
-import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.mybatis.generator.api.MyBatisGenerator;
 import org.mybatis.generator.api.ShellCallback;
@@ -31,13 +28,13 @@ import org.xstudio.plugin.idea.model.DbType;
 import org.xstudio.plugin.idea.model.TableConfig;
 import org.xstudio.plugin.idea.mybatis.generator.MergeableShellCallback;
 import org.xstudio.plugin.idea.setting.ProjectPersistentConfiguration;
+import org.xstudio.plugin.idea.util.ModuleUtil;
 
 import javax.swing.event.HyperlinkEvent;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -126,7 +123,7 @@ public class MyBatisGenerateCommand {
 
         // override=true
         ShellCallback shellCallback;
-        if (this.generatorConfig.isOverride()) {
+        if (getGeneratorConfig().isOverride()) {
             shellCallback = new DefaultShellCallback(true);
         } else {
             shellCallback = new MergeableShellCallback(true);
@@ -156,7 +153,6 @@ public class MyBatisGenerateCommand {
                     try {
                         // 生成代码
                         myBatisGenerator.generate(null);
-                        VirtualFile moduleFile = ModuleRootManager.getInstance(module).getContentRoots()[0];
                         // 刷新工程
 
 //                        Objects.requireNonNull(project.getProjectFile()).refresh(true, true);
@@ -165,15 +161,26 @@ public class MyBatisGenerateCommand {
                         NotificationGroup balloonNotifications = new NotificationGroup(Constant.TITLE, NotificationDisplayType.STICKY_BALLOON, true);
 
                         List<String> result = myBatisGenerator.getGeneratedJavaFiles().stream()
-                                .map(generatedJavaFile -> String.format("<a href=\"%s%s/%s/%s\" target=\"_blank\">%s</a>", getRelativePath(module), MyBatisGenerateCommand.this.generatorConfig.getSourcePath(), generatedJavaFile.getTargetPackage().replace(".", "/"), generatedJavaFile.getFileName(), generatedJavaFile.getFileName()))
+                                .map(generatedJavaFile -> String.format("<a href=\"%s%s%s%s%s\">%s</a>",
+                                        generatorConfig.getSourcePath(),
+                                        File.separator,
+                                        generatedJavaFile.getTargetPackage().replace(".", File.separator),
+                                        File.separator,
+                                        generatedJavaFile.getFileName(),
+                                        generatedJavaFile.getFileName()))
                                 .collect(Collectors.toList());
                         result.addAll(myBatisGenerator.getGeneratedXmlFiles().stream()
-                                .map(generatedXmlFile -> String.format("<a href=\"%s%s/%s/%s\" target=\"_blank\">%s</a>", getRelativePath(module).replace(moduleFile.getPath() + "/", ""), MyBatisGenerateCommand.this.generatorConfig.getMapperTargetPackage(), generatedXmlFile.getTargetPackage().replace(".", "/"), generatedXmlFile.getFileName(), generatedXmlFile.getFileName()))
+                                .map(generatedXmlFile -> String.format("<a href=\"%s%s%s%s\">%s</a>",
+                                        getGeneratorConfig().getMapperTargetPackage(),
+                                        generatedXmlFile.getTargetPackage().replace(".", File.separator),
+                                        File.separator,
+                                        generatedXmlFile.getFileName(),
+                                        generatedXmlFile.getFileName()))
                                 .collect(Collectors.toList()));
 
                         Notification notification = balloonNotifications.createNotification("Generate Successfully", "<html>" + String.join("<br/>", result) + "</html>", NotificationType.INFORMATION, (notification1, hyperlinkEvent) -> {
                             if (hyperlinkEvent.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
-                                new OpenFileDescriptor(project, Objects.requireNonNull(moduleFile.findFileByRelativePath(hyperlinkEvent.getDescription()))).navigate(true);
+                                new OpenFileDescriptor(project, ModuleUtil.getModule(module,"root").findFileByRelativePath(hyperlinkEvent.getDescription())).navigate(true);
                             }
                         });
                         Notifications.Bus.notify(notification);
@@ -197,26 +204,26 @@ public class MyBatisGenerateCommand {
         PluginConfiguration pluginConfiguration;
 
         // swagger2 注解插件
-        if (generatorConfig.isSwagger2Plugin()) {
+        if (getGeneratorConfig().isSwagger2Plugin()) {
             pluginConfiguration = new PluginConfiguration();
             pluginConfiguration.setConfigurationType("org.xstudio.plugin.mybatis.ModelSwaggerPropertyAnnotationPlugin");
             context.addPluginConfiguration(pluginConfiguration);
         }
 
         // 标记移除插件配置
-        if (generatorConfig.isMarkDeletePlugin()) {
+        if (getGeneratorConfig().isMarkDeletePlugin()) {
             pluginConfiguration = new PluginConfiguration();
             pluginConfiguration.setConfigurationType("org.xstudio.plugin.mybatis.ModelMarkDeleteFieldPlugin");
             context.addPluginConfiguration(pluginConfiguration);
         }
 
         // 父对象插件配置
-        if (generatorConfig.isRootObjectPlugin()) {
+        if (getGeneratorConfig().isRootObjectPlugin()) {
             pluginConfiguration = new PluginConfiguration();
             pluginConfiguration.setConfigurationType("org.xstudio.plugin.mybatis.ModelRootObjectPlugin");
-            pluginConfiguration.addProperty("rootObject", generatorConfig.getBaseObject());
+            pluginConfiguration.addProperty("rootObject", getGeneratorConfig().getBaseObject());
             pluginConfiguration.addProperty("generateGetSetKey", "true");
-            pluginConfiguration.addProperty("excludeFields", generatorConfig.getIgnoreColumn());
+            pluginConfiguration.addProperty("excludeFields", getGeneratorConfig().getIgnoreColumn());
             context.addPluginConfiguration(pluginConfiguration);
 
             // 给日期类型添加 ***Begin ***End 属性
@@ -233,7 +240,7 @@ public class MyBatisGenerateCommand {
             // dao 继承父类
             pluginConfiguration = new PluginConfiguration();
             pluginConfiguration.setConfigurationType("org.xstudio.plugin.mybatis.ClientRootPlugin");
-            pluginConfiguration.addProperty("rootClient", generatorConfig.getIDao());
+            pluginConfiguration.addProperty("rootClient", getGeneratorConfig().getDaoInterface());
             pluginConfiguration.addProperty("beginEndPluginEnable", "true");
             pluginConfiguration.addProperty("excludeMethods", "countByExample" +
                     ",deleteByExample,deleteByPrimaryKey," +
@@ -260,7 +267,7 @@ public class MyBatisGenerateCommand {
             // mapper 模糊搜索插件
             pluginConfiguration = new PluginConfiguration();
             pluginConfiguration.setConfigurationType("org.xstudio.plugin.mybatis.MapperFuzzySearchPlugin");
-            pluginConfiguration.addProperty("nonFuzzyColumn", generatorConfig.getNonFuzzyColumn());
+            pluginConfiguration.addProperty("nonFuzzyColumn", getGeneratorConfig().getNonFuzzyColumn());
             pluginConfiguration.addProperty("beginEndPluginEnable", "true");
             context.addPluginConfiguration(pluginConfiguration);
 
@@ -272,35 +279,35 @@ public class MyBatisGenerateCommand {
             // service 代码服务
             pluginConfiguration = new PluginConfiguration();
             pluginConfiguration.setConfigurationType("org.xstudio.plugin.mybatis.ServicePlugin");
-            pluginConfiguration.addProperty("idGenerator", generatorConfig.getIdGenerator());
-            pluginConfiguration.addProperty("rootClient", generatorConfig.getIDao());
-            pluginConfiguration.addProperty("rootService", generatorConfig.getIService());
-            pluginConfiguration.addProperty("rootServiceImpl", generatorConfig.getServiceImpl());
-            pluginConfiguration.addProperty("package", generatorConfig.getTargetPackage());
+            pluginConfiguration.addProperty("idGenerator", getGeneratorConfig().getIdGenerator());
+            pluginConfiguration.addProperty("rootClient", getGeneratorConfig().getDaoInterface());
+            pluginConfiguration.addProperty("rootService", getGeneratorConfig().getServiceInterface());
+            pluginConfiguration.addProperty("rootServiceImpl", getGeneratorConfig().getServiceImplement());
+            pluginConfiguration.addProperty("package", getGeneratorConfig().getTargetPackage());
             pluginConfiguration.addProperty("generateGetSetKeyValue", "false");
             context.addPluginConfiguration(pluginConfiguration);
         }
 
         // json 序列化注解插件配置
-        if (generatorConfig.isFastjsonPlugin()) {
+        if (getGeneratorConfig().isFastjsonPlugin()) {
             pluginConfiguration = new PluginConfiguration();
             pluginConfiguration.setConfigurationType("org.xstudio.plugin.mybatis.ModelFieldJsonSerializePlugin");
             context.addPluginConfiguration(pluginConfiguration);
         }
 
         // facade service 代码服务
-        if (generatorConfig.isFacadePlugin()) {
+        if (getGeneratorConfig().isFacadePlugin()) {
             pluginConfiguration = new PluginConfiguration();
             pluginConfiguration.setConfigurationType("org.xstudio.plugin.mybatis.FacadePlugin");
-            pluginConfiguration.addProperty("rootService", generatorConfig.getIService());
-            pluginConfiguration.addProperty("rootFacadeService", generatorConfig.getIFacade());
-            pluginConfiguration.addProperty("rootFacadeServiceImpl", generatorConfig.getFacadeImpl());
-            pluginConfiguration.addProperty("package", generatorConfig.getTargetPackage());
+            pluginConfiguration.addProperty("rootService", getGeneratorConfig().getServiceInterface());
+            pluginConfiguration.addProperty("rootFacadeService", getGeneratorConfig().getFacadeInterface());
+            pluginConfiguration.addProperty("rootFacadeServiceImpl", getGeneratorConfig().getFacadeImplement());
+            pluginConfiguration.addProperty("package", getGeneratorConfig().getTargetPackage());
             context.addPluginConfiguration(pluginConfiguration);
         }
 
         // lombox
-        if (generatorConfig.isLombokPlugin()) {
+        if (getGeneratorConfig().isLombokPlugin()) {
             pluginConfiguration = new PluginConfiguration();
             pluginConfiguration.setConfigurationType("org.xstudio.plugin.mybatis.ModelLombokPlugin");
             context.addPluginConfiguration(pluginConfiguration);
@@ -314,15 +321,6 @@ public class MyBatisGenerateCommand {
         pluginConfiguration.addProperty("suppressJavaInterface", "false");
         pluginConfiguration.addProperty("addGWTInterface", "false");
         context.addPluginConfiguration(pluginConfiguration);
-    }
-
-    private String getRelativePath(Module module) {
-        String path = ModuleRootManager.getInstance(module).getContentRoots()[0].getPath();
-        if (generatorConfig.getModuleRootPath().equals(path)) {
-            return "";
-        } else {
-            return generatorConfig.getModuleRootPath().replace(path + "/", "") + "/";
-        }
     }
 
     /**
@@ -370,7 +368,7 @@ public class MyBatisGenerateCommand {
         jdbcConfig.setUserId(username);
         jdbcConfig.setPassword(password);
 
-        Boolean isMysql8 = generatorConfig.isMysql8();
+        boolean isMysql8 = getGeneratorConfig().isMysql8();
         if (isMysql8) {
             driverClass = DbType.MySQL_8.getDriverClass();
             databaseUrl += "?serverTimezone=UTC&useSSL=false";
@@ -389,13 +387,13 @@ public class MyBatisGenerateCommand {
      * @return {@link JavaModelGeneratorConfiguration}
      */
     private JavaModelGeneratorConfiguration buildModelConfig() {
-        String projectFolder = handleProjectFolder(generatorConfig.getModuleRootPath());
+        String projectFolder = handleProjectFolder(getGeneratorConfig().getModuleRootPath());
 
-        String sourcePath = generatorConfig.getSourcePath();
+        String sourcePath = getGeneratorConfig().getSourcePath();
 
         JavaModelGeneratorConfiguration modelConfig = new JavaModelGeneratorConfiguration();
 
-        modelConfig.setTargetPackage(generatorConfig.getTargetPackage() + ".model");
+        modelConfig.setTargetPackage(getGeneratorConfig().getTargetPackage() + ".model");
         modelConfig.setTargetProject(targetPath(projectFolder, sourcePath));
         return modelConfig;
     }
@@ -407,13 +405,13 @@ public class MyBatisGenerateCommand {
      */
     private SqlMapGeneratorConfiguration buildMapperXmlConfig() {
 
-        String projectFolder = handleProjectFolder(generatorConfig.getModuleRootPath());
+        String projectFolder = handleProjectFolder(getGeneratorConfig().getModuleRootPath());
 
         SqlMapGeneratorConfiguration mapperConfig = new SqlMapGeneratorConfiguration();
 
-        mapperConfig.setTargetPackage(generatorConfig.getDatabaseNamePackage());
+        mapperConfig.setTargetPackage(getGeneratorConfig().getDatabaseNamePackage());
 
-        String mapperPath = targetPath(projectFolder, generatorConfig.getMapperTargetPackage());
+        String mapperPath = targetPath(projectFolder, getGeneratorConfig().getMapperTargetPackage());
         mapperConfig.setTargetProject(mapperPath);
 
         File file = new File(mapperPath);
@@ -421,39 +419,7 @@ public class MyBatisGenerateCommand {
             file.mkdirs();
         }
 
-        if (generatorConfig.isOverride()) {
-//            String mappingXmlFilePath = getMappingXmlFilePath(generatorConfig);
-//            File mappingXmlFile = new File(mappingXmlFilePath);
-//            if (mappingXmlFile.exists()) {
-//                mappingXmlFile.delete();
-//            }
-        }
-
         return mapperConfig;
-    }
-
-    /**
-     * 获取xml文件路径 用以删除之前的xml
-     *
-     * @param tableConfig {@link TableConfig}
-     * @return mapper path
-     */
-    private String getMappingXmlFilePath(TableConfig tableConfig) {
-        StringBuilder sb = new StringBuilder();
-        String mappingXmlPackage = tableConfig.getMapperImplClass();
-        String xmlMvnPath = tableConfig.getMapperTargetPackage();
-        sb.append(tableConfig.getModuleRootPath() + "/" + xmlMvnPath + "/");
-
-        if (!StringUtils.isEmpty(mappingXmlPackage)) {
-            sb.append(mappingXmlPackage.replace(".", "/")).append("/");
-        }
-        if (!StringUtils.isEmpty(tableConfig.getMapperImplClass())) {
-            sb.append(tableConfig.getMapperImplClass());
-        } else {
-            sb.append(tableConfig.getEntityName()).append("Mapper.xml");
-        }
-
-        return sb.toString();
     }
 
     /**
@@ -464,10 +430,10 @@ public class MyBatisGenerateCommand {
      */
     private TableConfiguration buildTableConfig(Context context) {
         TableConfiguration tableConfig = new TableConfiguration(context);
-        tableConfig.setTableName(this.generatorConfig.getTableName());
-        tableConfig.setDomainObjectName(this.generatorConfig.getEntityName());
-        if (null != generatorConfig.getTablePrefix() && !"".equals(generatorConfig.getTablePrefix())) {
-            String camelCaseString = JavaBeansUtil.getCamelCaseString(generatorConfig.getTablePrefix(), true);
+        tableConfig.setTableName(getGeneratorConfig().getTableName());
+        tableConfig.setDomainObjectName(getGeneratorConfig().getEntityName());
+        if (null != getGeneratorConfig().getTablePrefix() && !"".equals(getGeneratorConfig().getTablePrefix())) {
+            String camelCaseString = JavaBeansUtil.getCamelCaseString(getGeneratorConfig().getTablePrefix(), true);
             DomainObjectRenamingRule domainObjectRenamingRule = new DomainObjectRenamingRule();
             domainObjectRenamingRule.setSearchString("^" + camelCaseString);
             domainObjectRenamingRule.setReplaceString("");
@@ -488,14 +454,7 @@ public class MyBatisGenerateCommand {
             tableConfig.setCatalog(schema);
         }
 
-//        if (!this.generatorConfig.isUseExample()) {
-//            tableConfig.setUpdateByExampleStatementEnabled(false);
-//            tableConfig.setCountByExampleStatementEnabled(false);
-//            tableConfig.setDeleteByExampleStatementEnabled(false);
-//            tableConfig.setSelectByExampleStatementEnabled(false);
-//        }
-
-        if (this.generatorConfig.isUseSchemaPrefix()) {
+        if (getGeneratorConfig().isUseSchemaPrefix()) {
             if (DbType.MySQL.name().equals(databaseType)) {
                 tableConfig.setSchema(schema);
             } else if (DbType.Oracle.name().equals(databaseType)) {
@@ -511,12 +470,12 @@ public class MyBatisGenerateCommand {
         }
 
 
-        if (this.generatorConfig.isUseActualColumnNames()) {
+        if (getGeneratorConfig().isUseActualColumnNames()) {
             tableConfig.addProperty("useActualColumnNames", "true");
         }
 
-        if (this.generatorConfig.isUseTableNameAlias()) {
-            tableConfig.setAlias(this.generatorConfig.getTableName());
+        if (getGeneratorConfig().isUseTableNameAlias()) {
+            tableConfig.setAlias(getGeneratorConfig().getTableName());
         }
 
 
@@ -530,14 +489,14 @@ public class MyBatisGenerateCommand {
      */
     private JavaClientGeneratorConfiguration buildMapperConfig() {
 
-        String projectFolder = handleProjectFolder(generatorConfig.getModuleRootPath());
+        String projectFolder = handleProjectFolder(getGeneratorConfig().getModuleRootPath());
         JavaClientGeneratorConfiguration mapperConfig = new JavaClientGeneratorConfiguration();
         mapperConfig.setConfigurationType("XMLMAPPER");
 
         mapperConfig.addProperty("enableSubPackages", "false");
-        mapperConfig.setTargetPackage(generatorConfig.getTargetPackage() + ".mapper");
+        mapperConfig.setTargetPackage(getGeneratorConfig().getTargetPackage() + ".mapper");
 
-        mapperConfig.setTargetProject(targetPath(projectFolder, generatorConfig.getSourcePath()));
+        mapperConfig.setTargetProject(targetPath(projectFolder, getGeneratorConfig().getSourcePath()));
         return mapperConfig;
     }
 
@@ -552,10 +511,10 @@ public class MyBatisGenerateCommand {
         commentConfig.addProperty("addRemarkComments", "true");
         commentConfig.addProperty("suppressDate", "true");
 
-        if (generatorConfig.isComment()) {
+        if (getGeneratorConfig().isComment()) {
             commentConfig.addProperty("columnRemarks", "true");
         }
-        if (generatorConfig.isAnnotation()) {
+        if (getGeneratorConfig().isAnnotation()) {
             commentConfig.addProperty("annotations", "true");
         }
 
@@ -574,6 +533,10 @@ public class MyBatisGenerateCommand {
             return projectFolder + path;
         }
 
-        return projectFolder + "/" + generatorConfig.getSourcePath();
+        return projectFolder + "/" + getGeneratorConfig().getSourcePath();
+    }
+
+    public TableConfig getGeneratorConfig() {
+        return generatorConfig;
     }
 }

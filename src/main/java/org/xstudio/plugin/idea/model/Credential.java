@@ -19,7 +19,6 @@ public class Credential {
     }
 
 
-
     public String getUsername() {
         return username;
     }
