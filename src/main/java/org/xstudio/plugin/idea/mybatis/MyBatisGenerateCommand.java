@@ -17,6 +17,8 @@ import com.intellij.openapi.wm.StatusBar;
 import com.intellij.openapi.wm.WindowManager;
 import com.intellij.ui.awt.RelativePoint;
 import org.jetbrains.annotations.NotNull;
+import org.mybatis.generator.api.GeneratedJavaFile;
+import org.mybatis.generator.api.GeneratedXmlFile;
 import org.mybatis.generator.api.MyBatisGenerator;
 import org.mybatis.generator.api.ShellCallback;
 import org.mybatis.generator.config.*;
@@ -35,7 +37,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * @author xiaobiao
@@ -108,6 +109,7 @@ public class MyBatisGenerateCommand {
         // 生成表对象设置
         JavaModelGeneratorConfiguration modelConfig = buildModelConfig();
         context.setJavaModelGeneratorConfiguration(modelConfig);
+
         // 生成表设置
         TableConfiguration tableConfig = buildTableConfig(context);
         context.addTableConfiguration(tableConfig);
@@ -121,6 +123,10 @@ public class MyBatisGenerateCommand {
         CommentGeneratorConfiguration commentConfig = buildCommentConfig();
         context.setCommentGeneratorConfiguration(commentConfig);
 
+        JavaTypeResolverConfiguration javaTypeResolverConfiguration = new JavaTypeResolverConfiguration();
+        javaTypeResolverConfiguration.addProperty("type", "org.xstudio.plugin.mybatis.MyJavaTypeResolver");
+        context.setJavaTypeResolverConfiguration(javaTypeResolverConfiguration);
+
         // override=true
         ShellCallback shellCallback;
         if (getGeneratorConfig().isOverride()) {
@@ -131,6 +137,7 @@ public class MyBatisGenerateCommand {
         // =====================================
         // plugins config
         // =====================================
+
 
         buildPluginConfig(context);
 
@@ -160,23 +167,28 @@ public class MyBatisGenerateCommand {
 
                         NotificationGroup balloonNotifications = new NotificationGroup(Constant.TITLE, NotificationDisplayType.STICKY_BALLOON, true);
 
-                        List<String> result = myBatisGenerator.getGeneratedJavaFiles().stream()
-                                .map(generatedJavaFile -> String.format("<a href=\"%s%s%s%s%s\">%s</a>",
-                                        generatorConfig.getSourcePath(),
-                                        File.separator,
-                                        generatedJavaFile.getTargetPackage().replace(".", File.separator),
-                                        File.separator,
-                                        generatedJavaFile.getFileName(),
-                                        generatedJavaFile.getFileName()))
-                                .collect(Collectors.toList());
-                        result.addAll(myBatisGenerator.getGeneratedXmlFiles().stream()
-                                .map(generatedXmlFile -> String.format("<a href=\"%s%s%s%s\">%s</a>",
-                                        getGeneratorConfig().getMapperTargetPackage(),
-                                        generatedXmlFile.getTargetPackage().replace(".", File.separator),
-                                        File.separator,
-                                        generatedXmlFile.getFileName(),
-                                        generatedXmlFile.getFileName()))
-                                .collect(Collectors.toList()));
+                        List<String> result = new ArrayList<>();
+                        List<GeneratedJavaFile> generatedJavaFiles = myBatisGenerator.getGeneratedJavaFiles();
+                        for (GeneratedJavaFile generatedJavaFile : generatedJavaFiles) {
+                            String link = String.format("<a href=\"%s%s%s%s%s\">%s</a>",
+                                    generatorConfig.getSourcePath(),
+                                    File.separator,
+                                    generatedJavaFile.getTargetPackage().replace(".", File.separator),
+                                    File.separator,
+                                    generatedJavaFile.getFileName(),
+                                    generatedJavaFile.getFileName());
+                            result.add(link);
+                        }
+
+                        for (GeneratedXmlFile generatedXmlFile : myBatisGenerator.getGeneratedXmlFiles()) {
+                            String link = String.format("<a href=\"%s%s%s%s\">%s</a>",
+                                    getGeneratorConfig().getMapperTargetPackage(),
+                                    generatedXmlFile.getTargetPackage().replace(".", File.separator),
+                                    File.separator,
+                                    generatedXmlFile.getFileName(),
+                                    generatedXmlFile.getFileName());
+                            result.add(link);
+                        }
 
                         Notification notification = balloonNotifications.createNotification("Generate Successfully", "<html>" + String.join("<br/>", result) + "</html>", NotificationType.INFORMATION, (notification1, hyperlinkEvent) -> {
                             if (hyperlinkEvent.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {

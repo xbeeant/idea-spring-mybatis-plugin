@@ -10,7 +10,6 @@ import org.mybatis.generator.api.dom.xml.VisitableElement;
 import org.mybatis.generator.api.dom.xml.XmlElement;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -57,9 +56,7 @@ public class MapperTypeHandlerPlugin extends PluginAdapter {
 
     private void addTypeHandlerAttribute(XmlElement element) {
         List<VisitableElement> elements = element.getElements();
-        Iterator<VisitableElement> iterator = elements.iterator();
-        while (iterator.hasNext()) {
-            VisitableElement next = iterator.next();
+        for (VisitableElement next : elements) {
             if (next instanceof XmlElement) {
                 XmlElement xmlElement = (XmlElement) next;
                 String handler = typeHandlersMap.get(xmlElement.getAttributes().get(0).getValue());
@@ -72,9 +69,7 @@ public class MapperTypeHandlerPlugin extends PluginAdapter {
 
     private void replaceByTypeHandler(XmlElement element) {
         List<VisitableElement> elements = element.getElements();
-        Iterator<VisitableElement> iterator = elements.iterator();
-        while (iterator.hasNext()) {
-            VisitableElement next = iterator.next();
+        for (VisitableElement next : elements) {
             if (next instanceof XmlElement) {
                 XmlElement xmlElement = (XmlElement) next;
                 TextElement columnElement = (TextElement) xmlElement.getElements().get(0);
