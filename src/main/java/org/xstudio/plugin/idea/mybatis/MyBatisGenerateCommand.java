@@ -123,10 +123,6 @@ public class MyBatisGenerateCommand {
         CommentGeneratorConfiguration commentConfig = buildCommentConfig();
         context.setCommentGeneratorConfiguration(commentConfig);
 
-        JavaTypeResolverConfiguration javaTypeResolverConfiguration = new JavaTypeResolverConfiguration();
-        javaTypeResolverConfiguration.addProperty("type", "org.xstudio.plugin.mybatis.MyJavaTypeResolver");
-        context.setJavaTypeResolverConfiguration(javaTypeResolverConfiguration);
-
         // override=true
         ShellCallback shellCallback;
         if (getGeneratorConfig().isOverride()) {
