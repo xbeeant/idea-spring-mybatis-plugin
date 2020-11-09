@@ -8,7 +8,7 @@ import com.intellij.openapi.components.Storage;
 import com.intellij.util.xmlb.XmlSerializerUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.xstudio.plugin.idea.model.PersistentConfig;
+import org.xstudio.plugin.idea.mybatis.generator.PersistentProperties;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,22 +17,22 @@ import java.util.Map;
  * @author xiaobiao
  * @version 2019/9/22
  */
-@State(name = "MybatisSpringGeneratorPersistentConfiguration", storages = {@Storage("mybatis-spring-generator-config.xml")})
+@State(name = "XstudioGenerator", storages = {@Storage("xstudio-generator.xml")})
 public class DefaultPersistentConfiguration implements PersistentStateComponent<DefaultPersistentConfiguration> {
 
-    private PersistentConfig persistentConfig = new PersistentConfig();
+    private PersistentProperties persistentConfig = new PersistentProperties();
 
-    public PersistentConfig getPersistentConfig() {
+    public PersistentProperties getPersistentConfig() {
         return persistentConfig;
     }
 
-    private Map<String, PersistentConfig> configs = new HashMap<>();
+    private Map<String, PersistentProperties> configs = new HashMap<>();
 
-    public Map<String, PersistentConfig> getConfigs() {
+    public Map<String, PersistentProperties> getConfigs() {
         return configs;
     }
 
-    public void setConfigs(Map<String, PersistentConfig> configs) {
+    public void setConfigs(Map<String, PersistentProperties> configs) {
         this.configs = configs;
     }
 
@@ -41,12 +41,12 @@ public class DefaultPersistentConfiguration implements PersistentStateComponent<
         return ServiceManager.getService(DefaultPersistentConfiguration.class);
     }
 
-    public void setPersistentConfig(PersistentConfig persistentConfig) {
-        PersistentConfig newConfig = JSON.parseObject(JSON.toJSONString(persistentConfig), PersistentConfig.class);
+    public void setPersistentConfig(PersistentProperties persistentConfig) {
+        PersistentProperties newConfig = JSON.parseObject(JSON.toJSONString(persistentConfig), PersistentProperties.class);
         this.persistentConfig = persistentConfig;
         String name = "default";
-        if (null != persistentConfig.getConfigName() && !"".equals(persistentConfig.getConfigName())) {
-            name = persistentConfig.getConfigName();
+        if (null != persistentConfig.getCfgName() && !"".equals(persistentConfig.getCfgName())) {
+            name = persistentConfig.getCfgName();
         }
         configs.put(name, newConfig);
     }

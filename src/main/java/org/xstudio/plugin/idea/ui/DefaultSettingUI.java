@@ -1,9 +1,16 @@
 package org.xstudio.plugin.idea.ui;
 
-import org.xstudio.plugin.idea.model.PersistentConfig;
+import com.xstudio.mybatis.po.Properties;
+import org.xstudio.plugin.idea.mybatis.generator.PersistentProperties;
+import org.xstudio.plugin.idea.mybatis.generator.PluginProperties;
 import org.xstudio.plugin.idea.setting.DefaultPersistentConfiguration;
 
 import javax.swing.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -12,73 +19,127 @@ import java.util.Objects;
  */
 public class DefaultSettingUI extends JDialog {
 
-    private JPanel mainPanel;
-    private JTextField tSrcPath;
+    private final PersistentProperties persistentConfig;
     private JCheckBox chkComment;
+    private JCheckBox chkFastJson;
+    private JCheckBox chkGenerateFacade;
+    private JCheckBox chkLombok;
+    private JCheckBox chkMarkDelete;
+    private JCheckBox chkMySQL8;
     private JCheckBox chkOverwrite;
+    private JCheckBox chkRootEntityObject;
+    private JCheckBox chkSwaggerModel;
     private JCheckBox chkToString;
     private JCheckBox chkUseAlias;
-    private JCheckBox chkLombok;
-    private JCheckBox chkGenerateFacade;
-    private JCheckBox chkRootEntityObject;
     private JCheckBox chkUseSchemaPrefix;
-    private JCheckBox chkMySQL8;
-    private JCheckBox chkSwaggerModel;
-    private JCheckBox chkMarkDelete;
-    private JCheckBox chkFastJson;
-    private JTextField tIdGenerator;
-    private JTextField tServiceInterface;
-    private JTextField tServiceImplement;
-    private JTextField tFacadeInterface;
+    private JPanel mainPanel;
+    private JTextField tCfgName;
     private JTextField tFacadeImplement;
-    private JTextField tMapperInterface;
-    private JTextField tRootObject;
+    private JTextField tFacadeInterface;
+    private JTextField tIdGenerator;
     private JTextField tIgnoreColumns;
+    private JTextField tMapperInterface;
     private JTextField tNonFuzzySearchColumns;
-    private JTextField tConfigurationName;
+    private JTextField tReplaceString;
     private JTextField tResourcePath;
+    private JTextField tRootObject;
     private JTextField tRootPackage;
-    private JTextField tTablePrefix;
-
-    private final PersistentConfig persistentConfig;
+    private JTextField tSearchString;
+    private JTextField tServiceImplement;
+    private JTextField tServiceInterface;
+    private JTextField tSrcPath;
+    private JTextField tResponseObject;
+    private JComboBox comboxCfgName;
 
     public DefaultSettingUI() {
         DefaultPersistentConfiguration instance = DefaultPersistentConfiguration.getInstance();
         assert instance != null;
+        Map<String, PersistentProperties> configs = instance.getConfigs();
         persistentConfig = instance.getPersistentConfig();
         if (null != persistentConfig) {
             initialPanel(persistentConfig);
         }
+        comboxCfgName.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent event) {
+                if (event.getStateChange() == ItemEvent.SELECTED) {
+                    Object item = event.getItem();
+                    // do something with object
+                }
+            }
+        });
     }
 
-    private void initialPanel(PersistentConfig config) {
-        tConfigurationName.setText(config.getConfigName());
-        tSrcPath.setText(config.getSourcePath());
+    private void initialPanel(PersistentProperties config) {
+        tCfgName.setText(config.getCfgName());
+        tSrcPath.setText(config.getSrcPath());
         tResourcePath.setText(config.getResourcePath());
-        tTablePrefix.setText(config.getTablePrefix());
+        tSearchString.setText(config.getSearchString());
+        tReplaceString.setText(config.getReplaceString());
         tRootPackage.setText(config.getRootPackage());
         tIdGenerator.setText(config.getIdGenerator());
         tServiceInterface.setText(config.getServiceInterface());
-        tServiceImplement.setText(config.getServiceImplement());
+        tServiceImplement.setText(config.getServiceImpl());
         tFacadeInterface.setText(config.getFacadeInterface());
-        tFacadeImplement.setText(config.getFacadeImplement());
-        tMapperInterface.setText(config.getDaoInterface());
-        tRootObject.setText(config.getBaseObject());
-        tIgnoreColumns.setText(config.getIgnoreColumn());
-        tNonFuzzySearchColumns.setText(config.getNonFuzzyColumn());
+        tFacadeImplement.setText(config.getFacadeImpl());
+        tMapperInterface.setText(config.getMapperInterface());
 
-        chkComment.setSelected(config.isComment());
-        chkOverwrite.setSelected(config.isOverride());
-        chkToString.setSelected(config.isToStringHashcodeEquals());
-        chkUseSchemaPrefix.setSelected(config.isUseSchemaPrefix());
-        chkUseAlias.setSelected(config.isUseTableNameAlias());
-        chkMySQL8.setSelected(config.isMysql8());
-        chkLombok.setSelected(config.isLombokPlugin());
-        chkSwaggerModel.setSelected(config.isSwagger2Plugin());
-        chkGenerateFacade.setSelected(config.isFacadePlugin());
-        chkMarkDelete.setSelected(config.isMarkDeletePlugin());
-        chkRootEntityObject.setSelected(config.isRootObjectPlugin());
-        chkFastJson.setSelected(config.isFastjsonPlugin());
+        tRootObject.setText(config.getRootClass());
+
+        tIgnoreColumns.setText(config.getIgnoreColumns());
+        tNonFuzzySearchColumns.setText(config.getNonFuzzySearchColumn());
+
+        PluginProperties plugin = config.getPlugin();
+        if (null != plugin) {
+            chkComment.setSelected(plugin.isChkComment());
+            chkFastJson.setSelected(plugin.isChkFastJson());
+            chkGenerateFacade.setSelected(plugin.isChkGenerateFacade());
+            chkLombok.setSelected(plugin.isChkLombok());
+            chkMarkDelete.setSelected(plugin.isChkMarkDelete());
+            chkMySQL8.setSelected(plugin.isChkMySQL8());
+            chkOverwrite.setSelected(plugin.isChekOverwrite());
+            chkRootEntityObject.setSelected(plugin.isChkRootEntityObject());
+            chkSwaggerModel.setSelected(plugin.isChkSwaggerModel());
+            chkToString.setSelected(plugin.isChkToString());
+            chkUseAlias.setSelected(plugin.isChkUseAlias());
+            chkUseSchemaPrefix.setSelected(plugin.isChkUseSchemaPrefix());
+        }
+    }
+
+    public void apply() {
+        persistentConfig.setCfgName(tCfgName.getText());
+        persistentConfig.setFacadeImpl(tFacadeImplement.getText());
+        persistentConfig.setFacadeInterface(tFacadeInterface.getText());
+        persistentConfig.setIdGenerator(tIdGenerator.getText());
+        persistentConfig.setIgnoreColumns(tIgnoreColumns.getText());
+        persistentConfig.setMapperInterface(tMapperInterface.getText());
+        persistentConfig.setNonFuzzySearchColumn(tNonFuzzySearchColumns.getText());
+        PluginProperties pluginProperties = new PluginProperties();
+        pluginProperties.setChkComment(chkComment.isSelected());
+        pluginProperties.setChkToString(chkToString.isSelected());
+        pluginProperties.setChkUseAlias(chkUseAlias.isSelected());
+        pluginProperties.setChkLombok(chkLombok.isSelected());
+        pluginProperties.setChkGenerateFacade(chkGenerateFacade.isSelected());
+        pluginProperties.setChkRootEntityObject(chkRootEntityObject.isSelected());
+        pluginProperties.setChekOverwrite(chkOverwrite.isSelected());
+        pluginProperties.setChkUseSchemaPrefix(chkUseSchemaPrefix.isSelected());
+        pluginProperties.setChkMySQL8(chkMySQL8.isSelected());
+        pluginProperties.setChkSwaggerModel(chkSwaggerModel.isSelected());
+        pluginProperties.setChkMarkDelete(chkMarkDelete.isSelected());
+        pluginProperties.setChkFastJson(chkFastJson.isSelected());
+
+        persistentConfig.setPlugin(pluginProperties);
+        persistentConfig.setReplaceString(tReplaceString.getText());
+        persistentConfig.setResourcePath(tResourcePath.getText());
+        persistentConfig.setRootClass(tRootObject.getText());
+        persistentConfig.setRootPackage(tRootPackage.getText());
+        persistentConfig.setSearchString(tSearchString.getText());
+        persistentConfig.setServiceImpl(tServiceImplement.getText());
+        persistentConfig.setServiceInterface(tServiceInterface.getText());
+        persistentConfig.setSrcPath(tSrcPath.getText());
+        persistentConfig.setResponseObject(tResponseObject.getText());
+
+        Objects.requireNonNull(DefaultPersistentConfiguration.getInstance()).setPersistentConfig(persistentConfig);
     }
 
     public JPanel getMainPanel() {
@@ -86,67 +147,39 @@ public class DefaultSettingUI extends JDialog {
     }
 
     public boolean isModified() {
-        boolean modified = !tSrcPath.getText().equals(persistentConfig.getSourcePath());
-        modified |= !tConfigurationName.getText().equals(persistentConfig.getConfigName());
+
+        boolean modified = !tSrcPath.getText().equals(persistentConfig.getSrcPath());
+        modified |= !tCfgName.getText().equals(persistentConfig.getCfgName());
         modified |= !tResourcePath.getText().equals(persistentConfig.getResourcePath());
 
-        modified |= !tTablePrefix.getText().equals(persistentConfig.getTablePrefix());
+        modified |= !tSearchString.getText().equals(persistentConfig.getSearchString());
+        modified |= !tReplaceString.getText().equals(persistentConfig.getReplaceString());
         modified |= !tRootPackage.getText().equals(persistentConfig.getRootPackage());
         modified |= !tIdGenerator.getText().equals(persistentConfig.getIdGenerator());
         modified |= !tServiceInterface.getText().equals(persistentConfig.getServiceInterface());
-        modified |= !tServiceImplement.getText().equals(persistentConfig.getServiceImplement());
+        modified |= !tServiceImplement.getText().equals(persistentConfig.getServiceImpl());
         modified |= !tFacadeInterface.getText().equals(persistentConfig.getFacadeInterface());
-        modified |= !tFacadeImplement.getText().equals(persistentConfig.getFacadeImplement());
-        modified |= !tMapperInterface.getText().equals(persistentConfig.getDaoInterface());
-        modified |= !tRootObject.getText().equals(persistentConfig.getBaseObject());
-        modified |= !tIgnoreColumns.getText().equals(persistentConfig.getIgnoreColumn());
-        modified |= !tNonFuzzySearchColumns.getText().equals(persistentConfig.getNonFuzzyColumn());
+        modified |= !tFacadeImplement.getText().equals(persistentConfig.getFacadeImpl());
+        modified |= !tMapperInterface.getText().equals(persistentConfig.getMapperInterface());
+        modified |= !tRootObject.getText().equals(persistentConfig.getRootClass());
+        modified |= !tResponseObject.getText().equals(persistentConfig.getResponseObject());
+        modified |= !tIgnoreColumns.getText().equals(persistentConfig.getIgnoreColumns());
+        modified |= !tNonFuzzySearchColumns.getText().equals(persistentConfig.getNonFuzzySearchColumn());
 
-        modified |= chkComment.isSelected() != persistentConfig.isComment();
-        modified |= chkFastJson.isSelected() != persistentConfig.isFastjsonPlugin();
-        modified |= chkRootEntityObject.isSelected() != persistentConfig.isRootObjectPlugin();
-        modified |= chkMarkDelete.isSelected() != persistentConfig.isMarkDeletePlugin();
-        modified |= chkGenerateFacade.isSelected() != persistentConfig.isFacadePlugin();
-        modified |= chkSwaggerModel.isSelected() != persistentConfig.isSwagger2Plugin();
-        modified |= chkLombok.isSelected() != persistentConfig.isLombokPlugin();
-        modified |= chkMySQL8.isSelected() != persistentConfig.isMysql8();
-        modified |= chkUseAlias.isSelected() != persistentConfig.isUseTableNameAlias();
-        modified |= chkOverwrite.isSelected() != persistentConfig.isOverride();
-        modified |= chkToString.isSelected() != persistentConfig.isToStringHashcodeEquals();
-        modified |= chkUseSchemaPrefix.isSelected() != persistentConfig.isUseSchemaPrefix();
+        PluginProperties plugin = persistentConfig.getPlugin();
+        modified |= chkComment.isSelected() != plugin.isChkComment();
+        modified |= chkFastJson.isSelected() != plugin.isChkFastJson();
+        modified |= chkRootEntityObject.isSelected() != plugin.isChkRootEntityObject();
+        modified |= chkMarkDelete.isSelected() != plugin.isChkMarkDelete();
+        modified |= chkGenerateFacade.isSelected() != plugin.isChkGenerateFacade();
+        modified |= chkSwaggerModel.isSelected() != plugin.isChkSwaggerModel();
+        modified |= chkLombok.isSelected() != plugin.isChkLombok();
+        modified |= chkMySQL8.isSelected() != plugin.isChkMySQL8();
+        modified |= chkUseAlias.isSelected() != plugin.isChkUseAlias();
+        modified |= chkOverwrite.isSelected() != plugin.isChekOverwrite();
+        modified |= chkToString.isSelected() != plugin.isChkToString();
+        modified |= chkUseSchemaPrefix.isSelected() != plugin.isChkUseSchemaPrefix();
 
         return modified;
-    }
-
-    public void apply() {
-        persistentConfig.setSourcePath(tSrcPath.getText());
-        persistentConfig.setConfigName(tConfigurationName.getText());
-        persistentConfig.setResourcePath(tResourcePath.getText());
-        persistentConfig.setTablePrefix(tTablePrefix.getText());
-        persistentConfig.setRootPackage(tRootPackage.getText());
-        persistentConfig.setIdGenerator(tIdGenerator.getText());
-        persistentConfig.setServiceInterface(tServiceInterface.getText());
-        persistentConfig.setServiceImplement(tServiceImplement.getText());
-        persistentConfig.setFacadeInterface(tFacadeInterface.getText());
-        persistentConfig.setFacadeImplement(tFacadeImplement.getText());
-        persistentConfig.setDaoInterface(tMapperInterface.getText());
-        persistentConfig.setBaseObject(tRootObject.getText());
-        persistentConfig.setIgnoreColumn(tIgnoreColumns.getText());
-        persistentConfig.setNonFuzzyColumn(tNonFuzzySearchColumns.getText());
-
-        persistentConfig.setComment(chkComment.isSelected());
-        persistentConfig.setFastjsonPlugin(chkFastJson.isSelected());
-        persistentConfig.setRootObjectPlugin(chkRootEntityObject.isSelected());
-        persistentConfig.setMarkDeletePlugin(chkMarkDelete.isSelected());
-        persistentConfig.setFacadePlugin(chkGenerateFacade.isSelected());
-        persistentConfig.setSwagger2Plugin(chkSwaggerModel.isSelected());
-        persistentConfig.setLombokPlugin(chkLombok.isSelected());
-        persistentConfig.setMysql8(chkMySQL8.isSelected());
-        persistentConfig.setUseTableNameAlias(chkUseAlias.isSelected());
-        persistentConfig.setOverride(chkOverwrite.isSelected());
-        persistentConfig.setToStringHashcodeEquals(chkToString.isSelected());
-        persistentConfig.setUseSchemaPrefix(chkUseSchemaPrefix.isSelected());
-
-        Objects.requireNonNull(DefaultPersistentConfiguration.getInstance()).setPersistentConfig(persistentConfig);
     }
 }

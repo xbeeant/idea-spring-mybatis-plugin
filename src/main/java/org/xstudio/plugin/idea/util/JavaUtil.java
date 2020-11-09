@@ -1,13 +1,8 @@
 package org.xstudio.plugin.idea.util;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.xstudio.plugin.idea.model.PanelLabel;
-import org.xstudio.plugin.idea.model.PersistentConfig;
 
-import javax.swing.*;
-import java.awt.*;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 

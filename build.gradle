@@ -10,20 +10,41 @@ sourceCompatibility = 1.8
 
 repositories {
     maven {
-        url "http://maven.aliyun.com/nexus/content/groups/public"
+        url "https://maven.pkg.github.com/xbeeant/packages"
+    }
+    maven {
+        url "https://maven.pkg.github.com/xbeeant/xstudio-code-generator"
+    }
+    maven {
+        url "https://maven.aliyun.com/repository/public"
+    }
+    maven {
+        url "https://maven.aliyun.com/repository/jcenter"
+    }
+    maven {
+        url "https://maven.aliyun.com/repository/spring"
+    }
+    maven {
+        url "https://maven.aliyun.com/repository/spring-plugin"
+    }
+    maven {
+        url "https://maven.aliyun.com/repository/gradle-plugin"
+    }
+    maven {
+        url "https://maven.aliyun.com/repository/google"
+    }
+    maven {
+        url "https://maven.aliyun.com/repository/grails-core"
+    }
+    maven {
+        url "https://maven.aliyun.com/repository/apache-snapshots"
     }
     mavenCentral()
+    mavenLocal()
 }
 
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
-    compile group: 'com.github.javaparser', name: 'javaparser-core', version: '2.1.0'
-
-    compile(group: 'com.freetmp', name: 'dolphin-mybatis-generator', version: '1.1.0') {
-        exclude group: 'org.mybatis.generator', module: 'mybatis-generator-core'
-        exclude group: 'org.mybatis', module: 'mybatis'
-        exclude group: 'dom4j', module: 'dom4j'
-    }
 
     compile group: 'commons-io', name: 'commons-io', version: '2.6'
     compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.9'
@@ -39,6 +60,8 @@ dependencies {
     compile group: 'org.apache.ant', name: 'ant', version: '1.10.7'
     compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.12.1'
 
+    compile group: 'com.xstudio', name: 'mybatis-code-generator', version: '1.0-SNAPSHOT'
+    compile group: 'com.xstudio', name: 'java-merger', version: '1.0-SNAPSHOT'
 }
 
 // See https://github.com/JetBrains/gradle-intellij-plugin/
@@ -49,7 +72,7 @@ intellij {
     version "IU-191.7141.44"
     patchPluginXml {
         sinceBuild "191.6707.61"
-        untilBuild "202.*"
+        untilBuild "203.*"
     }
     type "IU"
 }

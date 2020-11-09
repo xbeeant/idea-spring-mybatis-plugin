@@ -7,11 +7,12 @@ import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.intellij.openapi.project.Project;
 import com.intellij.util.xmlb.XmlSerializerUtil;
+import com.xstudio.mybatis.po.TableProperty;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.xstudio.plugin.idea.model.Credential;
-import org.xstudio.plugin.idea.model.PersistentConfig;
-import org.xstudio.plugin.idea.model.TableConfig;
+import org.xstudio.plugin.idea.mybatis.generator.PersistentProperties;
+import org.xstudio.plugin.idea.mybatis.generator.ProjectPersistentProperties;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -20,7 +21,7 @@ import java.util.Map;
  * @author xiaobiao
  * @version 2019/9/22
  */
-@State(name = "MybatisSpringGeneratorConfiguration", storages = {@Storage("mybatis-spring-generator-project-config.xml")})
+@State(name = "XstudioGenerator", storages = {@Storage("xstudio-generator.xml")})
 public class ProjectPersistentConfiguration implements PersistentStateComponent<ProjectPersistentConfiguration> {
     /**
      * 账号密码信息
@@ -28,10 +29,20 @@ public class ProjectPersistentConfiguration implements PersistentStateComponent<
     private Map<String, Credential> credentials;
 
     private String databaseUrl;
+    private ProjectPersistentProperties persistentConfig = new ProjectPersistentProperties();
+    private Map<String, ProjectPersistentProperties> tableConfigs = new HashMap<>(1);
 
-    private Map<String, TableConfig> tableConfigs = new HashMap<>(1);
+    @Nullable
+    public static ProjectPersistentConfiguration getInstance(Project project) {
+        return ServiceManager.getService(project, ProjectPersistentConfiguration.class);
+    }
 
-    private PersistentConfig persistentConfig = new PersistentConfig();
+    public void addTableConfig(String databaseName, String schema, ProjectPersistentProperties tableConfig) {
+        if (null == tableConfigs) {
+            tableConfigs = new HashMap<>();
+        }
+        tableConfigs.put(schema, tableConfig);
+    }
 
     public Map<String, Credential> getCredentials() {
         return credentials;
@@ -49,29 +60,12 @@ public class ProjectPersistentConfiguration implements PersistentStateComponent<
         this.databaseUrl = databaseUrl;
     }
 
-    public Map<String, TableConfig> getTableConfigs() {
-        return tableConfigs;
-    }
-
-    public void setTableConfigs(Map<String, TableConfig> tableConfigs) {
-        this.tableConfigs = tableConfigs;
-    }
-
-    public PersistentConfig getPersistentConfig() {
+    public ProjectPersistentProperties getPersistentConfig() {
         return persistentConfig;
     }
 
-    public void setPersistentConfig(PersistentConfig persistentConfig) {
+    public void setPersistentConfig(ProjectPersistentProperties persistentConfig) {
         this.persistentConfig = persistentConfig;
-    }
-
-    @Nullable
-    public static ProjectPersistentConfiguration getInstance(Project project) {
-        return ServiceManager.getService(project, ProjectPersistentConfiguration.class);
-    }
-
-    public void setTableGenerateTarget(TableConfig tableConfig) {
-        tableConfigs.put(tableConfig.getTableName(), tableConfig);
     }
 
     @Nullable
@@ -85,32 +79,37 @@ public class ProjectPersistentConfiguration implements PersistentStateComponent<
         XmlSerializerUtil.copyBean(projectPersistentConfiguration, this);
     }
 
-    public void addTableConfig(String databaseName, TableConfig tableConfig) {
-        if (null == tableConfigs) {
-            tableConfigs = new HashMap<>();
-        }
-        tableConfigs.put(tableConfig.getTableName(), tableConfig);
-    }
-
-    public TableConfig getTableConfig(String tableName, String databaseName) {
+    public ProjectPersistentProperties getTableConfig(String databaseName, String schema) {
         DefaultPersistentConfiguration defaultPersistentConfiguration = ServiceManager.getService(DefaultPersistentConfiguration.class);
-        PersistentConfig persistentConfig = defaultPersistentConfiguration.getPersistentConfig();
-        TableConfig tableConfig = tableConfigs.get(tableName);
+        PersistentProperties persistentConfig = defaultPersistentConfiguration.getPersistentConfig();
+        ProjectPersistentProperties tableConfig = tableConfigs.get(databaseName);
         if (null == tableConfig) {
-            if (null != persistentConfig){
-                tableConfig = JSON.parseObject(JSON.toJSONString(persistentConfig), TableConfig.class);
+            if (null != persistentConfig) {
+                tableConfig = JSON.parseObject(JSON.toJSONString(persistentConfig), ProjectPersistentProperties.class);
             } else {
-                tableConfig = new TableConfig();
+                tableConfig = new ProjectPersistentProperties();
             }
-            tableConfig.setDatabaseName(databaseName);
-            tableConfig.setTableName(tableName);
+            tableConfig.setSchema(schema);
+            tableConfig.setDatabase(databaseName);
             setTableGenerateTarget(tableConfig);
             return tableConfig;
         }
         return tableConfig;
     }
 
-    public void saveProjectConfig(String tableName, TableConfig tableConfig) {
+    public void setTableGenerateTarget(ProjectPersistentProperties tableConfig) {
+        tableConfigs.put(tableConfig.getDatabase(), tableConfig);
+    }
+
+    public Map<String, ProjectPersistentProperties> getTableConfigs() {
+        return tableConfigs;
+    }
+
+    public void setTableConfigs(Map<String, ProjectPersistentProperties> tableConfigs) {
+        this.tableConfigs = tableConfigs;
+    }
+
+    public void saveProjectConfig(String tableName, ProjectPersistentProperties tableConfig) {
         tableConfigs.put(tableName, tableConfig);
     }
 }

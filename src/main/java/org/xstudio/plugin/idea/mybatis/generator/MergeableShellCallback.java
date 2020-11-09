@@ -1,7 +1,8 @@
 package org.xstudio.plugin.idea.mybatis.generator;
 
-import com.freetmp.mbg.merge.CompilationUnitMerger;
+import com.github.javaparser.ast.CompilationUnit;
 import com.intellij.notification.*;
+import com.xstudio.javamerge.merger.JavaMerger;
 import org.apache.commons.io.FileUtils;
 import org.mybatis.generator.exception.ShellException;
 import org.mybatis.generator.internal.DefaultShellCallback;
@@ -27,7 +28,9 @@ public class MergeableShellCallback extends DefaultShellCallback {
     @Override
     public String mergeJavaFile(String newFileSource, File existingFile, String[] javadocTags, String fileEncoding) throws ShellException {
         try {
-            return CompilationUnitMerger.merge(newFileSource, FileUtils.readFileToString(existingFile, Charset.defaultCharset()));
+            CompilationUnit newCu = new CompilationUnit(newFileSource);
+            CompilationUnit oldCu = new CompilationUnit(FileUtils.readFileToString(existingFile, Charset.defaultCharset()));
+            return JavaMerger.merge(oldCu, newCu, true).toString();
         } catch (Exception e) {
             e.printStackTrace();
             NotificationGroup balloonNotifications = new NotificationGroup(Constant.TITLE, NotificationDisplayType.STICKY_BALLOON, true);

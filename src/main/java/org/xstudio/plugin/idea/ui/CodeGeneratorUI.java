@@ -2,6 +2,7 @@ package org.xstudio.plugin.idea.ui;
 
 import com.intellij.application.options.ModulesComboBox;
 import com.intellij.credentialStore.CredentialAttributes;
+import com.intellij.database.dataSource.LocalDataSource;
 import com.intellij.database.model.RawConnectionConfig;
 import com.intellij.database.psi.DbDataSource;
 import com.intellij.database.psi.DbNamespaceImpl;
@@ -17,22 +18,23 @@ import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
+import com.xstudio.mybatis.MybatisGenerator;
+import com.xstudio.mybatis.po.*;
 import org.jetbrains.annotations.Nullable;
-import org.mybatis.generator.internal.util.JavaBeansUtil;
+import org.mybatis.generator.config.DomainObjectRenamingRule;
+import org.mybatis.generator.exception.InvalidConfigurationException;
 import org.xstudio.plugin.idea.Constant;
 import org.xstudio.plugin.idea.model.Credential;
-import org.xstudio.plugin.idea.model.PersistentConfig;
-import org.xstudio.plugin.idea.model.TableConfig;
 import org.xstudio.plugin.idea.model.TableInfo;
-import org.xstudio.plugin.idea.mybatis.MyBatisGenerateCommand;
+import org.xstudio.plugin.idea.mybatis.generator.PluginProperties;
+import org.xstudio.plugin.idea.mybatis.generator.ProjectPersistentProperties;
 import org.xstudio.plugin.idea.setting.ProjectPersistentConfiguration;
 import org.xstudio.plugin.idea.util.DatabaseUtils;
 import org.xstudio.plugin.idea.util.ModuleUtil;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -45,60 +47,49 @@ import java.util.concurrent.FutureTask;
  */
 public class CodeGeneratorUI extends DialogWrapper {
 
-    private JPanel mainPanel;
-    private JTextField tpTableName;
     private JCheckBox chkComment;
+    private JCheckBox chkFastJson;
+    private JCheckBox chkGenerateFacade;
+    private JCheckBox chkLombok;
+    private JCheckBox chkMarkDelete;
+    private JCheckBox chkMySQL8;
     private JCheckBox chkOverwrite;
+    private JCheckBox chkRootEntityObject;
+    private JCheckBox chkSwaggerModel;
     private JCheckBox chkToString;
     private JCheckBox chkUseAlias;
-    private JCheckBox chkLombok;
-    private JCheckBox chkGenerateFacade;
-    private JCheckBox chkRootEntityObject;
     private JCheckBox chkUseSchemaPrefix;
-    private JCheckBox chkMySQL8;
-    private JCheckBox chkSwaggerModel;
-    private JCheckBox chkMarkDelete;
-    private JCheckBox chkFastJson;
-    private JTextField tIdGenerator;
-    private JTextField tServiceInterface;
-    private JTextField tServiceImplement;
-    private JTextField tFacadeInterface;
-    private JTextField tFacadeImplement;
-    private JTextField tMapperInterface;
-    private JTextField tRootObject;
-    private JTextField tIgnoreColumns;
-    private JTextField tNonFuzzySearchColumns;
-    private JTextField ptModelEntity;
-    private JTextField ptServiceInterface;
-    private JTextField ptServiceImplement;
-    private JTextField ptFacadeInterface;
-    private JTextField ptFacadeImplement;
-    private JTextField ptMapperInterface;
-    private JTextField ptMapperImplement;
-    private JTabbedPane tabbedPane;
     private ModulesComboBox comboModule;
-    private JTextField tRootPackage;
-    private JTextField tTablePrefix;
-
+    private RawConnectionConfig connectionConfig;
+    private DbDataSource dbDataSource;
     /**
      * idea 事件对象
      */
     private AnActionEvent event;
-
+    private JPanel mainPanel;
     private Project project;
-    private TableInfo tableInfo;
-
-    private RawConnectionConfig connectionConfig;
-    private DbDataSource dbDataSource;
-
-    private ProjectPersistentConfiguration persistentConfiguration;
-    private TableConfig tableConfig;
+    private ProjectPersistentConfiguration projectPersistent;
+    private ProjectPersistentProperties projectProperties;
+    private JTextField tFacadeImplement;
+    private JTextField tFacadeInterface;
+    private JTextField tIdGenerator;
+    private JTextField tIgnoreColumns;
+    private JTextField tMapperInterface;
+    private JTextField tNonFuzzySearchColumns;
+    private JTextField tReplaceString;
+    private JTextField tResponseObject;
+    private JTextField tRootObject;
+    private JTextField tRootPackage;
+    private JTextField tSearchString;
+    private JTextField tServiceImplement;
+    private JTextField tServiceInterface;
+    private JTabbedPane tabbedPane;
+    private JTextField tpTableName;
 
     public CodeGeneratorUI(AnActionEvent event, @Nullable Project project, TableInfo tableInfo) {
         super(project);
         this.project = project;
         this.event = event;
-        this.tableInfo = tableInfo;
         PsiElement[] psiElements = event.getData(LangDataKeys.PSI_ELEMENT_ARRAY);
         // =================================
         // 从所选择的元素中获取数据库的配置
@@ -128,18 +119,19 @@ public class CodeGeneratorUI extends DialogWrapper {
             return;
         }
 
-        this.persistentConfiguration = ProjectPersistentConfiguration.getInstance(project);
+        this.projectPersistent = ProjectPersistentConfiguration.getInstance(project);
 
         String tableName = tableInfo.getTableName();
 
-        tableConfig = persistentConfiguration.getTableConfig(tableName, databaseName);
-        tableConfig.setDatabaseType(tableInfo.getTypeName());
-
+        projectProperties = projectPersistent.getTableConfig(databaseName, tableName);
+        projectProperties.setType(tableInfo.getTypeName());
+        projectProperties.setDatabase(databaseName);
+        projectProperties.setSchema(tableName);
         this.setTitle("Mybatis Spring Code Generator");
         mainPanel.setPreferredSize(new Dimension(800, 300));
         this.init();
         // initial panel defaults value
-        initialPanel(tableConfig);
+        initialPanel(projectProperties);
 
         //
         tpTableName.setText(tableName);
@@ -167,62 +159,42 @@ public class CodeGeneratorUI extends DialogWrapper {
                 break;
             }
         }
-
-        tTablePrefix.addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyReleased(KeyEvent e) {
-                String prefix = tTablePrefix.getText();
-                tableConfig.setTablePrefix(prefix);
-                String entityName = JavaBeansUtil.getCamelCaseString(tableName.replace(prefix, ""), true);
-                setPreviewPanel(entityName);
-            }
-        });
-
-        String entityName = JavaBeansUtil.getCamelCaseString(tableName.replace(tableConfig.getTablePrefix(), ""), true);
-        setPreviewPanel(entityName);
     }
 
-    private void setPreviewPanel(String entityName) {
-        tableConfig.setEntityName(entityName);
-
-        ptModelEntity.setText(entityName);
-
-        ptServiceInterface.setText(tableConfig.getRootPackage() + ".service.I" + entityName + "Service");
-        ptServiceImplement.setText(tableConfig.getRootPackage() + ".service.impl." + entityName + "ServiceImpl");
-        if (tableConfig.isFacadePlugin()) {
-            ptFacadeInterface.setText(tableConfig.getRootPackage() + ".facade.I" + entityName + "FacadeService");
-            ptFacadeImplement.setText(tableConfig.getRootPackage() + ".facade.impl." + entityName + "FacadeServiceImpl");
-        }
-        ptMapperInterface.setText(tableConfig.getRootPackage() + ".mapper.I" + entityName + "Mapper");
-        ptMapperImplement.setText(tableConfig.getResourcePath() + "/mybatis/" + tableConfig.getDatabaseType() + "/" + tableConfig.getDatabaseName() + "/" + entityName + "Mapper.xml");
-    }
-
-    private void initialPanel(PersistentConfig config) {
-        tTablePrefix.setText(config.getTablePrefix());
+    private void initialPanel(ProjectPersistentProperties config) {
+        tSearchString.setText(config.getSearchString());
+        tReplaceString.setText(config.getReplaceString());
         tRootPackage.setText(config.getRootPackage());
         tIdGenerator.setText(config.getIdGenerator());
         tServiceInterface.setText(config.getServiceInterface());
-        tServiceImplement.setText(config.getServiceImplement());
+        tServiceImplement.setText(config.getServiceImpl());
         tFacadeInterface.setText(config.getFacadeInterface());
-        tFacadeImplement.setText(config.getFacadeImplement());
-        tMapperInterface.setText(config.getDaoInterface());
-        tRootObject.setText(config.getBaseObject());
-        tIgnoreColumns.setText(config.getIgnoreColumn());
-        tNonFuzzySearchColumns.setText(config.getNonFuzzyColumn());
+        tFacadeImplement.setText(config.getFacadeImpl());
+        tMapperInterface.setText(config.getMapperInterface());
 
-        chkComment.setSelected(config.isComment());
-        chkOverwrite.setSelected(config.isOverride());
-        chkToString.setSelected(config.isToStringHashcodeEquals());
-        chkUseSchemaPrefix.setSelected(config.isUseSchemaPrefix());
-        chkUseAlias.setSelected(config.isUseTableNameAlias());
-        chkMySQL8.setSelected(config.isMysql8());
-        chkLombok.setSelected(config.isLombokPlugin());
-        chkSwaggerModel.setSelected(config.isSwagger2Plugin());
-        chkGenerateFacade.setSelected(config.isFacadePlugin());
-        chkMarkDelete.setSelected(config.isMarkDeletePlugin());
-        chkRootEntityObject.setSelected(config.isRootObjectPlugin());
-        chkFastJson.setSelected(config.isFastjsonPlugin());
+        tRootObject.setText(config.getRootClass());
+        tResponseObject.setText(config.getResponseObject());
+
+        tIgnoreColumns.setText(config.getIgnoreColumns());
+        tNonFuzzySearchColumns.setText(config.getNonFuzzySearchColumn());
+
+        PluginProperties plugin = config.getPlugin();
+        if (null != plugin) {
+            chkComment.setSelected(plugin.isChkComment());
+            chkFastJson.setSelected(plugin.isChkFastJson());
+            chkGenerateFacade.setSelected(plugin.isChkGenerateFacade());
+            chkLombok.setSelected(plugin.isChkLombok());
+            chkMarkDelete.setSelected(plugin.isChkMarkDelete());
+            chkMySQL8.setSelected(plugin.isChkMySQL8());
+            chkOverwrite.setSelected(plugin.isChekOverwrite());
+            chkRootEntityObject.setSelected(plugin.isChkRootEntityObject());
+            chkSwaggerModel.setSelected(plugin.isChkSwaggerModel());
+            chkToString.setSelected(plugin.isChkToString());
+            chkUseAlias.setSelected(plugin.isChkUseAlias());
+            chkUseSchemaPrefix.setSelected(plugin.isChkUseSchemaPrefix());
+        }
     }
+
 
     @Nullable
     @Override
@@ -236,12 +208,12 @@ public class CodeGeneratorUI extends DialogWrapper {
 
         connectionConfig = dbDataSource.getConnectionConfig();
 
-        Map<String, Credential> credentials = persistentConfiguration.getCredentials();
+        Map<String, Credential> credentials = projectPersistent.getCredentials();
         Credential credential;
         if (credentials == null || !credentials.containsKey(connectionConfig.getUrl())) {
             boolean result = getDatabaseCredential(connectionConfig);
             if (result) {
-                credentials = persistentConfiguration.getCredentials();
+                credentials = projectPersistent.getCredentials();
                 credential = credentials.get(connectionConfig.getUrl());
             } else {
                 return;
@@ -249,18 +221,17 @@ public class CodeGeneratorUI extends DialogWrapper {
         } else {
             credential = credentials.get(connectionConfig.getUrl());
         }
-
         Callable<Exception> callable = new Callable<Exception>() {
             @Override
             public Exception call() {
-                String url = persistentConfiguration.getDatabaseUrl();
+                String url = projectPersistent.getDatabaseUrl();
                 CredentialAttributes credentialAttributes = new CredentialAttributes(Constant.PLUGIN_NAME + "-" + url, credential.getUsername(), this.getClass(), false);
                 String password = PasswordSafe.getInstance().getPassword(credentialAttributes);
                 try {
                     String databaseType = DatabaseUtils.testConnection(connectionConfig.getDriverClass(), connectionConfig.getUrl(), credential.getUsername(), password, chkMySQL8.getSelectedObjects() != null);
-                    tableConfig.setDatabaseType(databaseType);
+                    projectProperties.setType(databaseType);
                 } catch (ClassNotFoundException | SQLException e) {
-                    persistentConfiguration.setCredentials(null);
+                    projectPersistent.setCredentials(null);
                     return e;
                 }
                 return null;
@@ -304,38 +275,119 @@ public class CodeGeneratorUI extends DialogWrapper {
 
         super.doOKAction();
 
-        new MyBatisGenerateCommand(tableConfig).execute(project, comboModule.getSelectedModule(), connectionConfig);
+        generateCode();
     }
 
-    private void saveProjectConfig() {
-        tableConfig.setModuleRootPath(ModuleUtil.getPath(comboModule.getSelectedModule(), "root"));
-        tableConfig.setTablePrefix(tTablePrefix.getText());
-        tableConfig.setIdGenerator(tIdGenerator.getText());
-        tableConfig.setServiceInterface(tServiceInterface.getText());
-        tableConfig.setServiceImplement(tServiceImplement.getText());
-        tableConfig.setFacadeInterface(tFacadeInterface.getText());
-        tableConfig.setFacadeImplement(tFacadeImplement.getText());
-        tableConfig.setDaoInterface(tMapperInterface.getText());
-        tableConfig.setBaseObject(tRootObject.getText());
-        tableConfig.setIgnoreColumn(tIgnoreColumns.getText());
-        tableConfig.setNonFuzzyColumn(tNonFuzzySearchColumns.getText());
+    private void generateCode() {
+        MybatisGenerator mybatisGenerator = new MybatisGenerator();
+        Properties properties = new Properties();
 
-        tableConfig.setComment(chkComment.getSelectedObjects() != null);
-        tableConfig.setOverride(chkOverwrite.getSelectedObjects() != null);
-        tableConfig.setUseSchemaPrefix(chkUseSchemaPrefix.getSelectedObjects() != null);
-        tableConfig.setToStringHashcodeEquals(chkToString.getSelectedObjects() != null);
-        tableConfig.setUseTableNameAlias(chkUseAlias.getSelectedObjects() != null);
-        tableConfig.setMysql8(chkMySQL8.getSelectedObjects() != null);
-        tableConfig.setLombokPlugin(chkLombok.getSelectedObjects() != null);
-        tableConfig.setSwagger2Plugin(chkSwaggerModel.getSelectedObjects() != null);
-        tableConfig.setFacadePlugin(chkGenerateFacade.getSelectedObjects() != null);
-        tableConfig.setFastjsonPlugin(chkFastJson.getSelectedObjects() != null);
+        Map<String, Credential> credentials = projectPersistent.getCredentials();
+        String username = credentials.get(projectPersistent.getDatabaseUrl()).getUsername();
 
-        persistentConfiguration.saveProjectConfig(tableConfig.getTableName(), tableConfig);
+        CredentialAttributes credentialAttributes = new CredentialAttributes(Constant.PLUGIN_NAME + "-" + projectPersistent.getDatabaseUrl(), username, this.getClass(), false);
+        String password = PasswordSafe.getInstance().getPassword(credentialAttributes);
+
+        ConnectionProperty connectionProperty = new ConnectionProperty();
+        connectionProperty.setDriverClass(((LocalDataSource) (dbDataSource.getDelegate())).getDriverClass());
+        connectionProperty.setPassword(password);
+        connectionProperty.setUrl(projectPersistent.getDatabaseUrl());
+        connectionProperty.setUser(username);
+        properties.setConnectionProperty(connectionProperty);
+
+        JavaClientProperty javaClientProperty = new JavaClientProperty();
+        javaClientProperty.setTargetProject(projectProperties.getModulePath() + projectProperties.getSrcPath());
+        javaClientProperty.setTargetPackage(projectProperties.getRootPackage() + ".mapper");
+        javaClientProperty.setRootInterface(projectProperties.getMapperInterface());
+
+        properties.setJavaClientProperty(javaClientProperty);
+
+        JavaModelProperty javaModelProperty = new JavaModelProperty();
+        javaModelProperty.setTargetProject(projectProperties.getModulePath() + projectProperties.getSrcPath());
+        javaModelProperty.setTargetPackage(projectProperties.getRootPackage() + ".model");
+        javaModelProperty.setRootClass(projectProperties.getRootClass());
+        javaModelProperty.setTrimStrings(true);
+        properties.setJavaModelProperty(javaModelProperty);
+
+        SqlMapProperty sqlMapProperty = new SqlMapProperty();
+        sqlMapProperty.setTargetProject(projectProperties.getModulePath() + projectProperties.getResourcePath());
+        sqlMapProperty.setTargetPackage("mybatis." + projectProperties.getType() + "." + projectProperties.getDatabase());
+        properties.setSqlMapProperty(sqlMapProperty);
+
+        TableProperty tableProperty = new TableProperty();
+        tableProperty.setTableName(projectProperties.getSchema());
+        tableProperty.setSchema("");
+        tableProperty.setCatalog(projectProperties.getDatabase());
+
+        DomainObjectRenamingRule domainObjectRenamingRule = new DomainObjectRenamingRule();
+        domainObjectRenamingRule.setReplaceString(projectProperties.getReplaceString());
+        domainObjectRenamingRule.setSearchString(projectProperties.getSearchString());
+        if (null != projectProperties.getSearchString() && !"".equals(projectProperties.getSearchString())) {
+            tableProperty.setRenamingRule(domainObjectRenamingRule);
+        }
+
+        properties.setTableProperty(tableProperty);
+
+        XstudioProperty xstudioProperty = new XstudioProperty();
+        xstudioProperty.setServiceRootInterface(projectProperties.getServiceInterface());
+        xstudioProperty.setServiceTargetPackage(projectProperties.getRootPackage() + ".service");
+        xstudioProperty.setServiceImplementRootInterface(projectProperties.getServiceImpl());
+        xstudioProperty.setServiceImplementTargetPackage(projectProperties.getRootPackage() + ".service.impl");
+        xstudioProperty.setRootClient(projectProperties.getMapperInterface());
+        xstudioProperty.setIdGenerator(projectProperties.getIdGenerator());
+        xstudioProperty.setResponseObject(projectProperties.getResponseObject());
+        properties.setXstudioProperty(xstudioProperty);
+
+
+        try {
+            mybatisGenerator.generate(properties);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InvalidConfigurationException e) {
+            e.printStackTrace();
+        }
     }
 
     private boolean getDatabaseCredential(RawConnectionConfig connectionConfig) {
         DatabaseCredentialUI databaseCredentialUI = new DatabaseCredentialUI(event.getProject(), connectionConfig.getUrl());
         return databaseCredentialUI.showAndGet();
+    }
+
+    private void saveProjectConfig() {
+        projectProperties.setModulePath(ModuleUtil.getPath(comboModule.getSelectedModule(), "root"));
+        projectProperties.setFacadeImpl(tFacadeImplement.getText());
+        projectProperties.setFacadeInterface(tFacadeInterface.getText());
+        projectProperties.setIdGenerator(tIdGenerator.getText());
+        projectProperties.setIgnoreColumns(tIgnoreColumns.getText());
+        projectProperties.setMapperInterface(tMapperInterface.getText());
+        projectProperties.setNonFuzzySearchColumn(tNonFuzzySearchColumns.getText());
+        projectProperties.setResponseObject(tResponseObject.getText());
+        PluginProperties pluginProperties = new PluginProperties();
+        pluginProperties.setChkComment(chkComment.isSelected());
+        pluginProperties.setChkToString(chkToString.isSelected());
+        pluginProperties.setChkUseAlias(chkUseAlias.isSelected());
+        pluginProperties.setChkLombok(chkLombok.isSelected());
+        pluginProperties.setChkGenerateFacade(chkGenerateFacade.isSelected());
+        pluginProperties.setChkRootEntityObject(chkRootEntityObject.isSelected());
+        pluginProperties.setChekOverwrite(chkOverwrite.isSelected());
+        pluginProperties.setChkUseSchemaPrefix(chkUseSchemaPrefix.isSelected());
+        pluginProperties.setChkMySQL8(chkMySQL8.isSelected());
+        pluginProperties.setChkSwaggerModel(chkSwaggerModel.isSelected());
+        pluginProperties.setChkMarkDelete(chkMarkDelete.isSelected());
+        pluginProperties.setChkFastJson(chkFastJson.isSelected());
+
+        projectProperties.setPlugin(pluginProperties);
+        projectProperties.setReplaceString(tReplaceString.getText());
+        projectProperties.setRootClass(tRootObject.getText());
+        projectProperties.setRootPackage(tRootPackage.getText());
+        projectProperties.setSearchString(tSearchString.getText());
+        projectProperties.setServiceImpl(tServiceImplement.getText());
+        projectProperties.setServiceInterface(tServiceInterface.getText());
+
+        projectPersistent.saveProjectConfig(projectProperties.getSchema(), projectProperties);
     }
 }
