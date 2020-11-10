@@ -26,6 +26,7 @@ import org.mybatis.generator.exception.InvalidConfigurationException;
 import org.xstudio.plugin.idea.Constant;
 import org.xstudio.plugin.idea.model.Credential;
 import org.xstudio.plugin.idea.model.TableInfo;
+import org.xstudio.plugin.idea.mybatis.MybatisCommander;
 import org.xstudio.plugin.idea.mybatis.generator.PluginProperties;
 import org.xstudio.plugin.idea.mybatis.generator.ProjectPersistentProperties;
 import org.xstudio.plugin.idea.setting.ProjectPersistentConfiguration;
@@ -275,82 +276,11 @@ public class CodeGeneratorUI extends DialogWrapper {
 
         super.doOKAction();
 
-        generateCode();
+        MybatisCommander mybatisCommander = new MybatisCommander();
+        mybatisCommander.generate(project, projectProperties, dbDataSource, comboModule.getSelectedModule());
     }
 
-    private void generateCode() {
-        MybatisGenerator mybatisGenerator = new MybatisGenerator();
-        Properties properties = new Properties();
 
-        Map<String, Credential> credentials = projectPersistent.getCredentials();
-        String username = credentials.get(projectPersistent.getDatabaseUrl()).getUsername();
-
-        CredentialAttributes credentialAttributes = new CredentialAttributes(Constant.PLUGIN_NAME + "-" + projectPersistent.getDatabaseUrl(), username, this.getClass(), false);
-        String password = PasswordSafe.getInstance().getPassword(credentialAttributes);
-
-        ConnectionProperty connectionProperty = new ConnectionProperty();
-        connectionProperty.setDriverClass(((LocalDataSource) (dbDataSource.getDelegate())).getDriverClass());
-        connectionProperty.setPassword(password);
-        connectionProperty.setUrl(projectPersistent.getDatabaseUrl());
-        connectionProperty.setUser(username);
-        properties.setConnectionProperty(connectionProperty);
-
-        JavaClientProperty javaClientProperty = new JavaClientProperty();
-        javaClientProperty.setTargetProject(projectProperties.getModulePath() + projectProperties.getSrcPath());
-        javaClientProperty.setTargetPackage(projectProperties.getRootPackage() + ".mapper");
-        javaClientProperty.setRootInterface(projectProperties.getMapperInterface());
-
-        properties.setJavaClientProperty(javaClientProperty);
-
-        JavaModelProperty javaModelProperty = new JavaModelProperty();
-        javaModelProperty.setTargetProject(projectProperties.getModulePath() + projectProperties.getSrcPath());
-        javaModelProperty.setTargetPackage(projectProperties.getRootPackage() + ".model");
-        javaModelProperty.setRootClass(projectProperties.getRootClass());
-        javaModelProperty.setTrimStrings(true);
-        properties.setJavaModelProperty(javaModelProperty);
-
-        SqlMapProperty sqlMapProperty = new SqlMapProperty();
-        sqlMapProperty.setTargetProject(projectProperties.getModulePath() + projectProperties.getResourcePath());
-        sqlMapProperty.setTargetPackage("mybatis." + projectProperties.getType() + "." + projectProperties.getDatabase());
-        properties.setSqlMapProperty(sqlMapProperty);
-
-        TableProperty tableProperty = new TableProperty();
-        tableProperty.setTableName(projectProperties.getSchema());
-        tableProperty.setSchema("");
-        tableProperty.setCatalog(projectProperties.getDatabase());
-
-        DomainObjectRenamingRule domainObjectRenamingRule = new DomainObjectRenamingRule();
-        domainObjectRenamingRule.setReplaceString(projectProperties.getReplaceString());
-        domainObjectRenamingRule.setSearchString(projectProperties.getSearchString());
-        if (null != projectProperties.getSearchString() && !"".equals(projectProperties.getSearchString())) {
-            tableProperty.setRenamingRule(domainObjectRenamingRule);
-        }
-
-        properties.setTableProperty(tableProperty);
-
-        XstudioProperty xstudioProperty = new XstudioProperty();
-        xstudioProperty.setServiceRootInterface(projectProperties.getServiceInterface());
-        xstudioProperty.setServiceTargetPackage(projectProperties.getRootPackage() + ".service");
-        xstudioProperty.setServiceImplementRootInterface(projectProperties.getServiceImpl());
-        xstudioProperty.setServiceImplementTargetPackage(projectProperties.getRootPackage() + ".service.impl");
-        xstudioProperty.setRootClient(projectProperties.getMapperInterface());
-        xstudioProperty.setIdGenerator(projectProperties.getIdGenerator());
-        xstudioProperty.setResponseObject(projectProperties.getResponseObject());
-        properties.setXstudioProperty(xstudioProperty);
-
-
-        try {
-            mybatisGenerator.generate(properties);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (InvalidConfigurationException e) {
-            e.printStackTrace();
-        }
-    }
 
     private boolean getDatabaseCredential(RawConnectionConfig connectionConfig) {
         DatabaseCredentialUI databaseCredentialUI = new DatabaseCredentialUI(event.getProject(), connectionConfig.getUrl());
