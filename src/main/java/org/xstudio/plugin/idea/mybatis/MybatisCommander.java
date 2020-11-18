@@ -25,7 +25,7 @@ import org.mybatis.generator.api.MyBatisGenerator;
 import org.mybatis.generator.config.DomainObjectRenamingRule;
 import org.xstudio.plugin.idea.Constant;
 import org.xstudio.plugin.idea.model.Credential;
-import org.xstudio.plugin.idea.mybatis.generator.PluginProperties;
+import org.xstudio.plugin.idea.mybatis.generator.MergeableShellCallback;
 import org.xstudio.plugin.idea.mybatis.generator.ProjectPersistentProperties;
 import org.xstudio.plugin.idea.setting.ProjectPersistentConfiguration;
 import org.xstudio.plugin.idea.util.ModuleUtil;
@@ -119,6 +119,7 @@ public class MybatisCommander {
 
         properties.setPluginProperty(pluginProperty);
 
+        properties.setCallback(new MergeableShellCallback(projectProperties.getPlugin().isChekOverwrite()));
         try {
             StatusBar statusBar = WindowManager.getInstance().getStatusBar(project);
             Balloon balloon = JBPopupFactory.getInstance()
@@ -167,7 +168,7 @@ public class MybatisCommander {
 
                         Notification notification = balloonNotifications.createNotification("Generate Successfully", "<html>" + String.join("<br/>", result) + "</html>", NotificationType.INFORMATION, (notification1, hyperlinkEvent) -> {
                             if (hyperlinkEvent.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
-                                new OpenFileDescriptor(project, ModuleUtil.getModule(module,"root").findFileByRelativePath(hyperlinkEvent.getDescription())).navigate(true);
+                                new OpenFileDescriptor(project, ModuleUtil.getModule(module, "root").findFileByRelativePath(hyperlinkEvent.getDescription())).navigate(true);
                             }
                         });
                         Notifications.Bus.notify(notification);
