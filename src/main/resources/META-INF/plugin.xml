@@ -15,38 +15,7 @@
 
     <change-notes>
         <![CDATA[
-        1.0.0.6:
-        <ul>
-          <li>support 2020.2+</li>
-        </ul>
-        1.0.0.5:
-        <ul>
-          <li>fix link bug</li>
-        </ul>
-        1.0.0.4:
-        <ul>
-          <li>fix merge java file bug</li>
-        </ul>
-        1.0.0.3:
-        <ul>
-          <li>fix bugs</li>
-        </ul>
-        1.0.0.2:
-        <ul>
-          <li>fix bugs</li>
-          <li>initial default config</li>
-        </ul>
-
-        1.0.0.0:
-        Initial release of the plugin. <br />
-        generate:
-        <ul>
-            <li>service interface</li>
-            <li>service implements</li>
-            <li>mybatis dao interface</li>
-            <li>mybatis dao mapper</li>
-            <li>mybatis dao entity</li>
-        </ul>
+        1.1.0: new ui & new merger
     ]]>
     </change-notes>
 
