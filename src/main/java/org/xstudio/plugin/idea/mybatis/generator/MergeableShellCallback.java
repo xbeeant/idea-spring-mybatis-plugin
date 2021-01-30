@@ -30,7 +30,11 @@ public class MergeableShellCallback extends DefaultShellCallback {
         try {
             CompilationUnit newCu = new CompilationUnit(newFileSource);
             CompilationUnit oldCu = new CompilationUnit(FileUtils.readFileToString(existingFile, Charset.defaultCharset()));
-            return JavaMerger.merge(oldCu, newCu, true).toString();
+            String content = JavaMerger.merge(oldCu, newCu, true).toString().replace("package package","package");
+            if (content.lastIndexOf(";") == content.length()) {
+                content = content.substring(0, content.length());
+            }
+            return content;
         } catch (Exception e) {
             e.printStackTrace();
             NotificationGroup balloonNotifications = new NotificationGroup(Constant.TITLE, NotificationDisplayType.STICKY_BALLOON, true);

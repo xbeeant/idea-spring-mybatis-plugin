@@ -15,6 +15,7 @@
 
     <change-notes>
         <![CDATA[
+        1.1.1: feat - support 211.*
         1.1.0: new ui & new merger
     ]]>
     </change-notes>

@@ -10,7 +10,7 @@ public class PersistentProperties implements Serializable {
     private String cfgName = "pagehelper";
     private String facadeImpl = "";
     private String facadeInterface = "";
-    private String idGenerator = "com.xstudio.core.IdWorker.getId";
+    private String idGenerator = "com.xstudio.core.IdWorker";
     private String ignoreColumns = "create_by,update_by,create_at,update_at";
     private String mapperInterface = "com.xstudio.spring.mybatis.pagehelper.IMybatisPageHelperDao";
     private String nonFuzzySearchColumn = "create_by, update_by";

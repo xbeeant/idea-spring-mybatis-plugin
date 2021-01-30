@@ -191,7 +191,7 @@
                   </grid>
                 </constraints>
                 <properties>
-                  <text value="com.xstudio.core.IdWorker.getId"/>
+                  <text value="com.xstudio.core.IdWorker"/>
                 </properties>
               </component>
               <component id="20cc5" class="javax.swing.JLabel">
