@@ -161,7 +161,7 @@ public class MybatisCommander {
                             String link = String.format("<a href=\"%s%s%s%s%s\">%s</a>",
                                     projectProperties.getResourcePath(),
                                     File.separator,
-                                    generatedXmlFile.getTargetPackage().replaceAll("\\.", File.separator),
+                                    generatedXmlFile.getTargetPackage().replace(".", File.separator),
                                     File.separator,
                                     generatedXmlFile.getFileName(),
                                     generatedXmlFile.getFileName());
