@@ -40,28 +40,32 @@ repositories {
         url "https://maven.aliyun.com/repository/apache-snapshots"
     }
     mavenCentral()
+    maven {
+        url "https://s01.oss.sonatype.org/content/groups/public/"
+    }
     mavenLocal()
 }
 
 dependencies {
-    testCompile group: 'junit', name: 'junit', version: '4.12'
-
     compile group: 'commons-io', name: 'commons-io', version: '2.6'
     compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.9'
+
     // database driver
     compile group: 'mysql', name: 'mysql-connector-java', version: '8.0.11'
     compile group: 'mysql', name: 'mysql-connector-java', version: '5.1.48'
     // https://mvnrepository.com/artifact/org.mariadb.jdbc/mariadb-java-client
     compile group: 'org.mariadb.jdbc', name: 'mariadb-java-client', version: '2.6.0'
 
-    compile group: 'com.alibaba', name: 'fastjson', version: "1.2.58"
-
     // dependencies for mybatis generator core
     compile group: 'org.apache.ant', name: 'ant', version: '1.10.7'
     compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.12.1'
 
-    compile group: 'com.xstudio', name: 'mybatis-code-generator', version: '1.0-SNAPSHOT'
-    compile group: 'com.xstudio', name: 'java-merger', version: '1.0-SNAPSHOT'
+    compile group: 'io.github.xbeeant', name: 'code-generator', version: '1.0-SNAPSHOT'
+    compile group: 'io.github.xbeeant', name: 'java-merger', version: '1.0.0-SNAPSHOT'
+
+
+    testImplementation(platform('org.junit:junit-bom:5.7.0'))
+    testImplementation('org.junit.jupiter:junit-jupiter')
 }
 
 // See https://github.com/JetBrains/gradle-intellij-plugin/
