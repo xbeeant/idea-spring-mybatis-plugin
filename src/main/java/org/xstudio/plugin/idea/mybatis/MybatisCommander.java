@@ -5,6 +5,7 @@ import com.intellij.database.dataSource.LocalDataSource;
 import com.intellij.database.psi.DbDataSource;
 import com.intellij.ide.passwordSafe.PasswordSafe;
 import com.intellij.notification.*;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileEditor.OpenFileDescriptor;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.progress.ProgressIndicator;
@@ -17,8 +18,8 @@ import com.intellij.openapi.ui.popup.JBPopupFactory;
 import com.intellij.openapi.wm.StatusBar;
 import com.intellij.openapi.wm.WindowManager;
 import com.intellij.ui.awt.RelativePoint;
-import com.xstudio.mybatis.MybatisGenerator;
-import com.xstudio.mybatis.po.*;
+import io.github.xbeeant.mybatis.MybatisGenerator;
+import io.github.xbeeant.mybatis.po.*;
 import org.mybatis.generator.api.GeneratedJavaFile;
 import org.mybatis.generator.api.GeneratedXmlFile;
 import org.mybatis.generator.api.MyBatisGenerator;
@@ -36,11 +37,13 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
 
 /**
  * @author huangxiaobiao
  */
 public class MybatisCommander {
+    private static final Logger log = Logger.getInstance(MybatisCommander.class);
 
     public void generate(Project project, ProjectPersistentProperties projectProperties, DbDataSource dbDataSource, Module module) {
         MybatisGenerator mybatisGenerator = new MybatisGenerator();
@@ -50,7 +53,7 @@ public class MybatisCommander {
         String username = credentials.get(projectPersistent.getDatabaseUrl()).getUsername();
 
         String database = projectProperties.getDatabase();
-        String databasePkg = database.replaceAll("_", ".").replaceAll("_", ".");
+        String databasePkg = database.replace("_", ".").replace("_", ".");
         CredentialAttributes credentialAttributes = new CredentialAttributes(
                 Constant.PLUGIN_NAME + "-" + projectPersistent.getDatabaseUrl(),
                 username, this.getClass(), false);
@@ -86,7 +89,6 @@ public class MybatisCommander {
         tableProperty.setTableName(projectProperties.getSchema());
         tableProperty.setSchema(projectProperties.getDatabase());
         tableProperty.setModelType(ModelType.FLAT);
-//        tableProperty.setCatalog("");
 
         DomainObjectRenamingRule domainObjectRenamingRule = new DomainObjectRenamingRule();
         domainObjectRenamingRule.setReplaceString(projectProperties.getReplaceString());
@@ -105,6 +107,8 @@ public class MybatisCommander {
         xstudioProperty.setRootClient(projectProperties.getMapperInterface());
         xstudioProperty.setIdGenerator(projectProperties.getIdGenerator());
         xstudioProperty.setResponseObject(projectProperties.getResponseObject());
+        xstudioProperty.setDateTime(projectProperties.getPlugin().isChkDateTime() ? "true" : "false");
+        xstudioProperty.setBeginEnd(projectProperties.getPlugin().isChkBeginEnd() ? "true" : "false");
         properties.setXstudioProperty(xstudioProperty);
 
         PluginProperty pluginProperty = new PluginProperty();
@@ -149,9 +153,9 @@ public class MybatisCommander {
                         for (GeneratedJavaFile generatedJavaFile : generatedJavaFiles) {
                             String link = String.format("<a href=\"%s%s%s%s%s\">%s</a>",
                                     projectProperties.getSrcPath(),
-                                    File.separator,
-                                    generatedJavaFile.getTargetPackage().replace(".", File.separator),
-                                    File.separator,
+                                    Matcher.quoteReplacement(File.separator),
+                                    generatedJavaFile.getTargetPackage().replace(".", Matcher.quoteReplacement(File.separator)),
+                                    Matcher.quoteReplacement(File.separator),
                                     generatedJavaFile.getFileName(),
                                     generatedJavaFile.getFileName());
                             result.add(link);
@@ -160,9 +164,9 @@ public class MybatisCommander {
                         for (GeneratedXmlFile generatedXmlFile : myBatisGenerator.getGeneratedXmlFiles()) {
                             String link = String.format("<a href=\"%s%s%s%s%s\">%s</a>",
                                     projectProperties.getResourcePath(),
-                                    File.separator,
-                                    generatedXmlFile.getTargetPackage().replace(".", File.separator),
-                                    File.separator,
+                                    Matcher.quoteReplacement(File.separator),
+                                    generatedXmlFile.getTargetPackage().replace(".", Matcher.quoteReplacement(File.separator)),
+                                    Matcher.quoteReplacement(File.separator),
                                     generatedXmlFile.getFileName(),
                                     generatedXmlFile.getFileName());
                             result.add(link);
@@ -175,9 +179,8 @@ public class MybatisCommander {
                         });
                         Notifications.Bus.notify(notification);
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        log.error(e);
                         balloon.hide();
-                        Messages.showMessageDialog(e.getMessage(), "Generate Failure", Messages.getInformationIcon());
                     }
                 }
             };

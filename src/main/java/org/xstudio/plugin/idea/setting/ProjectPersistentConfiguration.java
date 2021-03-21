@@ -7,7 +7,6 @@ import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.intellij.openapi.project.Project;
 import com.intellij.util.xmlb.XmlSerializerUtil;
-import com.xstudio.mybatis.po.TableProperty;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.xstudio.plugin.idea.model.Credential;
@@ -81,11 +80,11 @@ public class ProjectPersistentConfiguration implements PersistentStateComponent<
 
     public ProjectPersistentProperties getTableConfig(String databaseName, String schema) {
         DefaultPersistentConfiguration defaultPersistentConfiguration = ServiceManager.getService(DefaultPersistentConfiguration.class);
-        PersistentProperties persistentConfig = defaultPersistentConfiguration.getPersistentConfig();
+        PersistentProperties config = defaultPersistentConfiguration.getPersistentConfig();
         ProjectPersistentProperties tableConfig = tableConfigs.get(databaseName);
         if (null == tableConfig) {
-            if (null != persistentConfig) {
-                tableConfig = JSON.parseObject(JSON.toJSONString(persistentConfig), ProjectPersistentProperties.class);
+            if (null != config) {
+                tableConfig = JSON.parseObject(JSON.toJSONString(config), ProjectPersistentProperties.class);
             } else {
                 tableConfig = new ProjectPersistentProperties();
             }

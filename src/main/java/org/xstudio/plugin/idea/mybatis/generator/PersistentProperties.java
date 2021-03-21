@@ -10,20 +10,20 @@ public class PersistentProperties implements Serializable {
     private String cfgName = "pagehelper";
     private String facadeImpl = "";
     private String facadeInterface = "";
-    private String idGenerator = "com.xstudio.core.IdWorker";
+    private String idGenerator = "io.github.xbeeant.core.IdWorker";
     private String ignoreColumns = "create_by,update_by,create_at,update_at";
-    private String mapperInterface = "com.xstudio.spring.mybatis.pagehelper.IMybatisPageHelperDao";
+    private String mapperInterface = "io.github.xbeeant.spring.mybatis.pagehelper.IMybatisPageHelperDao";
     private String nonFuzzySearchColumn = "create_by, update_by";
     private PluginProperties plugin = new PluginProperties();
     private String replaceString = "";
     private String resourcePath = "/src/main/resources";
-    private String rootClass = "com.xstudio.core.BaseModelObject";
-    private String rootPackage = "com.xstudio";
+    private String rootClass = "io.github.xbeeant.core.BaseModelObject";
+    private String rootPackage = "io.github.xbeeant";
     private String searchString = "";
-    private String serviceImpl = "com.xstudio.config.AbstractSecurityMybatisPageHelperServiceImpl";
-    private String serviceInterface = "com.xstudio.spring.mybatis.pagehelper.IMybatisPageHelperService";
+    private String serviceImpl = "io.github.xbeeant.config.AbstractSecurityMybatisPageHelperServiceImpl";
+    private String serviceInterface = "io.github.xbeeant.spring.mybatis.pagehelper.IMybatisPageHelperService";
     private String srcPath = "/src/main/java";
-    private String responseObject = "com.xstudio.ApiResponse";
+    private String responseObject = "io.github.xbeeant.ApiResponse";
 
     public String getCfgName() {
         return cfgName;

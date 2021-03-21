@@ -16,6 +16,8 @@ public class PluginProperties {
     private boolean chkSwaggerModel = false;
     private boolean chkMarkDelete = true;
     private boolean chkFastJson = true;
+    private boolean chkBeginEnd = false;
+    private boolean chkDateTime = true;
 
 
     public boolean isChkComment() {
@@ -112,5 +114,21 @@ public class PluginProperties {
 
     public void setChkFastJson(boolean chkFastJson) {
         this.chkFastJson = chkFastJson;
+    }
+
+    public boolean isChkBeginEnd() {
+        return chkBeginEnd;
+    }
+
+    public void setChkBeginEnd(boolean chkBeginEnd) {
+        this.chkBeginEnd = chkBeginEnd;
+    }
+
+    public boolean isChkDateTime() {
+        return chkDateTime;
+    }
+
+    public void setChkDateTime(boolean chkDateTime) {
+        this.chkDateTime = chkDateTime;
     }
 }

@@ -2,7 +2,6 @@ package org.xstudio.plugin.idea.ui;
 
 import com.intellij.application.options.ModulesComboBox;
 import com.intellij.credentialStore.CredentialAttributes;
-import com.intellij.database.dataSource.LocalDataSource;
 import com.intellij.database.model.RawConnectionConfig;
 import com.intellij.database.psi.DbDataSource;
 import com.intellij.database.psi.DbNamespaceImpl;
@@ -18,11 +17,7 @@ import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
-import com.xstudio.mybatis.MybatisGenerator;
-import com.xstudio.mybatis.po.*;
 import org.jetbrains.annotations.Nullable;
-import org.mybatis.generator.config.DomainObjectRenamingRule;
-import org.mybatis.generator.exception.InvalidConfigurationException;
 import org.xstudio.plugin.idea.Constant;
 import org.xstudio.plugin.idea.model.Credential;
 import org.xstudio.plugin.idea.model.TableInfo;
@@ -35,7 +30,6 @@ import org.xstudio.plugin.idea.util.ModuleUtil;
 
 import javax.swing.*;
 import java.awt.*;
-import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -86,6 +80,8 @@ public class CodeGeneratorUI extends DialogWrapper {
     private JTextField tServiceInterface;
     private JTabbedPane tabbedPane;
     private JTextField tpTableName;
+    private JCheckBox chkBeginEnd;
+    private JCheckBox chkDateTime;
 
     public CodeGeneratorUI(AnActionEvent event, @Nullable Project project, TableInfo tableInfo) {
         super(project);
@@ -193,6 +189,8 @@ public class CodeGeneratorUI extends DialogWrapper {
             chkToString.setSelected(plugin.isChkToString());
             chkUseAlias.setSelected(plugin.isChkUseAlias());
             chkUseSchemaPrefix.setSelected(plugin.isChkUseSchemaPrefix());
+            chkDateTime.setSelected(plugin.isChkDateTime());
+            chkBeginEnd.setSelected(plugin.isChkBeginEnd());
         }
     }
 
@@ -255,7 +253,6 @@ public class CodeGeneratorUI extends DialogWrapper {
                     boolean result = getDatabaseCredential(connectionConfig);
                     if (result) {
                         this.doOKAction();
-                        return;
                     }
                 }
             }
@@ -309,6 +306,8 @@ public class CodeGeneratorUI extends DialogWrapper {
         pluginProperties.setChkSwaggerModel(chkSwaggerModel.isSelected());
         pluginProperties.setChkMarkDelete(chkMarkDelete.isSelected());
         pluginProperties.setChkFastJson(chkFastJson.isSelected());
+        pluginProperties.setChkBeginEnd(chkBeginEnd.isSelected());
+        pluginProperties.setChkDateTime(chkDateTime.isSelected());
 
         projectProperties.setPlugin(pluginProperties);
         projectProperties.setReplaceString(tReplaceString.getText());

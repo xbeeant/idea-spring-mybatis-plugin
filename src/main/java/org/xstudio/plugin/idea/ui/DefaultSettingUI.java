@@ -1,13 +1,10 @@
 package org.xstudio.plugin.idea.ui;
 
-import com.xstudio.mybatis.po.Properties;
 import org.xstudio.plugin.idea.mybatis.generator.PersistentProperties;
 import org.xstudio.plugin.idea.mybatis.generator.PluginProperties;
 import org.xstudio.plugin.idea.setting.DefaultPersistentConfiguration;
 
 import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.Map;
@@ -50,6 +47,8 @@ public class DefaultSettingUI extends JDialog {
     private JTextField tSrcPath;
     private JTextField tResponseObject;
     private JComboBox comboxCfgName;
+    private JCheckBox chkBeginEnd;
+    private JCheckBox chkDateTime;
 
     public DefaultSettingUI() {
         DefaultPersistentConfiguration instance = DefaultPersistentConfiguration.getInstance();
@@ -179,6 +178,8 @@ public class DefaultSettingUI extends JDialog {
         modified |= chkOverwrite.isSelected() != plugin.isChekOverwrite();
         modified |= chkToString.isSelected() != plugin.isChkToString();
         modified |= chkUseSchemaPrefix.isSelected() != plugin.isChkUseSchemaPrefix();
+        modified |= chkBeginEnd.isSelected() != plugin.isChkBeginEnd();
+        modified |= chkDateTime.isSelected() != plugin.isChkDateTime();
 
         return modified;
     }

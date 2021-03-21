@@ -4,7 +4,7 @@ plugins {
 }
 
 group 'org.xstudio.plugin'
-version '1.1.1'
+version '1.1.2'
 
 sourceCompatibility = 1.8
 
@@ -66,6 +66,8 @@ dependencies {
 
     testImplementation(platform('org.junit:junit-bom:5.7.0'))
     testImplementation('org.junit.jupiter:junit-jupiter')
+
+    compile 'com.alibaba:fastjson:1.2.75'
 }
 
 // See https://github.com/JetBrains/gradle-intellij-plugin/

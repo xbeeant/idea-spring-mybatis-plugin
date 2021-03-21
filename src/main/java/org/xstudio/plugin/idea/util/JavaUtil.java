@@ -1,13 +1,13 @@
 package org.xstudio.plugin.idea.util;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+
+import com.intellij.openapi.diagnostic.Logger;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 public class JavaUtil {
-    private static final Logger logger = LogManager.getLogger(JavaUtil.class);
+    private static final Logger logger = Logger.getInstance(JavaUtil.class);
 
     private JavaUtil() {
         super();
@@ -62,7 +62,7 @@ public class JavaUtil {
                 try {
                     return obj.getClass().getDeclaredField(fieldName).get(obj);
                 } catch (Exception e1) {
-                    logger.error("获取{} get方法失败", fieldName, e);
+                    logger.error("获取{} get方法失败", fieldName);
                 }
             }
         }
