@@ -1,5 +1,10 @@
 package org.xstudio.plugin.idea.mybatis.generator;
 
+import io.github.xbeeant.mybatis.po.ColumnProperty;
+
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * @author huangxiaobiao
  */
@@ -11,6 +16,8 @@ public class ProjectPersistentProperties extends PersistentProperties {
     private String type;
 
     private String modulePath;
+
+    private List<ColumnProperty> columns = new ArrayList<>();
 
     public String getType() {
         return type;
@@ -42,5 +49,13 @@ public class ProjectPersistentProperties extends PersistentProperties {
 
     public void setModulePath(String modulePath) {
         this.modulePath = modulePath;
+    }
+
+    public List<ColumnProperty> getColumns() {
+        return columns;
+    }
+
+    public void setColumns(List<ColumnProperty> columns) {
+        this.columns = columns;
     }
 }

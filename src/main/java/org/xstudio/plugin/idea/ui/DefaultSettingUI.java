@@ -126,6 +126,8 @@ public class DefaultSettingUI extends JDialog {
         pluginProperties.setChkSwaggerModel(chkSwaggerModel.isSelected());
         pluginProperties.setChkMarkDelete(chkMarkDelete.isSelected());
         pluginProperties.setChkFastJson(chkFastJson.isSelected());
+        pluginProperties.setChkBeginEnd(chkBeginEnd.isSelected());
+        pluginProperties.setChkDateTime(chkDateTime.isSelected());
 
         persistentConfig.setPlugin(pluginProperties);
         persistentConfig.setReplaceString(tReplaceString.getText());

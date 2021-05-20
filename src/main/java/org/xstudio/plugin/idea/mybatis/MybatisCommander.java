@@ -109,6 +109,7 @@ public class MybatisCommander {
         xstudioProperty.setResponseObject(projectProperties.getResponseObject());
         xstudioProperty.setDateTime(projectProperties.getPlugin().isChkDateTime() ? "true" : "false");
         xstudioProperty.setBeginEnd(projectProperties.getPlugin().isChkBeginEnd() ? "true" : "false");
+        xstudioProperty.setColumns(projectProperties.getColumns());
         properties.setXstudioProperty(xstudioProperty);
 
         PluginProperty pluginProperty = new PluginProperty();
