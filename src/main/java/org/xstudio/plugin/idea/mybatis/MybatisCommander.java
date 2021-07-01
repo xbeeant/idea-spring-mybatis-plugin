@@ -95,6 +95,9 @@ public class MybatisCommander {
         domainObjectRenamingRule.setSearchString(projectProperties.getSearchString());
         if (null != projectProperties.getSearchString() && !"".equals(projectProperties.getSearchString())) {
             tableProperty.setRenamingRule(domainObjectRenamingRule);
+            String tableName = tableProperty.getTableName();
+            tableName = tableName.replace(projectProperties.getSearchString(), projectProperties.getReplaceString());
+            tableProperty.setDomainObjectName(tableName.substring(0, 1).toUpperCase() + tableName.substring(1));
         }
 
         properties.setTableProperty(tableProperty);
