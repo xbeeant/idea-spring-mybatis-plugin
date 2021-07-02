@@ -243,12 +243,15 @@ public class CodeGeneratorUI extends DialogWrapper {
 
 
     public static String typeHandler(String remarks) {
+        if(null == remarks) {
+            return null;
+        }
         Matcher matcher = HANDLER_PATTERN.matcher(remarks);
         if (matcher.find()) {
             return matcher.group(1);
         }
 
-        return "";
+        return null;
     }
 
     @Nullable

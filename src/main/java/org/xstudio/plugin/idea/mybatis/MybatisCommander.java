@@ -25,6 +25,7 @@ import org.mybatis.generator.api.GeneratedXmlFile;
 import org.mybatis.generator.api.MyBatisGenerator;
 import org.mybatis.generator.config.DomainObjectRenamingRule;
 import org.mybatis.generator.config.ModelType;
+import org.mybatis.generator.internal.util.JavaBeansUtil;
 import org.xstudio.plugin.idea.Constant;
 import org.xstudio.plugin.idea.model.Credential;
 import org.xstudio.plugin.idea.mybatis.generator.MergeableShellCallback;
@@ -97,7 +98,7 @@ public class MybatisCommander {
             tableProperty.setRenamingRule(domainObjectRenamingRule);
             String tableName = tableProperty.getTableName();
             tableName = tableName.replace(projectProperties.getSearchString(), projectProperties.getReplaceString());
-            tableProperty.setDomainObjectName(tableName.substring(0, 1).toUpperCase() + tableName.substring(1));
+            tableProperty.setDomainObjectName(JavaBeansUtil.getCamelCaseString(tableName, true));
         }
 
         properties.setTableProperty(tableProperty);
