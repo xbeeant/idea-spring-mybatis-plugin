@@ -2,13 +2,16 @@ package org.xstudio.plugin.idea.model;
 
 /**
  * 保存数据库连接对应的用户名，密码存在keepass库中
- * Created by kangtian on 2018/8/3.
+ *
+ * @author ca62785
+ * @date 2020/11/07
  */
 public class Credential {
 
-    //用户名
+    /**
+     * 用户名
+     */
     private String username;
-
 
     public Credential() {
     }

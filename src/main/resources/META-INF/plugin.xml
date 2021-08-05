@@ -1,4 +1,6 @@
-<idea-plugin url="https://beeant0512.github.io">
+<idea-plugin>
+    <version>1.2.3</version>
+    <idea-version since-build="191.6707.61"/>
     <id>org.xstudio.plugin.idea</id>
     <name>spring mybatis code generator</name>
     <vendor email="huangxb0512@gmail.com" url="https://beeant0512.github.io">Beeant</vendor>
@@ -15,56 +17,29 @@
 
     <change-notes>
         <![CDATA[
-        1.0.0.6:
-        <ul>
-          <li>support 2020.2+</li>
-        </ul>
-        1.0.0.5:
-        <ul>
-          <li>fix link bug</li>
-        </ul>
-        1.0.0.4:
-        <ul>
-          <li>fix merge java file bug</li>
-        </ul>
-        1.0.0.3:
-        <ul>
-          <li>fix bugs</li>
-        </ul>
-        1.0.0.2:
-        <ul>
-          <li>fix bugs</li>
-          <li>initial default config</li>
-        </ul>
-
-        1.0.0.0:
-        Initial release of the plugin. <br />
-        generate:
-        <ul>
-            <li>service interface</li>
-            <li>service implements</li>
-            <li>mybatis dao interface</li>
-            <li>mybatis dao mapper</li>
-            <li>mybatis dao entity</li>
-        </ul>
+        1.1.3: fix: 212.4746.92
+        1.1.2: feat - column order & type handler
+        1.1.1: feat - support 211.*
+        1.1.0: new ui & new merger
     ]]>
     </change-notes>
 
-    <depends config-file="">com.intellij.database</depends>
+    <depends>com.intellij.database</depends>
 
     <extensions defaultExtensionNs="com.intellij">
         <!-- Add your extensions here -->
         <applicationService
-                serviceImplementation="org.xstudio.plugin.idea.setting.DefaultPersistentConfiguration" />
+                serviceImplementation="org.xstudio.plugin.idea.setting.DefaultPersistentConfiguration"/>
         <projectService
                 serviceImplementation="org.xstudio.plugin.idea.setting.ProjectPersistentConfiguration"/>
         <applicationConfigurable groupId="tools" displayName="Mybatis Spring Generator" id="Mybatis.Generator.Plugin"
-                             instance="org.xstudio.plugin.idea.setting.DefaultSettingConfigurable"/>
+                                 instance="org.xstudio.plugin.idea.setting.DefaultSettingConfigurable"/>
     </extensions>
 
     <actions>
         <!-- Add your actions here -->
-        <action id="mybatis-generator-action" class="org.xstudio.plugin.idea.action.MainAction" text="Mybatis Spring Code Generate">
+        <action id="mybatis-generator-action" class="org.xstudio.plugin.idea.action.MainAction"
+                text="Mybatis Spring Code Generate">
             <add-to-group group-id="DatabaseViewPopupMenu" anchor="first"/>
             <keyboard-shortcut keymap="$default" first-keystroke="shift meta G"/>
         </action>
