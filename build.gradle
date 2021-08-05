@@ -1,10 +1,10 @@
 plugins {
     id 'java'
-    id 'org.jetbrains.intellij' version '0.4.10'
+    id 'org.jetbrains.intellij' version '1.1.4'
 }
 
 group 'org.xstudio.plugin'
-version '1.1.2'
+version '1.1.3'
 
 sourceCompatibility = 1.8
 
@@ -45,26 +45,15 @@ dependencies {
 
 // See https://github.com/JetBrains/gradle-intellij-plugin/
 intellij {
-    plugins 'java'
-    plugins "com.intellij.database:191.4212.27"
+    plugins = ["com.intellij.database:191.4212.27"]
 //    localPath "C:\\Program Files\\JetBrains\\IntelliJ IDEA 2020.1\\"
-    version "IU-191.7141.44"
-    updateSinceUntilBuild false
-    patchPluginXml {
-        sinceBuild "191.6707.61"
-//        untilBuild "203.*"
-    }
-    type "IU"
-}
-
-
-publishPlugin {
-    token = System.getenv("token")
-    channels "Stable"
+    version = "IU-191.7141.44"
+    updateSinceUntilBuild = false
+    type = "IU"
 }
 
 // 指定编译的编码
-tasks.withType(JavaCompile){
+tasks.withType(JavaCompile) {
     options.encoding = "UTF-8"
 }
 
