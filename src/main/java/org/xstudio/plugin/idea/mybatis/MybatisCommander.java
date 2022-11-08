@@ -11,6 +11,7 @@ import com.intellij.openapi.module.Module;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.project.ProjectUtil;
 import com.intellij.openapi.ui.MessageType;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.ui.popup.Balloon;
@@ -38,6 +39,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.regex.Matcher;
 
 /**
@@ -114,6 +116,7 @@ public class MybatisCommander {
         xstudioProperty.setDateTime(projectProperties.getPlugin().isChkDateTime() ? "true" : "false");
         xstudioProperty.setBeginEnd(projectProperties.getPlugin().isChkBeginEnd() ? "true" : "false");
         xstudioProperty.setColumns(projectProperties.getColumns());
+        xstudioProperty.setLombok(projectProperties.getPlugin().isChkLombok() ? "true" : "false");
         properties.setXstudioProperty(xstudioProperty);
 
         PluginProperty pluginProperty = new PluginProperty();
@@ -149,7 +152,7 @@ public class MybatisCommander {
                         MyBatisGenerator myBatisGenerator = mybatisGenerator.generate(properties);
                         // 刷新工程
 
-                        project.getBaseDir().refresh(false, true);
+                        Objects.requireNonNull(ProjectUtil.guessProjectDir(project)).refresh(false, true);
 
                         NotificationGroup balloonNotifications = new NotificationGroup(Constant.TITLE, NotificationDisplayType.STICKY_BALLOON, true);
 
@@ -179,7 +182,7 @@ public class MybatisCommander {
 
                         Notification notification = balloonNotifications.createNotification("Generate Successfully", "<html>" + String.join("<br/>", result) + "</html>", NotificationType.INFORMATION, (notification1, hyperlinkEvent) -> {
                             if (hyperlinkEvent.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
-                                new OpenFileDescriptor(project, ModuleUtil.getModule(module, "root").findFileByRelativePath(hyperlinkEvent.getDescription())).navigate(true);
+                                new OpenFileDescriptor(project, Objects.requireNonNull(ModuleUtil.getModule(module, "root").findFileByRelativePath(hyperlinkEvent.getDescription()))).navigate(true);
                             }
                         });
                         Notifications.Bus.notify(notification);

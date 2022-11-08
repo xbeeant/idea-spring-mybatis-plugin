@@ -1,43 +1,51 @@
-<idea-plugin url="https://beeant0512.github.io">
+<idea-plugin>
     <id>org.xstudio.plugin.idea</id>
-    <name>spring mybatis code generator</name>
+
+    <name>Mybatis Spring Code Generator</name>
+
+
+
     <vendor email="huangxb0512@gmail.com" url="https://beeant0512.github.io">Beeant</vendor>
 
-    <description><![CDATA[
+    <description>
+    <![CDATA[
     <p>a idea plugin for generate mybatis mapper(model, interface and mapper.xml files) and spring service, facade files</p>
-    <p>modified from <a href="https://github.com/leecho/mybatis-generator-plus">https://github.com/leecho/mybatis-generator-plus</a></p>
-    <p>using with <a href="https://github.com/xbeeant/xstudio">xstudio</a></p>
+        <p>modified from <a href="https://github.com/leecho/mybatis-generator-plus">https://github.com/leecho/mybatis-generator-plus</a></p>
+        <p>using with <a href="https://github.com/xbeeant/xstudio">xstudio</a></p>
 
-    <p>spring + mybatis 基础代码[增删改查，批量增删改，模糊查询，字段唯一性校验]生成器，结合 <a href="https://github.com/xbeeant/xstudio">xstudio</a> 使用</p>
+        <p>spring + mybatis 基础代码[增删改查，批量增删改，模糊查询，字段唯一性校验]生成器，结合 <a href="https://github.com/xbeeant/xstudio">xstudio</a> 使用</p>
 
-    <p>WELCOME TO JOIN QQ Group: 977611117 </p>
-    ]]></description>
+        <p>WELCOME TO JOIN QQ Group: 977611117 </p>
+    ]]>
+    </description>
 
+    <idea-version since-build="201.*.*" />
     <change-notes>
-        <![CDATA[
-        1.1.2: feat - column order & type handler
-        1.1.1: feat - support 211.*
-        1.1.0: new ui & new merger
+    <![CDATA[
+    1.1.5: fix - bugs<br />
+    1.1.4: fix - bugs<br />
+    1.1.3: fix - bugs<br />
+    1.1.2: feat - column order & type handler<br />
+    1.1.1: feat - support 211.*<br />
+    1.1.0: new ui & new merger
     ]]>
     </change-notes>
 
-    <depends config-file="">com.intellij.database</depends>
+    <depends>com.intellij.database</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <!-- Add your extensions here -->
-        <applicationService
-                serviceImplementation="org.xstudio.plugin.idea.setting.DefaultPersistentConfiguration" />
-        <projectService
-                serviceImplementation="org.xstudio.plugin.idea.setting.ProjectPersistentConfiguration"/>
+        <applicationService serviceImplementation="org.xstudio.plugin.idea.setting.DefaultPersistentConfiguration"/>
+        <projectService serviceImplementation="org.xstudio.plugin.idea.setting.ProjectPersistentConfiguration"/>
         <applicationConfigurable groupId="tools" displayName="Mybatis Spring Generator" id="Mybatis.Generator.Plugin"
-                             instance="org.xstudio.plugin.idea.setting.DefaultSettingConfigurable"/>
+                                 instance="org.xstudio.plugin.idea.setting.DefaultSettingConfigurable"/>
     </extensions>
 
     <actions>
-        <!-- Add your actions here -->
-        <action id="mybatis-generator-action" class="org.xstudio.plugin.idea.action.MainAction" text="Mybatis Spring Code Generate">
+        <action id="mybatis-generator-action" class="org.xstudio.plugin.idea.action.MainAction"
+                text="Mybatis Spring Code Generate">
             <add-to-group group-id="DatabaseViewPopupMenu" anchor="first"/>
             <keyboard-shortcut keymap="$default" first-keystroke="shift meta G"/>
         </action>
     </actions>
+
 </idea-plugin>

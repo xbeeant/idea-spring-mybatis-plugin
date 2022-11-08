@@ -1,18 +1,16 @@
 plugins {
+    id "org.jetbrains.intellij" version "1.4.0"
     id 'java'
-    id 'org.jetbrains.intellij' version '0.4.10'
 }
 
 group 'org.xstudio.plugin'
-version '1.1.2'
-
-sourceCompatibility = 1.8
+version '1.1.6'
 
 repositories {
+    mavenCentral()
     maven {
         url "https://maven.aliyun.com/repository/public"
     }
-    mavenCentral()
     maven {
         url "https://s01.oss.sonatype.org/content/groups/public/"
     }
@@ -20,52 +18,77 @@ repositories {
 }
 
 dependencies {
-    compile group: 'commons-io', name: 'commons-io', version: '2.6'
-    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.9'
+    implementation group: 'commons-io', name: 'commons-io', version: '2.6'
+    implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.9'
 
     // database driver
-    compile group: 'mysql', name: 'mysql-connector-java', version: '8.0.11'
-    compile group: 'mysql', name: 'mysql-connector-java', version: '5.1.48'
+    implementation group: 'mysql', name: 'mysql-connector-java', version: '8.0.11'
+    implementation group: 'mysql', name: 'mysql-connector-java', version: '5.1.48'
     // https://mvnrepository.com/artifact/org.mariadb.jdbc/mariadb-java-client
-    compile group: 'org.mariadb.jdbc', name: 'mariadb-java-client', version: '2.6.0'
+    implementation group: 'org.mariadb.jdbc', name: 'mariadb-java-client', version: '2.6.0'
 
     // dependencies for mybatis generator core
-    compile group: 'org.apache.ant', name: 'ant', version: '1.10.7'
-    compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.12.1'
+    implementation group: 'org.apache.ant', name: 'ant', version: '1.10.7'
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.12.1'
 
-    compile group: 'io.github.xbeeant', name: 'code-generator', version: '1.0-SNAPSHOT'
-    compile group: 'io.github.xbeeant', name: 'java-merger', version: '1.0.0-SNAPSHOT'
+    implementation group: 'io.github.xbeeant', name: 'code-generator', version: '1.0-SNAPSHOT'
+    implementation group: 'io.github.xbeeant', name: 'java-merger', version: '1.0.0-SNAPSHOT'
 
 
-    testImplementation(platform('org.junit:junit-bom:5.7.0'))
+    testImplementation(platform('org.junit:junit-bom:5.8.1'))
     testImplementation('org.junit.jupiter:junit-jupiter')
 
-    compile 'com.alibaba:fastjson:1.2.75'
+    implementation 'com.alibaba:fastjson:1.2.83'
 }
 
 // See https://github.com/JetBrains/gradle-intellij-plugin/
 intellij {
-    plugins 'java'
-    plugins "com.intellij.database:191.4212.27"
-//    localPath "C:\\Program Files\\JetBrains\\IntelliJ IDEA 2020.1\\"
-    version "IU-191.7141.44"
-    updateSinceUntilBuild false
-    patchPluginXml {
-        sinceBuild "191.6707.61"
-//        untilBuild "203.*"
-    }
-    type "IU"
+    pluginName = "Spring Mybatis Code Generator"
+
+    plugins = [
+            'com.intellij.database'
+    ]
+    version = "IU-191.7141.44"
+    updateSinceUntilBuild = false
+    type = "IU"
 }
 
+patchPluginXml {
+    version = "1.1.6"
+    sinceBuild = "191.6707.61"
+    untilBuild = ""
+    changeNotes = """
+    1.1.6: fix - bugs<br />
+    1.1.5: fix - bugs<br />
+    1.1.4: fix - bugs<br />
+    1.1.3: fix - bugs<br />
+    1.1.2: feat - column order & type handler<br />
+    1.1.1: feat - support 211.*<br />
+    1.1.0: new ui & new merger
+    """
+    pluginDescription = """
+        <p>a idea plugin for generate mybatis mapper(model, interface and mapper.xml files) and spring service, facade files</p>
+        <p>modified from <a href="https://github.com/leecho/mybatis-generator-plus">https://github.com/leecho/mybatis-generator-plus</a></p>
+        <p>using with <a href="https://github.com/xbeeant/xstudio">xstudio</a></p>
+
+        <p>spring + mybatis 基础代码[增删改查，批量增删改，模糊查询，字段唯一性校验]生成器，结合 <a href="https://github.com/xbeeant/xstudio">xstudio</a> 使用</p>
+
+        <p>WELCOME TO JOIN QQ Group: 977611117 </p>
+    """
+}
 
 publishPlugin {
-    token = System.getenv("token")
-    channels "Stable"
+    token = System.getenv("ORG_GRADLE_PROJECT_intellijPublishToken")
 }
 
 // 指定编译的编码
-tasks.withType(JavaCompile){
+tasks.withType(JavaCompile) {
     options.encoding = "UTF-8"
 }
 
 buildSearchableOptions.enabled = false
+
+runIde {
+    jvmArgs("-Xmx4096m","-XX:ReservedCodeCacheSize=512m","-Xms128m")
+//    ideDir = file('C:\\Users\\Haha\\AppData\\Local\\JetBrains\\Toolbox\\apps\\IDEA-U\\ch-0\\222.4345.14')
+}
